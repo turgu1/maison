@@ -1,0 +1,14 @@
+{
+    "name": "Maison",
+    "keywords": "iot, mqtt, tls, home",
+    "description": "Secure IOT Framework for embedded ESP8266 devices to serve into a Home IOT environment.",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/turgu1/maison.git"
+    },
+    "version": "0.1",
+    "frameworks": "arduino",
+    "platforms": [
+        "espressif"
+    ]
+}
