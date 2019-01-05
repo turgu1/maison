@@ -5,7 +5,7 @@
 
 #include <FS.h>
 #include <ESP8266WiFi.h>
-#include <ArduinoBearSSL.h>
+//#include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include <stdio.h>
