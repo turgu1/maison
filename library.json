@@ -25,7 +25,7 @@
             "version": "~2.7"
         },
         {
-            "name": "ArduinoJSON",
+            "name": "ArduinoJson",
             "version": "~5.13.4"
         }
     ]
