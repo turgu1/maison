@@ -84,7 +84,7 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
 
   SHOW("process_callback()");
 
-  if (strcmp(topic, my_topic(DEVICE_CTRL_SUFFIX_TOPIC, buffer, 40)) == 0) {
+  if (strcmp(topic, my_topic(MAISON_DEVICE_CTRL_SUFFIX_TOPIC, buffer, 40)) == 0) {
     int len;
 
     debug(" Received MQTT Message: ");
@@ -133,7 +133,7 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
         else {
           if (cfg.version > config.version) {
             config = cfg;
-            #if TESTING
+            #if MAISON_TESTING
               show_config(config);
             #endif
             save_config();
@@ -444,7 +444,7 @@ bool Maison::load_config(int version)
   file.close();
   SHOW_RESULT("load_config()");
 
-  #if TESTING
+  #if MAISON_TESTING
     if (result) show_config(config);
   #endif
 
@@ -586,7 +586,7 @@ bool Maison::mqtt_reconnect()
     if (mqtt_connected()) {
       static char buffer[40];
       mqtt_client.setCallback(maison_callback);
-      if (!mqtt_client.subscribe(my_topic(DEVICE_CTRL_SUFFIX_TOPIC, buffer, 40))) {
+      if (!mqtt_client.subscribe(my_topic(MAISON_DEVICE_CTRL_SUFFIX_TOPIC, buffer, 40))) {
         debug(F("Hum... unable to subscribe to topic (State:"));
         debug(mqtt_client.state());
         debug("): ");
@@ -868,7 +868,7 @@ uint32_t Maison::CRC32(const uint8_t * data, size_t length)
   return crc;
 }
 
-#if TESTING
+#if MAISON_TESTING
 
   void Maison::show_config(Config & config)
   {

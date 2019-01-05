@@ -11,14 +11,16 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-// If TESTING is != 0, the Serial port must be properly initialized by the user sketch before calling
+// If MAISON_TESTING is != 0, the Serial port must be properly initialized by the user sketch before calling
 // Maison::setup()
 //
-// If TESTING is == to 0, the framework wont use the serial port at all.
+// If MAISON_TESTING is == to 0, the framework wont use the serial port at all.
 
-#define TESTING 0
+#ifndef MAISON_TESTING
+  #define MAISON_TESTING 0
+#endif
 
-#if TESTING
+#if MAISON_TESTING
   #define       debug(a) Serial.print(a)
   #define     debugln(a) Serial.println(a)
   #define        SHOW(f) debugln(F(f));
@@ -49,16 +51,27 @@
 #define BATTERY_POWER 0x02 // Using batteries -> deep_sleep will be used then
 #define WATCHDOG_24H  0x04 // Watchdog status sent every 24 hours
 
-#if TESTING
+#if MAISON_TESTING
   #define WATCH_DOG_ONE_HOUR 60
 #else
   #define WATCH_DOG_ONE_HOUR 3600
 #endif
 
-#define MAISON_PREFIX_TOPIC "maison/"
-#define MAISON_STATUS_TOPIC MAISON_PREFIX_TOPIC "status"
-#define MAISON_CTRL_TOPIC   MAISON_PREFIX_TOPIC "ctrl"
-#define DEVICE_CTRL_SUFFIX_TOPIC   "/ctrl"
+#ifndef MAISON_PREFIX_TOPIC
+  #define MAISON_PREFIX_TOPIC "maison/"
+#endif
+
+#ifndef MAISON_STATUS_TOPIC
+  #define MAISON_STATUS_TOPIC MAISON_PREFIX_TOPIC "status"
+#endif
+
+#ifndef MAISON_CTRL_TOPIC
+  #define MAISON_CTRL_TOPIC   MAISON_PREFIX_TOPIC "ctrl"
+#endif
+
+#ifndef MAISON_DEVICE_CTRL_SUFFIX_TOPIC
+  #define MAISON_DEVICE_CTRL_SUFFIX_TOPIC   "/ctrl"
+#endif
 
 // The ProcessResult is returned by the user process function to indicate
 // how to proceed with the finite state machine transformation:
