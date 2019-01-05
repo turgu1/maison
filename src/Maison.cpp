@@ -1,7 +1,7 @@
 #include <Maison.h>
 
-WiFiClientSecure Maison::wifi_client;
-PubSubClient     Maison::mqtt_client;
+BearSSL::WiFiClientSecure Maison::wifi_client;
+PubSubClient  Maison::mqtt_client;
 
 static Maison * maison;
 
@@ -374,10 +374,8 @@ void Maison::loop(Process * process)
   }
 
 #define GETA(dst, src, size) \
-  if (src.as<JsonArray>().copyTo(dst) != size) ERROR(" Copy To " STRINGIZE(dst) " with inconsistent size")
-  // for (int i = 0; i < size; i++) { \
-  //   dst[i] = src[i]; \
-  // }
+  if (src.as<JsonArray>().copyTo(dst) != size) \
+    ERROR(" Copy To " STRINGIZE(dst) " with inconsistent size")
 
 bool Maison::retrieve_config(JsonObject & root, Config & config)
 {
