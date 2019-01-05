@@ -132,7 +132,7 @@ class Maison
       return (mem.state & (STARTUP|CHECK_MSGS|PROCESS_EVENT|END_EVENT|WATCH_DOG)) != 0;
     }
 
-    inline char * my_topic(char * topic, char * buffer, int buffer_length) {
+    inline char * my_topic(const char * topic, char * buffer, uint16_t buffer_length) {
       if (buffer_length > (strlen(MAISON_PREFIX_TOPIC) + strlen(config.device_name) + strlen(topic))) {
         strcpy(buffer, MAISON_PREFIX_TOPIC);
         strcat(buffer, config.device_name);

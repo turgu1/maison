@@ -354,7 +354,7 @@ void Maison::loop(Process * process)
 }
 
 #define GETS(dst, src, size) \
-  if (tmp = src) { \
+  if ((tmp = src)) { \
     strlcpy(dst, tmp, size); \
   } \
   else { \
