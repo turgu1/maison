@@ -10,14 +10,61 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-// If MAISON_TESTING is != 0, the Serial port must be properly initialized by the user sketch before calling
-// Maison::setup()
+// Insure that MQTT Packet size is big enough for the needs of the framework
+
+#if MQTT_MAX_PACKET_SIZE < 512
+  #error "MQTT_MAX_PACKET_SIZE MUST BE AT LEAST 512 IN SIZE."
+#endif
+
+// ----- OPTIONS -----
 //
-// If MAISON_TESTING is == to 0, the framework wont use the serial port at all.
+// To be set in the platformio.ini file
+
+// If MAISON_TESTING is != 0, the Serial port must be properly initialized by 
+// the user sketch before calling Maison::setup(). For example:
+//
+// Serial.begin(9600)
+//
+// If MAISON_TESTING is 0, the framework won't use the serial port at all.
 
 #ifndef MAISON_TESTING
   #define MAISON_TESTING 0
 #endif
+
+// This is prepended to all topics used by the framework
+
+#ifndef MAISON_PREFIX_TOPIC
+  #define MAISON_PREFIX_TOPIC "maison/"
+#endif
+
+// This is the topic name to send status information to
+
+#ifndef MAISON_STATUS_TOPIC
+  #define MAISON_STATUS_TOPIC MAISON_PREFIX_TOPIC "status"
+#endif
+
+// This is the topic name to send control information to
+//
+// For example: maison/ctrl
+
+#ifndef MAISON_CTRL_TOPIC
+  #define MAISON_CTRL_TOPIC   MAISON_PREFIX_TOPIC "ctrl"
+#endif
+
+// This is the topic name suffix where the device wait for control commands from site
+// The completed topic is build using:
+//
+// 1) MAISON_PREFIX_TOPIC
+// 2) The device name from config or MAC address if device name is empty
+// 3) MAISON_DEVICE_CTRL_SUFFIX_TOPIC
+//
+// For example: maison/DEV_TEST/crtl
+
+#ifndef MAISON_DEVICE_CTRL_SUFFIX_TOPIC
+  #define MAISON_DEVICE_CTRL_SUFFIX_TOPIC   "/ctrl"
+#endif
+
+// ----- END OPTIONS -----
 
 #if MAISON_TESTING
   #define       debug(a) Serial.print(a)
@@ -38,26 +85,12 @@
 #define OK_DO     { result = true; break; }
 #define ERROR(m)  { debugln(F(" ERROR: " m)); break; }
 
+// To get WATCH_DOG Time faster during tests
+
 #if MAISON_TESTING
-  #define WATCH_DOG_ONE_HOUR 60
+  #define WATCH_DOG_ONE_HOUR 60   // In seconds. So WATCH_DOG fired every 24 minutes.
 #else
-  #define WATCH_DOG_ONE_HOUR 3600
-#endif
-
-#ifndef MAISON_PREFIX_TOPIC
-  #define MAISON_PREFIX_TOPIC "maison/"
-#endif
-
-#ifndef MAISON_STATUS_TOPIC
-  #define MAISON_STATUS_TOPIC MAISON_PREFIX_TOPIC "status"
-#endif
-
-#ifndef MAISON_CTRL_TOPIC
-  #define MAISON_CTRL_TOPIC   MAISON_PREFIX_TOPIC "ctrl"
-#endif
-
-#ifndef MAISON_DEVICE_CTRL_SUFFIX_TOPIC
-  #define MAISON_DEVICE_CTRL_SUFFIX_TOPIC   "/ctrl"
+  #define WATCH_DOG_ONE_HOUR 3600 // In seconds. Normal is one hour x 24 = 24 hours.
 #endif
 
 class Maison
@@ -107,7 +140,7 @@ class Maison
     //          processing, such that the finite state machine return to the
     //          WAIT_FOR_EVENT state instead of going to the WAIT_END_EVENT state.
     //
-    // NEW_EVENT: Returned when processing a WAIT_FOR_EVENT state to signifiate that
+    // NEW_EVENT: Returned when processing a WAIT_FOR_EVENT state to indicate that
     //            an event must be processed.
 
     enum UserResult : uint8_t { COMPLETED = 1, NOT_COMPLETED, ABORTED, NEW_EVENT };
