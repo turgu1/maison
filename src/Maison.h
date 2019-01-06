@@ -5,7 +5,6 @@
 
 #include <FS.h>
 #include <ESP8266WiFi.h>
-//#include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include <stdio.h>
@@ -39,18 +38,6 @@
 #define OK_DO     { result = true; break; }
 #define ERROR(m)  { debugln(F(" ERROR: " m)); break; }
 
-// Features in feature_mask
-//
-// Note: if VOLTAGE_CHECK is requested and the internal battery readout is targeted, the main
-//       user sketch must add the following line at the beginning of the sketch source code file:
-//
-//    ADC_MODE(ADC_VCC);
-
-#define NONE          0x00 // No special feature
-#define VOLTAGE_CHECK 0x01 // Chip A2D voltage readout will be sent on status/watchdog messages
-#define BATTERY_POWER 0x02 // Using batteries -> deep_sleep will be used then
-#define WATCHDOG_24H  0x04 // Watchdog status sent every 24 hours
-
 #if MAISON_TESTING
   #define WATCH_DOG_ONE_HOUR 60
 #else
@@ -73,28 +60,23 @@
   #define MAISON_DEVICE_CTRL_SUFFIX_TOPIC   "/ctrl"
 #endif
 
-// The ProcessResult is returned by the user process function to indicate
-// how to proceed with the finite state machine transformation:
-//
-// COMPLETED: Returned when the processing for the current state is
-//            considered completed. This is used mainly for all states.
-//            
-// NOT_COMPLETED: The reverse of COMPLETED. Mainly used with PROCESS_EVENT in the
-//                case that it must be fired again to complete the processing
-//
-// ABORTED: Return in the case of PROCESS_EVENT when the event vanished before
-//          processing, such that the finite state machine return to the
-//          WAIT_FOR_EVENT state instead of going to the WAIT_END_EVENT state.
-//
-// NEW_EVENT: Returned when processing a WAIT_FOR_EVENT state to signifiate that
-//            an event must be processed.
-
-enum UserResult : uint8_t { COMPLETED = 1, NOT_COMPLETED, ABORTED, NEW_EVENT };
-
-
 class Maison
 {
   public:
+
+    // Features in feature_mask
+    //
+    // Note: if VOLTAGE_CHECK is requested and the internal battery readout is targeted, the main
+    //       user sketch must add the following line at the beginning of the sketch source code file:
+    //
+    //    ADC_MODE(ADC_VCC);
+
+    enum Feature : uint8_t {
+      NONE          = 0x00, // No special feature
+      VOLTAGE_CHECK = 0x01, // Chip A2D voltage readout will be sent on status/watchdog messages
+      BATTERY_POWER = 0x02, // Using batteries -> deep_sleep will be used then
+      WATCHDOG_24H  = 0x04 // Watchdog status sent every 24 hours
+    };
 
     // States of the finite state machine
     //
@@ -111,6 +93,24 @@ class Maison
       END_EVENT      = 32,
       WATCH_DOG      = 64
     };
+
+    // The ProcessResult is returned by the user process function to indicate
+    // how to proceed with the finite state machine transformation:
+    //
+    // COMPLETED: Returned when the processing for the current state is
+    //            considered completed. This is used mainly for all states.
+    //            
+    // NOT_COMPLETED: The reverse of COMPLETED. Mainly used with PROCESS_EVENT in the
+    //                case that it must be fired again to complete the processing
+    //
+    // ABORTED: Return in the case of PROCESS_EVENT when the event vanished before
+    //          processing, such that the finite state machine return to the
+    //          WAIT_FOR_EVENT state instead of going to the WAIT_END_EVENT state.
+    //
+    // NEW_EVENT: Returned when processing a WAIT_FOR_EVENT state to signifiate that
+    //            an event must be processed.
+
+    enum UserResult : uint8_t { COMPLETED = 1, NOT_COMPLETED, ABORTED, NEW_EVENT };
 
     typedef UserResult Process(State state);
     typedef void Callback(const char * topic, byte * payload, unsigned int length);
