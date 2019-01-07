@@ -166,21 +166,7 @@ class Maison
       return (mem.state & (STARTUP|CHECK_MSGS|PROCESS_EVENT|END_EVENT|WATCH_DOG)) != 0;
     }
 
-    inline char * my_topic(const char * topic, char * buffer, uint16_t buffer_length) {
-      if (buffer_length > (strlen(MAISON_PREFIX_TOPIC) + strlen(config.device_name) + strlen(topic))) {
-        strcpy(buffer, MAISON_PREFIX_TOPIC);
-        strcat(buffer, config.device_name);
-        strcat(buffer, topic);
-        DEBUG(F("my_topic() result: ")); DEBUGLN(buffer);
-      }
-      else {
-        DEBUGLN(F("ERROR: my_topic(): Buffer too small!"));
-        buffer[0] = 0;
-      }
-
-      return buffer;
-    }
-
+    char * my_topic(const char * topic, char * buffer, uint16_t buffer_length);
     uint32_t CRC32(const uint8_t * data, size_t length);
     bool setUserCallback(Callback * _cb, const char * _topic, uint8_t _qos = 0);
     void loop(Process * process = NULL);

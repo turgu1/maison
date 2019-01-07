@@ -866,6 +866,23 @@ uint32_t Maison::CRC32(const uint8_t * data, size_t length)
   return crc;
 }
 
+char * Maison::my_topic(const char * topic, char * buffer, uint16_t buffer_length) 
+{
+  if (buffer_length > (strlen(MAISON_PREFIX_TOPIC) + strlen(config.device_name) + strlen(topic))) {
+    strcpy(buffer, MAISON_PREFIX_TOPIC);
+    strcat(buffer, config.device_name);
+    strcat(buffer, topic);
+    DEBUG(F("my_topic() result: ")); DEBUGLN(buffer);
+  }
+  else {
+    DEBUGLN(F("ERROR: my_topic(): Buffer too small!"));
+    buffer[0] = 0;
+  }
+
+  return buffer;
+}
+
+
 #if MAISON_TESTING
 
   void Maison::show_config(Config & config)
