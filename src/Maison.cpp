@@ -51,8 +51,8 @@ bool Maison::setup()
 
     if (hard_reset()) {
       mem.state = mem.sub_state = STARTUP;
-      mem.watchdog_count = 0;
-      mem.watchdog_step_count = 0;
+      mem.hours_24_count = 0;
+      mem.one_hour_step_count = 0;
     }
 
     if (network_required()) {
@@ -191,7 +191,7 @@ bool Maison::setUserCallback(Callback * _cb, const char * _topic, uint8_t _qos)
 void Maison::loop(Process * process) 
 { 
   State new_state, new_sub_state;
-  static long last_watchdog_time_count = 0;
+  static long last_time_count = 0;
 
   DEBUG(F("Maison::loop(): Current state: "));
   DEBUGLN(mem.state);
@@ -253,22 +253,10 @@ void Maison::loop(Process * process)
         new_state     = PROCESS_EVENT;
         new_sub_state = PROCESS_EVENT;
       }
-      else if (watchdog_enabled()) {
-        if (mem.watchdog_step_count >= (ONE_HOUR * 1000)) {
-          if (++mem.watchdog_count >= 24) {
-            new_state          = WATCHDOG;
-            new_sub_state      = WAIT_FOR_EVENT;
-            mem.watchdog_count = 0;
-          }
-          mem.watchdog_step_count = 0;
-        }
+      else {
+        new_sub_state = WAIT_FOR_EVENT;
+        new_state = check_if_24_hours_time(WAIT_FOR_EVENT);
       }
-      break;
-
-    case CHECK_MSGS:
-      delay(100);
-      if (mqtt_connected()) mqtt_loop(); 
-      new_state = new_sub_state;
       break;
 
     case PROCESS_EVENT:
@@ -278,21 +266,19 @@ void Maison::loop(Process * process)
       else if (res != NOT_COMPLETED) {
         new_state = new_sub_state = WAIT_END_EVENT;
       }
+      else {
+        new_sub_state = PROCESS_EVENT;
+        new_state = check_if_24_hours_time(PROCESS_EVENT);
+      }
       break;
 
     case WAIT_END_EVENT:
       if (res != NOT_COMPLETED) {
         new_state = new_sub_state = WAIT_FOR_EVENT;
       }
-      else if (watchdog_enabled()) {
-        if (mem.watchdog_step_count >= (ONE_HOUR * 1000)) {
-          if (++mem.watchdog_count >= 24) {
-            new_state          = WATCHDOG;
-            new_sub_state      = WAIT_END_EVENT;
-            mem.watchdog_count = 0;
-          }
-          mem.watchdog_step_count = 0;
-        }
+      else {
+        new_sub_state = WAIT_END_EVENT;
+        new_state = check_if_24_hours_time(WAIT_END_EVENT);
       }
       break;
 
@@ -302,25 +288,29 @@ void Maison::loop(Process * process)
       }
       break;
 
-    case WATCHDOG:
-      if (show_voltage()) {
-        if (!send_msg(MAISON_STATUS_TOPIC, 
-                      "{\"device\":\"%s\",\"msg_type\":\"%s\",\"VBAT\":%3.1f}", 
-                      config.device_name, 
-                      "WATCHDOG",
-                      battery_voltage())) {
-          ERROR("Unable to send watchdog message");
+    case HOURS_24:
+      delay(100);
+      if (mqtt_connected()) mqtt_loop(); // Second chance to process received msgs
+      if (watchdog_enabled()) {
+        if (show_voltage()) {
+          if (!send_msg(MAISON_STATUS_TOPIC, 
+                        "{\"device\":\"%s\",\"msg_type\":\"%s\",\"VBAT\":%3.1f}", 
+                        config.device_name, 
+                        "WATCHDOG",
+                        battery_voltage())) {
+            ERROR("Unable to send watchdog message");
+          }
+        }
+        else {
+          if (!send_msg(MAISON_STATUS_TOPIC, 
+                        "{\"device\":\"%s\",\"msg_type\":\"%s\"}", 
+                        config.device_name,
+                        "WATCHDOG")) {
+            ERROR("Unable to send watchdog message");
+          }
         }
       }
-      else {
-        if (!send_msg(MAISON_STATUS_TOPIC, 
-                      "{\"device\":\"%s\",\"msg_type\":\"%s\"}", 
-                      config.device_name,
-                      "WATCHDOG")) {
-          ERROR("Unable to send watchdog message");
-        }
-      }
-      
+            
       new_state = new_sub_state;
       break;
   }
@@ -333,10 +323,8 @@ void Maison::loop(Process * process)
   if (on_battery_power()) {
     uint16_t wait_count = short_reboot_time() ? 5 : ONE_HOUR;
 
-    if (watchdog_enabled()) {
-      mem.watchdog_step_count += wait_count * 1000;
-      DEBUG(F(" Watchdog step count: ")); DEBUGLN(mem.watchdog_step_count);
-    }
+    mem.one_hour_step_count += wait_count * 1000;
+    DEBUG(F(" One hour step count: ")); DEBUGLN(mem.one_hour_step_count);
     
     DEBUGLN(" Prepare for deep sleep");
     save_mems();
@@ -344,10 +332,10 @@ void Maison::loop(Process * process)
     delay(1000);
     DEBUGLN(" HUM... Not suppose to come here after deep_sleep call...");
   }
-  else if (watchdog_enabled()) {
-    mem.watchdog_step_count += millis() - last_watchdog_time_count;
-    last_watchdog_time_count = millis();
-    DEBUG(F(" Watchdog step count: ")); DEBUGLN(mem.watchdog_step_count);
+  else {
+    mem.one_hour_step_count += millis() - last_time_count;
+    last_time_count = millis();
+    DEBUG(F(" One hour step count: ")); DEBUGLN(mem.one_hour_step_count);
   }
 
   DEBUGLN("End of loop()");

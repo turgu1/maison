@@ -118,16 +118,15 @@ class Maison
     //
     // On battery power, only the following states will have networking capability:
     //
-    //    STARTUP, CHECK_MSGS, PROCESS_EVENT, END_EVENT, WATCHDOG
+    //    STARTUP, PROCESS_EVENT, END_EVENT, HOURS_24
 
     enum State : uint8_t {
       STARTUP        =  1,
       WAIT_FOR_EVENT =  2,
-      CHECK_MSGS     =  4,
-      PROCESS_EVENT  =  8,
-      WAIT_END_EVENT = 16,
-      END_EVENT      = 32,
-      WATCHDOG       = 64
+      PROCESS_EVENT  =  4,
+      WAIT_END_EVENT =  8,
+      END_EVENT      = 16,
+      HOURS_24       = 32
     };
 
     // The ProcessResult is returned by the user process function to indicate
@@ -164,7 +163,7 @@ class Maison
     inline float battery_voltage() { return (ESP.getVcc() * (1.0 / 1024.0)); }    
 
     inline bool network_required() { 
-      return (mem.state & (STARTUP|CHECK_MSGS|PROCESS_EVENT|END_EVENT|WATCHDOG)) != 0;
+      return (mem.state & (STARTUP|PROCESS_EVENT|END_EVENT|HOURS_24)) != 0;
     }
 
     char * my_topic(const char * topic, char * buffer, uint16_t buffer_length);
@@ -193,8 +192,8 @@ class Maison
       uint32_t csum;
       State    state;
       State    sub_state;
-      uint16_t watchdog_count;      // Up to 24 hours
-      uint32_t watchdog_step_count; // Up to 3600 seconds in milliseconds
+      uint16_t hours_24_count;      // Up to 24 hours
+      uint32_t one_hour_step_count; // Up to 3600 seconds in milliseconds
       uint32_t magic;
     } mem;
 
@@ -215,15 +214,26 @@ class Maison
     friend void maison_callback(const char * topic, byte * payload, unsigned int length);
     void process_callback(const char * topic, byte * payload, unsigned int length);
 
-    inline bool wifi_connected()    { return WiFi.status() == WL_CONNECTED;             }
-    inline bool mqtt_connected()    { return mqtt_client.connected();                   }
+    inline bool   wifi_connected() { return WiFi.status() == WL_CONNECTED;             }
+    inline bool   mqtt_connected() { return mqtt_client.connected();                   }
 
-    inline bool hard_reset()        { return reset_reason() != REASON_DEEP_SLEEP_AWAKE; }
-    inline void mqtt_loop()         { mqtt_client.loop();                               }
+    inline bool       hard_reset() { return reset_reason() != REASON_DEEP_SLEEP_AWAKE; }
+    inline void        mqtt_loop() { mqtt_client.loop();                               }
 
-    inline bool show_voltage()      { return (feature_mask & VOLTAGE_CHECK) != 0;       }
-    inline bool on_battery_power()  { return (feature_mask & BATTERY_POWER) != 0;       }
-    inline bool watchdog_enabled()  { return (feature_mask & WATCHDOG_24H) != 0;        }
+    inline bool     show_voltage() { return (feature_mask & VOLTAGE_CHECK) != 0;       }
+    inline bool on_battery_power() { return (feature_mask & BATTERY_POWER) != 0;       }
+    inline bool watchdog_enabled() { return (feature_mask & WATCHDOG_24H ) != 0;       }
+
+    inline State check_if_24_hours_time(State default_state) {
+      if (mem.one_hour_step_count >= (ONE_HOUR * 1000)) {
+        mem.one_hour_step_count = 0;
+        if (++mem.hours_24_count >= 24) {
+          mem.hours_24_count = 0;
+          return HOURS_24;
+        }
+      }
+      return default_state;
+    }
 
     inline bool short_reboot_time() { 
       return (mem.state & (PROCESS_EVENT|WAIT_END_EVENT|END_EVENT)) != 0;
