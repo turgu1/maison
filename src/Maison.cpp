@@ -145,7 +145,7 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
         }
       }
     }
-    else if (strncmp(buffer, "STATE?", 8) == 0) {
+    else if (strncmp(buffer, "STATE?", 6) == 0) {
       send_msg(
         MAISON_STATUS_TOPIC, 
         "{\"device\":\"%s\",\"msg_type\":\"state\",\"STATE\":%u,\"hours\":%u,\"millis\":%u}",
