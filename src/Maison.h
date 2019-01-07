@@ -11,6 +11,7 @@
 #include <stdarg.h>
 
 // Insure that MQTT Packet size is big enough for the needs of the framework
+// This is an option of the PubSubClient library that can be set through platformio.ini
 
 #if MQTT_MAX_PACKET_SIZE < 512
   #error "MQTT_MAX_PACKET_SIZE MUST BE AT LEAST 512 IN SIZE."
@@ -252,7 +253,7 @@ class Maison
     bool retrieve_config(JsonObject & root, Config & config);
     bool load_config(int version = 0);
     bool save_config();
-    #if TESTING
+    #if MAISON_TESTING
       void show_config(Config & config);
     #endif
 
