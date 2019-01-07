@@ -169,6 +169,7 @@ class Maison
     void deep_sleep(bool back_with_wifi, int sleep_time_in_sec);
 
     inline float battery_voltage() { return (ESP.getVcc() * (1.0 / 1024.0)); }    
+    inline bool       hard_reset() { return reset_reason() != REASON_DEEP_SLEEP_AWAKE; }
 
     inline bool network_required() { 
       return (mem.state & (STARTUP|PROCESS_EVENT|END_EVENT|HOURS_24)) != 0;
@@ -225,7 +226,6 @@ class Maison
     inline bool   wifi_connected() { return WiFi.status() == WL_CONNECTED;             }
     inline bool   mqtt_connected() { return mqtt_client.connected();                   }
 
-    inline bool       hard_reset() { return reset_reason() != REASON_DEEP_SLEEP_AWAKE; }
     inline void        mqtt_loop() { mqtt_client.loop();                               }
 
     inline bool     show_voltage() { return (feature_mask & VOLTAGE_CHECK) != 0;       }

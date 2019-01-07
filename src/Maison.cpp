@@ -148,7 +148,7 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
     else if (strncmp(buffer, "STATE?", 6) == 0) {
       send_msg(
         MAISON_STATUS_TOPIC, 
-        "{\"device\":\"%s\",\"msg_type\":\"state\",\"STATE\":%u,\"hours\":%u,\"millis\":%u}",
+        "{\"device\":\"%s\",\"msg_type\":\"STATE\",\"state\":%u,\"hours\":%u,\"millis\":%u}",
         config.device_name,
         mem.state,
         mem.hours_24_count,
@@ -571,14 +571,23 @@ bool Maison::wifi_connect()
 
 bool Maison::mqtt_reconnect()
 {
+  static bool first_connect = true;
+
   SHOW("mqtt_reconnect()");
 
   if (!mqtt_connected()) {
-    DEBUGLN(F("setClient..."));
-    mqtt_client.setClient(wifi_client);
-    DEBUGLN(F("setServer..."));
-    mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
+
+    if (first_connect) {
+      first_connect = false;
+      DEBUGLN(F("setClient..."));
+      mqtt_client.setClient(wifi_client);
+      
+      DEBUGLN(F("setServer..."));
+      mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
+    }    
+
     DEBUGLN(F("connect..."));
+    
     if (!mqtt_client.connect(config.device_name, config.mqtt_username, config.mqtt_password)) {
       DEBUG(F("Unable to connect to mqtt. State: "));
       DEBUGLN(mqtt_client.state());
