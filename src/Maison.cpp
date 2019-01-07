@@ -191,7 +191,7 @@ bool Maison::setUserCallback(Callback * _cb, const char * _topic, uint8_t _qos)
 void Maison::loop(Process * process) 
 { 
   State new_state, new_sub_state;
-  static long last_watch_dog_time_count = 0;
+  static long last_watchdog_time_count = 0;
 
   DEBUG(F("Maison::loop(): Current state: "));
   DEBUGLN(mem.state);
@@ -253,10 +253,10 @@ void Maison::loop(Process * process)
         new_state     = PROCESS_EVENT;
         new_sub_state = PROCESS_EVENT;
       }
-      else if (feature_mask & WATCHDOG_24H) {
-        if (mem.watchdog_step_count >= (WATCH_DOG_ONE_HOUR * 1000)) {
+      else if (watchdog_enabled()) {
+        if (mem.watchdog_step_count >= (ONE_HOUR * 1000)) {
           if (++mem.watchdog_count >= 24) {
-            new_state          = WATCH_DOG;
+            new_state          = WATCHDOG;
             new_sub_state      = WAIT_FOR_EVENT;
             mem.watchdog_count = 0;
           }
@@ -284,10 +284,10 @@ void Maison::loop(Process * process)
       if (res != NOT_COMPLETED) {
         new_state = new_sub_state = WAIT_FOR_EVENT;
       }
-      else if (feature_mask & WATCHDOG_24H) {
-        if (mem.watchdog_step_count >= (WATCH_DOG_ONE_HOUR * 1000)) {
+      else if (watchdog_enabled()) {
+        if (mem.watchdog_step_count >= (ONE_HOUR * 1000)) {
           if (++mem.watchdog_count >= 24) {
-            new_state          = WATCH_DOG;
+            new_state          = WATCHDOG;
             new_sub_state      = WAIT_END_EVENT;
             mem.watchdog_count = 0;
           }
@@ -302,7 +302,7 @@ void Maison::loop(Process * process)
       }
       break;
 
-    case WATCH_DOG:
+    case WATCHDOG:
       if (show_voltage()) {
         if (!send_msg(MAISON_STATUS_TOPIC, 
                       "{\"device\":\"%s\",\"msg_type\":\"%s\",\"VBAT\":%3.1f}", 
@@ -331,9 +331,9 @@ void Maison::loop(Process * process)
   DEBUG(" Next state: "); DEBUGLN(mem.state);
 
   if (on_battery_power()) {
-    uint16_t wait_count = short_reboot_time() ? 5 : 3600;
+    uint16_t wait_count = short_reboot_time() ? 5 : ONE_HOUR;
 
-    if (feature_mask & WATCHDOG_24H) {
+    if (watchdog_enabled()) {
       mem.watchdog_step_count += wait_count * 1000;
       DEBUG(F(" Watchdog step count: ")); DEBUGLN(mem.watchdog_step_count);
     }
@@ -344,9 +344,9 @@ void Maison::loop(Process * process)
     delay(1000);
     DEBUGLN(" HUM... Not suppose to come here after deep_sleep call...");
   }
-  else if (feature_mask & WATCHDOG_24H) {
-    mem.watchdog_step_count += millis() - last_watch_dog_time_count;
-    last_watch_dog_time_count = millis();
+  else if (watchdog_enabled()) {
+    mem.watchdog_step_count += millis() - last_watchdog_time_count;
+    last_watchdog_time_count = millis();
     DEBUG(F(" Watchdog step count: ")); DEBUGLN(mem.watchdog_step_count);
   }
 

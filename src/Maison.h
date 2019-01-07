@@ -88,12 +88,12 @@
 #define OK_DO     { result = true; break; }
 #define ERROR(m)  { DEBUGLN(F(" ERROR: " m)); break; }
 
-// To get WATCH_DOG Time faster during tests
+// To get WATCHDOG Time faster during tests
 
 #if MAISON_TESTING
-  #define WATCH_DOG_ONE_HOUR 60   // In seconds. So WATCH_DOG fired every 24 minutes.
+  #define ONE_HOUR 60   // In seconds. So WATCHDOG fired every 24 minutes.
 #else
-  #define WATCH_DOG_ONE_HOUR 3600 // In seconds. Normal is one hour x 24 = 24 hours.
+  #define ONE_HOUR 3600 // In seconds. Normal is one hour x 24 = 24 hours.
 #endif
 
 class Maison
@@ -118,7 +118,7 @@ class Maison
     //
     // On battery power, only the following states will have networking capability:
     //
-    //    STARTUP, CHECK_MSGS, PROCESS_EVENT, END_EVENT, WATCH_DOG
+    //    STARTUP, CHECK_MSGS, PROCESS_EVENT, END_EVENT, WATCHDOG
 
     enum State : uint8_t {
       STARTUP        =  1,
@@ -127,7 +127,7 @@ class Maison
       PROCESS_EVENT  =  8,
       WAIT_END_EVENT = 16,
       END_EVENT      = 32,
-      WATCH_DOG      = 64
+      WATCHDOG       = 64
     };
 
     // The ProcessResult is returned by the user process function to indicate
@@ -164,7 +164,7 @@ class Maison
     inline float battery_voltage() { return (ESP.getVcc() * (1.0 / 1024.0)); }    
 
     inline bool network_required() { 
-      return (mem.state & (STARTUP|CHECK_MSGS|PROCESS_EVENT|END_EVENT|WATCH_DOG)) != 0;
+      return (mem.state & (STARTUP|CHECK_MSGS|PROCESS_EVENT|END_EVENT|WATCHDOG)) != 0;
     }
 
     char * my_topic(const char * topic, char * buffer, uint16_t buffer_length);
@@ -215,14 +215,15 @@ class Maison
     friend void maison_callback(const char * topic, byte * payload, unsigned int length);
     void process_callback(const char * topic, byte * payload, unsigned int length);
 
-    inline bool wifi_connected()   { return WiFi.status() == WL_CONNECTED;             }
-    inline bool mqtt_connected()   { return mqtt_client.connected();                   }
+    inline bool wifi_connected()    { return WiFi.status() == WL_CONNECTED;             }
+    inline bool mqtt_connected()    { return mqtt_client.connected();                   }
 
-    inline bool hard_reset()       { return reset_reason() != REASON_DEEP_SLEEP_AWAKE; }
-    inline void mqtt_loop()        { mqtt_client.loop();                               }
+    inline bool hard_reset()        { return reset_reason() != REASON_DEEP_SLEEP_AWAKE; }
+    inline void mqtt_loop()         { mqtt_client.loop();                               }
 
-    inline bool show_voltage()     { return (feature_mask & VOLTAGE_CHECK) != 0;       }
-    inline bool on_battery_power() { return (feature_mask & BATTERY_POWER) != 0;       }
+    inline bool show_voltage()      { return (feature_mask & VOLTAGE_CHECK) != 0;       }
+    inline bool on_battery_power()  { return (feature_mask & BATTERY_POWER) != 0;       }
+    inline bool watchdog_enabled()  { return (feature_mask & WATCHDOG_24H) != 0;        }
 
     inline bool short_reboot_time() { 
       return (mem.state & (PROCESS_EVENT|WAIT_END_EVENT|END_EVENT)) != 0;
