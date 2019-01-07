@@ -288,7 +288,7 @@ void Maison::loop(Process * process)
         if (mem.watchdog_step_count >= (WATCH_DOG_ONE_HOUR * 1000)) {
           if (++mem.watchdog_count >= 24) {
             new_state          = WATCH_DOG;
-            new_sub_state      = WAIT_FOR_EVENT;
+            new_sub_state      = WAIT_END_EVENT;
             mem.watchdog_count = 0;
           }
           mem.watchdog_step_count = 0;
@@ -332,18 +332,22 @@ void Maison::loop(Process * process)
 
   if (on_battery_power()) {
     uint16_t wait_count = short_reboot_time() ? 5 : 3600;
+
     if (feature_mask & WATCHDOG_24H) {
       mem.watchdog_step_count += wait_count * 1000;
+      DEBUG(F(" Watchdog step count: ")); DEBUGLN(mem.watchdog_step_count);
     }
-    DEBUGLN("Prepare for deep sleep");
+    
+    DEBUGLN(" Prepare for deep sleep");
     save_mems();
     deep_sleep(network_required(), wait_count);
     delay(1000);
-    DEBUGLN("HUM... Not suppose to come here after deep_sleep call...");
+    DEBUGLN(" HUM... Not suppose to come here after deep_sleep call...");
   }
   else if (feature_mask & WATCHDOG_24H) {
     mem.watchdog_step_count += millis() - last_watch_dog_time_count;
     last_watch_dog_time_count = millis();
+    DEBUG(F(" Watchdog step count: ")); DEBUGLN(mem.watchdog_step_count);
   }
 
   DEBUGLN("End of loop()");
