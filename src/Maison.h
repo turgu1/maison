@@ -99,7 +99,7 @@
 // To get WATCHDOG Time faster during tests
 
 #if QUICK_TURN
-  #define ONE_HOUR 10   // In seconds. So HOURS_24 fired every 4 minutes.
+  #define ONE_HOUR 5   // In seconds. So HOURS_24 fired every 2 minutes.
 #else
   #define ONE_HOUR 3600 // In seconds. Normal is one hour x 24 = 24 hours.
 #endif

@@ -559,8 +559,6 @@ bool Maison::wifi_connect()
       }
     }
 
-    wifi_client.setFingerprint(config.mqtt_fingerprint);
-
     OK_DO;
   }
 
@@ -584,6 +582,8 @@ bool Maison::mqtt_reconnect()
       
       DEBUGLN(F("setServer..."));
       mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
+
+      wifi_client.setFingerprint(config.mqtt_fingerprint);
     }    
 
     DEBUGLN(F("connect..."));
@@ -636,7 +636,7 @@ bool Maison::mqtt_connect()
       }
       else { 
         long now = millis();
-        if (now - last_reconnect_attempt > 2000) {
+        if ((now - last_reconnect_attempt) > 2000) {
           last_reconnect_attempt = now;
           if (mqtt_reconnect()) {
             last_reconnect_attempt = 0;
