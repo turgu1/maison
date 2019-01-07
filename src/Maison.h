@@ -32,6 +32,14 @@
   #define MAISON_TESTING 0
 #endif
 
+#ifndef QUICK_TURN
+  #if MAISON_TESTING
+    #define QUICK_TURN 1
+  #else
+    #define QUICK_TURN 0
+  #endif
+#endif
+
 // This is prepended to all topics used by the framework
 
 #ifndef MAISON_PREFIX_TOPIC
@@ -90,8 +98,8 @@
 
 // To get WATCHDOG Time faster during tests
 
-#if MAISON_TESTING
-  #define ONE_HOUR 10   // In seconds. So WATCHDOG fired every 4 minutes.
+#if QUICK_TURN
+  #define ONE_HOUR 10   // In seconds. So HOURS_24 fired every 4 minutes.
 #else
   #define ONE_HOUR 3600 // In seconds. Normal is one hour x 24 = 24 hours.
 #endif

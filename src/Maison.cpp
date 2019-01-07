@@ -145,6 +145,15 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
         }
       }
     }
+    else if (strncmp(buffer, "STATE?", 8) == 0) {
+      mqtt_client.send_msg(
+        MAISON_STATUS_TOPIC, 
+        "{\"device\":\"%s\",\"msg_type\":\"state\",\"STATE\":%u,\"hours\":%u,\"millis\":%u}",
+        config.device_name,
+        mem.state,
+        mem.hours_24_count,
+        mem.one_hour_step_count);
+    }
     else if (strncmp(buffer, "RESTART!", 8) == 0) {
       DEBUGLN("Device is restarting");
       ESP.reset();
