@@ -91,7 +91,7 @@
 // To get WATCHDOG Time faster during tests
 
 #if MAISON_TESTING
-  #define ONE_HOUR 60   // In seconds. So WATCHDOG fired every 24 minutes.
+  #define ONE_HOUR 10   // In seconds. So WATCHDOG fired every 4 minutes.
 #else
   #define ONE_HOUR 3600 // In seconds. Normal is one hour x 24 = 24 hours.
 #endif
@@ -111,7 +111,7 @@ class Maison
       NONE          = 0x00, // No special feature
       VOLTAGE_CHECK = 0x01, // Chip A2D voltage readout will be sent on status/watchdog messages
       BATTERY_POWER = 0x02, // Using batteries -> deep_sleep will be used then
-      WATCHDOG_24H  = 0x04 // Watchdog status sent every 24 hours
+      WATCHDOG_24H  = 0x04  // Watchdog status sent every 24 hours
     };
 
     // States of the finite state machine
