@@ -226,7 +226,7 @@ void Maison::loop(Process * process)
     case STARTUP:
       if (show_voltage()) {
         if (!send_msg(MAISON_STATUS_TOPIC, 
-                      F("{\"device\":\"%s\",\"msg_type\":\"%s\",\"VBAT\":%3.1f}"), 
+                      "{\"device\":\"%s\",\"msg_type\":\"%s\",\"VBAT\":%3.1f}", 
                       config.device_name, 
                       "STARTUP", 
                       battery_voltage())) {
@@ -235,7 +235,7 @@ void Maison::loop(Process * process)
       }
       else {
         if (!send_msg(MAISON_STATUS_TOPIC, 
-                      F("{\"device\":\"%s\",\"msg_type\":\"%s\"}"), 
+                      "{\"device\":\"%s\",\"msg_type\":\"%s\"}", 
                       config.device_name,
                       "STARTUP")) {
           ERROR("Unable to send startup message");
@@ -317,7 +317,7 @@ void Maison::loop(Process * process)
     case WATCH_DOG:
       if (show_voltage()) {
         if (!send_msg(MAISON_STATUS_TOPIC, 
-                      F("{\"device\":\"%s\",\"msg_type\":\"%s\",\"VBAT\":%3.1f}"), 
+                      "{\"device\":\"%s\",\"msg_type\":\"%s\",\"VBAT\":%3.1f}", 
                       config.device_name, 
                       "WATCHDOG",
                       battery_voltage())) {
@@ -326,7 +326,7 @@ void Maison::loop(Process * process)
       }
       else {
         if (!send_msg(MAISON_STATUS_TOPIC, 
-                      F("{\"device\":\"%s\",\"msg_type\":\"%s\"}"), 
+                      "{\"device\":\"%s\",\"msg_type\":\"%s\"}", 
                       config.device_name,
                       "WATCHDOG")) {
           ERROR("Unable to send watchdog message");
@@ -652,28 +652,7 @@ bool Maison::mqtt_connect()
   return result;
 }
 
-bool Maison::send_msg(const char * _topic, const char * msg)
-{
-  SHOW("send_msg()");
-
-  DO {
-    DEBUG(F(" Sending msg to ")); DEBUG(_topic); DEBUG(F(": ")); DEBUGLN(msg);
-
-    if (!mqtt_connect()) ERROR("Unable to connect to mqtt server"); 
-    
-    if (!mqtt_client.publish(_topic, msg)) {
-      ERROR("Unable to publish message");
-    }
-
-    OK_DO;
-  }
-
-  SHOW_RESULT("send_msg()");
-
-  return result;
-}
-
-bool Maison::send_msg(const char * _topic, const __FlashStringHelper * format, ...)
+bool Maison::send_msg(const char * _topic, const char * format, ...)
 {
   SHOW("send_msg()");
 
@@ -682,7 +661,7 @@ bool Maison::send_msg(const char * _topic, const __FlashStringHelper * format, .
   va_list args;
   va_start (args, format);
 
-  vsnprintf(msg, 512, (const char *) format, args);
+  vsnprintf(msg, 512, format, args);
   
   DO {
     DEBUG(F(" Sending msg to ")); DEBUG(_topic); DEBUG(F(": ")); DEBUGLN(msg);

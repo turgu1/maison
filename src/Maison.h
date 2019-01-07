@@ -154,8 +154,7 @@ class Maison
     Maison(uint8_t _feature_mask, void * _user_mem, uint8_t _user_mem_length);
 
     bool setup();
-    bool send_msg(const char * _topic, const __FlashStringHelper * format, ...);
-    bool send_msg(const char * _topic, const char * msg);
+    bool send_msg(const char * _topic, const char * format, ...);
     int  reset_reason();
 
     void deep_sleep(bool back_with_wifi, int sleep_time_in_sec);
