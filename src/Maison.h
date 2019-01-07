@@ -39,6 +39,8 @@
 #endif
 
 // This is the topic name to send status information to
+//
+// For example: maison/status
 
 #ifndef MAISON_STATUS_TOPIC
   #define MAISON_STATUS_TOPIC MAISON_PREFIX_TOPIC "status"
@@ -191,7 +193,8 @@ class Maison
       uint32_t csum;
       State    state;
       State    sub_state;
-      uint16_t watchdog_count;
+      uint16_t watchdog_count;      // Up to 24 hours
+      uint32_t watchdog_step_count; // Up to 3600 seconds in milliseconds
       uint32_t magic;
     } mem;
 

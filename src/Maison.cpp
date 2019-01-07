@@ -52,6 +52,7 @@ bool Maison::setup()
     if (hard_reset()) {
       mem.state = mem.sub_state = STARTUP;
       mem.watchdog_count = 0;
+      mem.watchdog_step_count = 0;
     }
 
     if (network_required()) {
@@ -190,7 +191,7 @@ bool Maison::setUserCallback(Callback * _cb, const char * _topic, uint8_t _qos)
 void Maison::loop(Process * process) 
 { 
   State new_state, new_sub_state;
-  static long next_watch_dog_time_count = 0;
+  static long last_watch_dog_time_count = 0;
 
   DEBUG(F("Maison::loop(): Current state: "));
   DEBUGLN(mem.state);
@@ -253,19 +254,13 @@ void Maison::loop(Process * process)
         new_sub_state = PROCESS_EVENT;
       }
       else if (feature_mask & WATCHDOG_24H) {
-        if (on_battery_power()) {
-          new_state = WATCH_DOG;
-          new_sub_state = WAIT_FOR_EVENT;
-        }
-        else {
-          if ((millis() - next_watch_dog_time_count) >= (WATCH_DOG_ONE_HOUR * 1000)) {
-            if (++mem.watchdog_count >= 24) {
-              new_state = WATCH_DOG;
-              new_sub_state = WAIT_FOR_EVENT;
-              mem.watchdog_count = 0;
-            }
-            next_watch_dog_time_count = millis();
+        if (mem.watchdog_step_count >= (WATCH_DOG_ONE_HOUR * 1000)) {
+          if (++mem.watchdog_count >= 24) {
+            new_state          = WATCH_DOG;
+            new_sub_state      = WAIT_FOR_EVENT;
+            mem.watchdog_count = 0;
           }
+          mem.watchdog_step_count = 0;
         }
       }
       break;
@@ -290,20 +285,13 @@ void Maison::loop(Process * process)
         new_state = new_sub_state = WAIT_FOR_EVENT;
       }
       else if (feature_mask & WATCHDOG_24H) {
-        if (on_battery_power()) {
-          // Todo: Not sure how to count time here...
-          // new_state = WATCH_DOG;
-          // new_sub_state = WAIT_END_EVENT;
-        }
-        else {
-          if ((millis() - next_watch_dog_time_count) >= (WATCH_DOG_ONE_HOUR * 1000)) {
-            if (++mem.watchdog_count >= 24) {
-              new_state = WATCH_DOG;
-              new_sub_state = WAIT_FOR_EVENT;
-              mem.watchdog_count = 0;
-            }
-            next_watch_dog_time_count = millis();
+        if (mem.watchdog_step_count >= (WATCH_DOG_ONE_HOUR * 1000)) {
+          if (++mem.watchdog_count >= 24) {
+            new_state          = WATCH_DOG;
+            new_sub_state      = WAIT_FOR_EVENT;
+            mem.watchdog_count = 0;
           }
+          mem.watchdog_step_count = 0;
         }
       }
       break;
@@ -343,14 +331,24 @@ void Maison::loop(Process * process)
   DEBUG(" Next state: "); DEBUGLN(mem.state);
 
   if (on_battery_power()) {
+    uint16_t wait_count = short_reboot_time() ? 5 : 3600;
+    if (feature_mask & WATCHDOG_24H) {
+      mem.watchdog_step_count += wait_count * 1000;
+    }
     DEBUGLN("Prepare for deep sleep");
     save_mems();
-    deep_sleep(network_required(), short_reboot_time() ? 5 : 3600);
+    deep_sleep(network_required(), wait_count);
     delay(1000);
     DEBUGLN("HUM... Not suppose to come here after deep_sleep call...");
   }
+  else if (feature_mask & WATCHDOG_24H) {
+    mem.watchdog_step_count += millis() - last_watch_dog_time_count;
+    last_watch_dog_time_count = millis();
+  }
 
   DEBUGLN("End of loop()");
+
+  delay(10);
 }
 
 #define GETS(dst, src, size) \
