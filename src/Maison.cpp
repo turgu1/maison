@@ -146,7 +146,7 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
       }
     }
     else if (strncmp(buffer, "STATE?", 8) == 0) {
-      mqtt_client.send_msg(
+      send_msg(
         MAISON_STATUS_TOPIC, 
         "{\"device\":\"%s\",\"msg_type\":\"state\",\"STATE\":%u,\"hours\":%u,\"millis\":%u}",
         config.device_name,
