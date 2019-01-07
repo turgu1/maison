@@ -582,6 +582,10 @@ bool Maison::mqtt_reconnect()
       
       DEBUGLN(F("setServer..."));
       mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
+
+    }
+    else {
+      mqtt_client.disconnect();
     }    
 
     DEBUGLN(F("connect..."));
