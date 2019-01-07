@@ -886,7 +886,7 @@ uint32_t Maison::CRC32(const uint8_t * data, size_t length)
       if (i < 19) debug(F(",")); 
     }
     debugln(F("]"));
-    debugln(F("---- End ----"));
+    debugln(F("---- The End ----"));
   }
 
 #endif
