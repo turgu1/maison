@@ -68,14 +68,14 @@
 // ----- END OPTIONS -----
 
 #if MAISON_TESTING
-  #define       debug(a) Serial.print(a)
-  #define     debugln(a) Serial.println(a)
-  #define        SHOW(f) debugln(F(f));
-  #define SHOW_RESULT(f) debug(F(" Result " f ": ")); debugln(result ? F("success") : F("FAILURE"))
+  #define       DEBUG(a) Serial.print(a)
+  #define     DEBUGLN(a) Serial.println(a)
+  #define        SHOW(f) DEBUGLN(F(f));
+  #define SHOW_RESULT(f) DEBUG(F(" Result " f ": ")); DEBUGLN(result ? F("success") : F("FAILURE"))
   #define   STRINGIZE(a) #a
 #else
-  #define       debug(a)
-  #define     debugln(a)
+  #define       DEBUG(a)
+  #define     DEBUGLN(a)
   #define        SHOW(f)
   #define SHOW_RESULT(f)
 #endif
@@ -84,7 +84,7 @@
 
 #define DO        bool result = false; while (true)
 #define OK_DO     { result = true; break; }
-#define ERROR(m)  { debugln(F(" ERROR: " m)); break; }
+#define ERROR(m)  { DEBUGLN(F(" ERROR: " m)); break; }
 
 // To get WATCH_DOG Time faster during tests
 
@@ -171,10 +171,10 @@ class Maison
         strcpy(buffer, MAISON_PREFIX_TOPIC);
         strcat(buffer, config.device_name);
         strcat(buffer, topic);
-        debug(F("my_topic() result: ")); debugln(buffer);
+        DEBUG(F("my_topic() result: ")); DEBUGLN(buffer);
       }
       else {
-        debugln(F("ERROR: my_topic(): Buffer too small!"));
+        DEBUGLN(F("ERROR: my_topic(): Buffer too small!"));
         buffer[0] = 0;
       }
 
@@ -245,7 +245,7 @@ class Maison
         return COMPLETED;
       }
       else {
-        debugln("Calling user process...");
+        DEBUGLN("Calling user process...");
         return (*process)(mem.state);
       }
     }

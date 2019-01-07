@@ -59,7 +59,7 @@ bool Maison::setup()
       update_device_name();
     }
     
-    debug(F("MQTT_MAX_PACKET_SIZE = ")); debugln(MQTT_MAX_PACKET_SIZE);
+    DEBUG(F("MQTT_MAX_PACKET_SIZE = ")); DEBUGLN(MQTT_MAX_PACKET_SIZE);
 
     OK_DO;
   }
@@ -75,7 +75,7 @@ void maison_callback(const char * topic, byte * payload, unsigned int length)
 
   if (maison != NULL) maison->process_callback(topic, payload, length);
   
-  debugln(F(" End of maison_callback()"));
+  DEBUGLN(F(" End of maison_callback()"));
 }
 
 void Maison::process_callback(const char * topic, byte * payload, unsigned int length)
@@ -87,18 +87,18 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
   if (strcmp(topic, my_topic(MAISON_DEVICE_CTRL_SUFFIX_TOPIC, buffer, 40)) == 0) {
     int len;
 
-    debug(" Received MQTT Message: ");
+    DEBUG(" Received MQTT Message: ");
     
     memcpy(buffer, payload, len = (length > 1023) ? 1023 : length);
     buffer[len] = 0;
-    debugln(buffer);
+    DEBUGLN(buffer);
 
     if (strncmp(buffer, "CONFIG?", 7) == 0) {
-      debugln(F(" Config content requested by Maison"));
+      DEBUGLN(F(" Config content requested by Maison"));
 
       File file = SPIFFS.open("/config.json", "r");
       if (!file) {
-        debugln(" ERROR: Unable to open current config file");
+        DEBUGLN(" ERROR: Unable to open current config file");
       }
       else {
         mqtt_client.beginPublish(MAISON_CTRL_TOPIC, 
@@ -116,19 +116,19 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
       }
     }
     else if (strncmp(buffer, "CONFIG:", 7) == 0) {
-      debugln(F(" New config received"));
+      DEBUGLN(F(" New config received"));
 
       DynamicJsonBuffer jsonBuffer;
       JsonObject & root = jsonBuffer.parseObject(&buffer[7]);
 
       if (!root.success()) {
-        debugln(F(" ERROR: Unable to parse JSON content"));
+        DEBUGLN(F(" ERROR: Unable to parse JSON content"));
       }
       else {
         Config cfg;
 
         if (!retrieve_config(root, cfg)) {
-          debugln(F(" ERROR: Unable to retrieve config from received message"));
+          DEBUGLN(F(" ERROR: Unable to retrieve config from received message"));
         }
         else {
           if (cfg.version > config.version) {
@@ -139,19 +139,19 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
             save_config();
           }
           else {
-            debugln(F(" ERROR: New config with a wrong version number. Not saved."));
+            DEBUGLN(F(" ERROR: New config with a wrong version number. Not saved."));
           }
         }
       }
     }
     else if (strncmp(buffer, "RESTART!", 8) == 0) {
-      debugln("Device is restarting");
+      DEBUGLN("Device is restarting");
       ESP.reset();
       delay(200);
     }
   }
   else if (user_cb != NULL) {
-    debugln(F(" Calling user callback"));
+    DEBUGLN(F(" Calling user callback"));
     (*user_cb)(topic, payload, length);
   }
 }
@@ -168,15 +168,15 @@ bool Maison::setUserCallback(Callback * _cb, const char * _topic, uint8_t _qos)
 
   if (mqtt_client.connected()) {
     if (!mqtt_client.subscribe(user_topic, user_qos)) {
-      debug(F("Hum... unable to subscribe to user topic (State:"));
-      debug(mqtt_client.state());
-      debug("): ");
+      DEBUG(F("Hum... unable to subscribe to user topic (State:"));
+      DEBUG(mqtt_client.state());
+      DEBUG("): ");
     }
     else {
-      debug(F("Subscription completed to user topic "));
+      DEBUG(F("Subscription completed to user topic "));
       result = true;
     }
-    debugln(user_topic);            
+    DEBUGLN(user_topic);            
   }
   else {
     result = true;
@@ -192,13 +192,13 @@ void Maison::loop(Process * process)
   State new_state, new_sub_state;
   static long next_watch_dog_time_count = 0;
 
-  debug(F("Maison::loop(): Current state: "));
-  debugln(mem.state);
+  DEBUG(F("Maison::loop(): Current state: "));
+  DEBUGLN(mem.state);
 
   if (network_required()) {
     if (!mqtt_connected()) {
       if (!mqtt_connect()) {
-        debugln(F("No connecton to mqtt server. Waiting 5 seconds to retry..."));
+        DEBUGLN(F("No connecton to mqtt server. Waiting 5 seconds to retry..."));
         if (on_battery_power()) {
           deep_sleep(true, 5);
           delay(1000);
@@ -213,14 +213,14 @@ void Maison::loop(Process * process)
  
   if (mqtt_connected()) mqtt_loop();
   
-  debug(F("MQTT Connected: ")); debugln(mqtt_connected() ? "Yes" : "No");
+  DEBUG(F("MQTT Connected: ")); DEBUGLN(mqtt_connected() ? "Yes" : "No");
 
   new_state     = mem.state;
   new_sub_state = mem.sub_state;
 
   UserResult res = call_user_process(process);
 
-  debug(F("User process result: ")); debugln(res);
+  DEBUG(F("User process result: ")); DEBUGLN(res);
 
   switch (mem.state) {
     case STARTUP:
@@ -340,17 +340,17 @@ void Maison::loop(Process * process)
   mem.state     = new_state;
   mem.sub_state = new_sub_state;
 
-  debug(" Next state: "); debugln(mem.state);
+  DEBUG(" Next state: "); DEBUGLN(mem.state);
 
   if (on_battery_power()) {
-    debugln("Prepare for deep sleep");
+    DEBUGLN("Prepare for deep sleep");
     save_mems();
     deep_sleep(network_required(), short_reboot_time() ? 5 : 3600);
     delay(1000);
-    debugln("HUM... Not suppose to come here after deep_sleep call...");
+    DEBUGLN("HUM... Not suppose to come here after deep_sleep call...");
   }
 
-  debugln("End of loop()");
+  DEBUGLN("End of loop()");
 }
 
 #define GETS(dst, src, size) \
@@ -358,8 +358,8 @@ void Maison::loop(Process * process)
     strlcpy(dst, tmp, size); \
   } \
   else { \
-    debug(F(" ERROR: Unable to get ")); \
-    debugln(STRINGIZE(src)); \
+    DEBUG(F(" ERROR: Unable to get ")); \
+    DEBUGLN(STRINGIZE(src)); \
     break; \
   }
 
@@ -368,8 +368,8 @@ void Maison::loop(Process * process)
     dst = src; \
   } \
   else { \
-    debug(F(" ERROR: Unable to get ")); \
-    debugln(STRINGIZE(src)); \
+    DEBUG(F(" ERROR: Unable to get ")); \
+    DEBUGLN(STRINGIZE(src)); \
     break; \
   }
 
@@ -419,7 +419,7 @@ bool Maison::load_config(int version)
     strcat(filename, ".json");
   }
 
-  debug(F(" Config filename: ")); debugln(filename);
+  DEBUG(F(" Config filename: ")); DEBUGLN(filename);
 
   DO {
     if (!SPIFFS.begin())          ERROR("SPIFFS.begin() not working");
@@ -531,7 +531,7 @@ int Maison::reset_reason()
 {
   rst_info * reset_info = ESP.getResetInfoPtr();
   
-  debug(F("Reset reason: ")); debugln(reset_info->reason);
+  DEBUG(F("Reset reason: ")); DEBUGLN(reset_info->reason);
 
   return reset_info->reason;
 }
@@ -550,7 +550,7 @@ bool Maison::wifi_connect()
       int attempt = 0;
       while (!wifi_connected()) {
         delay(200);
-        debug(F("."));
+        DEBUG(F("."));
         if (++attempt >= 150) {
           ERROR("Unable to connect to WiFi");
         }
@@ -572,37 +572,37 @@ bool Maison::mqtt_reconnect()
   SHOW("mqtt_reconnect()");
 
   if (!mqtt_connected()) {
-    debugln(F("setClient..."));
+    DEBUGLN(F("setClient..."));
     mqtt_client.setClient(wifi_client);
-    debugln(F("setServer..."));
+    DEBUGLN(F("setServer..."));
     mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
-    debugln(F("connect..."));
+    DEBUGLN(F("connect..."));
     if (!mqtt_client.connect(config.device_name, config.mqtt_username, config.mqtt_password)) {
-      debug(F("Unable to connect to mqtt. State: "));
-      debugln(mqtt_client.state());
+      DEBUG(F("Unable to connect to mqtt. State: "));
+      DEBUGLN(mqtt_client.state());
     }
     if (mqtt_connected()) {
       static char buffer[40];
       mqtt_client.setCallback(maison_callback);
       if (!mqtt_client.subscribe(my_topic(MAISON_DEVICE_CTRL_SUFFIX_TOPIC, buffer, 40))) {
-        debug(F("Hum... unable to subscribe to topic (State:"));
-        debug(mqtt_client.state());
-        debug("): ");
+        DEBUG(F("Hum... unable to subscribe to topic (State:"));
+        DEBUG(mqtt_client.state());
+        DEBUG("): ");
       }
       else {
-        debug(F("Subscription completed to topic "));
+        DEBUG(F("Subscription completed to topic "));
       }
-      debugln(buffer);
+      DEBUGLN(buffer);
       if (user_topic != NULL) {
         if (!mqtt_client.subscribe(user_topic, user_qos)) {
-          debug(F("Hum... unable to subscribe to user topic (State:"));
-          debug(mqtt_client.state());
-          debug("): ");
+          DEBUG(F("Hum... unable to subscribe to user topic (State:"));
+          DEBUG(mqtt_client.state());
+          DEBUG("): ");
         }
         else {
-          debug(F("Subscription completed to user topic "));
+          DEBUG(F("Subscription completed to user topic "));
         }
-        debugln(user_topic);        
+        DEBUGLN(user_topic);        
       }
     }
   }
@@ -632,12 +632,12 @@ bool Maison::mqtt_connect()
             OK_DO;
           }
           else {
-            debug("!");
+            DEBUG("!");
           }
         }
         else {
           delay(100);
-          debug(F("-"));
+          DEBUG(F("-"));
         }
       }
     } 
@@ -657,7 +657,7 @@ bool Maison::send_msg(const char * _topic, const char * msg)
   SHOW("send_msg()");
 
   DO {
-    debug(F(" Sending msg to ")); debug(_topic); debug(F(": ")); debugln(msg);
+    DEBUG(F(" Sending msg to ")); DEBUG(_topic); DEBUG(F(": ")); DEBUGLN(msg);
 
     if (!mqtt_connect()) ERROR("Unable to connect to mqtt server"); 
     
@@ -685,7 +685,7 @@ bool Maison::send_msg(const char * _topic, const __FlashStringHelper * format, .
   vsnprintf(msg, 512, (const char *) format, args);
   
   DO {
-    debug(F(" Sending msg to ")); debug(_topic); debug(F(": ")); debugln(msg);
+    DEBUG(F(" Sending msg to ")); DEBUG(_topic); DEBUG(F(": ")); DEBUGLN(msg);
 
     if (!mqtt_connect()) ERROR("Unable to connect to mqtt server"); 
     
@@ -724,13 +724,13 @@ bool Maison::load_mems()
 
   DO {
     if ((!read_mem((uint32_t *) &mem, sizeof(mem), 0)) || (mem.magic != RTC_MAGIC)) {
-      debugln(F(" Maison state initialization"));
+      DEBUGLN(F(" Maison state initialization"));
       if (!init_mem()) ERROR("Unable to initialize Maison state in rtc memory");
     }
 
     if (user_mem != NULL) {
       if (!read_mem((uint32_t *) &user_mem, user_mem_length, sizeof(mem))) {
-        debugln(F(" User state initialization"));
+        DEBUGLN(F(" User state initialization"));
         if (!init_user_mem()) ERROR("Unable to initialize user state in rtc memory");
       }
     }
@@ -774,8 +774,8 @@ bool Maison::init_mem()
   mem.state     = STARTUP;
   mem.sub_state = WAIT_FOR_EVENT;
 
-  debug("Sizeof mem_struct: ");
-  debugln(sizeof(mem_struct));
+  DEBUG("Sizeof mem_struct: ");
+  DEBUGLN(sizeof(mem_struct));
 
   bool result = write_mem((uint32_t *) &mem, sizeof(mem), 0);
 
@@ -801,9 +801,9 @@ bool Maison::read_mem(uint32_t * data, uint16_t length, uint16_t addr)
 {
   SHOW("read_mem()");
 
-  debug(F("  data addr: "));  debugln((int)data);
-  debug(F("  length: "));     debugln(length);
-  debug(F("  pos in rtc: ")); debugln(addr);
+  DEBUG(F("  data addr: "));  DEBUGLN((int)data);
+  DEBUG(F("  length: "));     DEBUGLN(length);
+  DEBUG(F("  pos in rtc: ")); DEBUGLN(addr);
 
   DO {
     if (!ESP.rtcUserMemoryRead(addr, (uint32_t *) data, length)) {
@@ -826,9 +826,9 @@ bool Maison::write_mem(uint32_t * data, uint16_t length, uint16_t addr)
 {
   SHOW("write_mem()");
 
-  debug(F("  data addr: "));  debugln((int)data);
-  debug(F("  length: "));     debugln(length);
-  debug(F("  pos in rtc: ")); debugln(addr);
+  DEBUG(F("  data addr: "));  DEBUGLN((int)data);
+  DEBUG(F("  length: "));     DEBUGLN(length);
+  DEBUG(F("  pos in rtc: ")); DEBUGLN(addr);
 
   data[0] = CRC32((uint8_t *)(data + 4), length - 4);
 
@@ -870,23 +870,23 @@ uint32_t Maison::CRC32(const uint8_t * data, size_t length)
 
   void Maison::show_config(Config & config)
   {
-    debugln(F("\nConfiguration:\n-------------"));
-    debug(F("Version          : ")); debugln(config.version         );
-    debug(F("Device Name      : ")); debugln(config.device_name     );
-    debug(F("WiFi SSID        : ")); debugln(config.wifi_ssid       );
-    debug(F("WiFi Password    : ")); debugln(F("<Hidden>")          );
-    debug(F("MQTT Server      : ")); debugln(config.mqtt_server     );
-    debug(F("MQTT Username    : ")); debugln(config.mqtt_username   );
-    debug(F("MQTT Password    : ")); debugln(F("<Hidden>")          );
-    debug(F("MQTT Port        : ")); debugln(config.mqtt_port       );
+    DEBUGLN(F("\nConfiguration:\n-------------"));
+    DEBUG(F("Version          : ")); DEBUGLN(config.version         );
+    DEBUG(F("Device Name      : ")); DEBUGLN(config.device_name     );
+    DEBUG(F("WiFi SSID        : ")); DEBUGLN(config.wifi_ssid       );
+    DEBUG(F("WiFi Password    : ")); DEBUGLN(F("<Hidden>")          );
+    DEBUG(F("MQTT Server      : ")); DEBUGLN(config.mqtt_server     );
+    DEBUG(F("MQTT Username    : ")); DEBUGLN(config.mqtt_username   );
+    DEBUG(F("MQTT Password    : ")); DEBUGLN(F("<Hidden>")          );
+    DEBUG(F("MQTT Port        : ")); DEBUGLN(config.mqtt_port       );
 
-    debug(F("MQTT Fingerprint : [")); 
+    DEBUG(F("MQTT Fingerprint : [")); 
     for (int i = 0; i < 20; i++) { 
-      debug(config.mqtt_fingerprint[i]); 
-      if (i < 19) debug(F(",")); 
+      DEBUG(config.mqtt_fingerprint[i]); 
+      if (i < 19) DEBUG(F(",")); 
     }
-    debugln(F("]"));
-    //debugln(F("---- The End ----"));
+    DEBUGLN(F("]"));
+    DEBUGLN(F("---- The End ----"));
   }
 
 #endif
