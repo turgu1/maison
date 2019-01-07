@@ -324,7 +324,6 @@ void Maison::loop(Process * process)
     uint16_t wait_count = is_short_reboot_time_needed() ? 5 : ONE_HOUR;
 
     mem.one_hour_step_count += (wait_count * 1000) + millis();
-    DEBUG(F(" One hour step count: ")); DEBUGLN(mem.one_hour_step_count);
     
     DEBUGLN(" Prepare for deep sleep");
     save_mems();
@@ -335,9 +334,13 @@ void Maison::loop(Process * process)
   else {
     mem.one_hour_step_count += millis() - last_time_count;
     last_time_count = millis();
-    DEBUG(F(" One hour step count: ")); DEBUGLN(mem.one_hour_step_count);
   }
 
+  DEBUG(F(" One hour step count (")); 
+  DEBUG(mem.hours_24_count); 
+  DEBUG("): "); 
+  DEBUGLN(mem.one_hour_step_count);
+  
   DEBUGLN("End of loop()");
 
   delay(10);
