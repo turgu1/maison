@@ -310,7 +310,7 @@ void Maison::loop(Process * process)
           }
         }
       }
-            
+
       new_state = new_sub_state;
       break;
   }
@@ -321,9 +321,9 @@ void Maison::loop(Process * process)
   DEBUG(" Next state: "); DEBUGLN(mem.state);
 
   if (on_battery_power()) {
-    uint16_t wait_count = short_reboot_time() ? 5 : ONE_HOUR;
+    uint16_t wait_count = is_short_reboot_time_needed() ? 5 : ONE_HOUR;
 
-    mem.one_hour_step_count += wait_count * 1000;
+    mem.one_hour_step_count += (wait_count * 1000) + millis();
     DEBUG(F(" One hour step count: ")); DEBUGLN(mem.one_hour_step_count);
     
     DEBUGLN(" Prepare for deep sleep");

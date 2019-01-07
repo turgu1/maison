@@ -235,7 +235,7 @@ class Maison
       return default_state;
     }
 
-    inline bool short_reboot_time() { 
+    inline bool is_short_reboot_time_needed() { 
       return (mem.state & (PROCESS_EVENT|WAIT_END_EVENT|END_EVENT)) != 0;
     }
 
