@@ -49,12 +49,12 @@ platform = espressif8266
 ```
 ## Usage
 
-Here is an example of code to be used to initialize the framework and integrate it in the loop() function:
+Here is a minimal piece of code to initialize and start the framework:
 
 ```C++
 #include <Maison.h>
 
-Maison maison;
+Maison maison();
 
 void setup()
 {
@@ -67,17 +67,57 @@ void loop()
 }
 ```
 
+This piece of code won't do much at the user application level, but it will set the scene to the automation of exchanges with a MQTT message broker, sending startup/watchdog messages, answering information requests, changes of configuration, etc.
+
+Here is an example of code to be used to initialize the framework and integrate it in the loop() function. It shows both option parameters, calls to the framework and callback functions:
+
+```C++
+#include <Maison.h>
+
+Maison maison(Maison::Feature::WATCHDOG_24H|
+              Maison::Feature::VOLTAGE_CHECK);
+
+void mqtt_msg_callback(const char * topic, byte * payload, unsigned int length)
+{
+
+}
+
+Maison::UserResult process_state(Maison::State state)
+{
+  switch (state) {
+    case ...
+  }
+
+  return Maison::UserResult::COMPLETED;
+}
+
+void setup()
+{
+  maison.setup();
+  maison.setUserCallback("my_topic", mqtt_msg_callback, 0);
+}
+
+void loop()
+{
+  maison.loop(process_state);
+}
+```
+
+The use of `process_state` and `mqtt_msg_callback` is optional.
+
 ## Compilation Options
 
 The Maison framework allow for some defined options to be modified through -D compilation parameters (PlatformIO: build_flags). The following are the compilation options available to change some library behavior:
 
 Option              | Default   | Description
 --------------------|-----------|------------------------------------------------------------------------
-MAISON_TESTING      |    0      | If = 1, Enable debuging output through the standard Serial port  
-QUICK_TURN          |    0      | If = 1, WATCHDOG messages are sent every 2 minutes instead of 24 hours
+MAISON_TESTING      |    0      | If = 1, enable debuging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any Maison function. 
+QUICK_TURN          |    0      | If = 1, WATCHDOG messages are sent every 2 minutes instead of 24 hours. This is automatically the case when *MAISON_TESTING* is set to 1.
 MAISON_PREFIX_TOPIC | maison/   | All topics used by the framework are prefixed with this text   
 MAISON_STATUS_TOPIC | maison/status | Topic where the framework status are sent
 MAISON_CTRL_TOPIC   | maison/ctrl   | Topic where the framework config control are sent
 CTRL_SUFFIX_TOPIC   | /ctrl         | This is the topic suffix used to identify device-related control topic
 
 Note that for *MAISON_STATUS_TOPIC* and *MAISON_CTRL_TOPIC*, they will be modifified automatically if *MAISON_PREFIX_TOPIC* is changed. For example, if you change *MAISON_PREFIX_TOPIC* to be `home/`, *MAISON_STATUS_TOPIC* will become `home/status` and *MAISON_CTRL_TOPIC* will become `maison/ctrl`.
+
+The framework will subscribe to MQTT messages coming from the server on a topic built using *MAISON_PREFIX_TOPIC*, the device name and *CTRL_SUFFIX_TOPIC*. For example, if the device name is "WATER_SPILL", the subsribed topic would be `maison/WATER_SPILL/ctrl`.
