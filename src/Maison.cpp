@@ -51,8 +51,9 @@ bool Maison::setup()
 
     if (hard_reset()) {
       mem.state = mem.sub_state = STARTUP;
-      mem.hours_24_count = 0;
+      mem.hours_24_count      = 0;
       mem.one_hour_step_count = 0;
+      mem.lost_count          = 0;
     }
 
     if (network_required()) {
@@ -154,13 +155,17 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
         "\"state\":%u,"
         "\"hours\":%u,"
         "\"millis\":%u,"
-        "\"heap\":%u"
+        "\"lost\":%u,"
+        "\"heap\":%u,"
+        "\"VBAT\":%3.1f"
         "}",
         config.device_name,
         mem.state,
         mem.hours_24_count,
         mem.one_hour_step_count,
-        ESP.getFreeHeap());
+        mem.lost_count,
+        ESP.getFreeHeap(),
+        show_voltage() ? battery_voltage() : 0.0f);
     }
     else if (strncmp(buffer, "RESTART!", 8) == 0) {
       DEBUGLN("Device is restarting");
@@ -632,19 +637,27 @@ bool Maison::mqtt_connect()
 {
   SHOW("mqtt_connect()");
 
+  static bool counting_lost_connection = false;
+
   uint8_t retry_count = 0;
 
   DO {
     if (wifi_connected()) {
       if (mqtt_connected()) {
+        counting_lost_connection = true;
         OK_DO;
       }
       else { 
+        if (counting_lost_connection) {
+          mem.lost_count += 1;
+          counting_lost_connection = false;
+        }
         long now = millis();
         if ((now - last_reconnect_attempt) > 3000) {
           last_reconnect_attempt = now;
           if (mqtt_reconnect()) {
             last_reconnect_attempt = 0;
+            counting_lost_connection = true;
             OK_DO;
           }
           else {

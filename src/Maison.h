@@ -203,6 +203,7 @@ class Maison
       State    state;
       State    sub_state;
       uint16_t hours_24_count;      // Up to 24 hours
+      uint16_t lost_count;          // How many mqtt lost connections since reset
       uint32_t one_hour_step_count; // Up to 3600 seconds in milliseconds
       uint32_t magic;
     } mem;
