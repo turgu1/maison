@@ -569,26 +569,20 @@ bool Maison::wifi_connect()
 
 bool Maison::mqtt_reconnect()
 {
-  static bool first_connect = true;
-
   SHOW("mqtt_reconnect()");
 
   if (!mqtt_connected()) {
 
-    if (first_connect) {
-      first_connect = false;
-      DEBUGLN(F("setClient..."));
-      mqtt_client.setClient(wifi_client);
-      
-      DEBUGLN(F("setServer..."));
-      mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
+    DEBUGLN(F("setClient..."));
+    mqtt_client.setClient(wifi_client);
+    
+    DEBUGLN(F("setServer..."));
+    mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
 
-    }
+    wifi_client.setFingerprint(config.mqtt_fingerprint);
 
     DEBUGLN(F("connect..."));
     
-    wifi_client.setFingerprint(config.mqtt_fingerprint);
-
     if (!mqtt_client.connect(config.device_name, config.mqtt_username, config.mqtt_password)) {
       DEBUG(F("Unable to connect to mqtt. State: "));
       DEBUGLN(mqtt_client.state());
