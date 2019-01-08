@@ -364,8 +364,6 @@ void Maison::loop(Process * process)
   DEBUGLN(mem.one_hour_step_count);
   
   DEBUGLN("End of loop()");
-
-  delay(10);
 }
 
 #define GETS(dst, src, size) \
