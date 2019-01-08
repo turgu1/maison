@@ -26,13 +26,13 @@ The framework is to be used with the [PlarformIO](https://platformio.org/) ecosy
 
 The Maison framework, to be functional, requires the following:
 
-* Proper application setup parameters in file `platformio.ini`. Look at the [Building an application](#building-an-application) section;
-* Code in the user application to setup and use the framework. Look at the [Code usage](#code-usage) section;
-* Configuration parameters located in SPIFFS (file `/config.json`). Look at the [Configuration parameters](#configuration-parameters) section.
+* Proper application setup parameters in file `platformio.ini`. Look at the [Building an Application](#building-an-application) section;
+* Code in the user application to setup and use the framework. Look at the [Code Usage](#code-usage) section;
+* Configuration parameters located in SPIFFS (file `/config.json`). Look at the [Configuration Parameters](#configuration-parameters) section.
 
 The sections below describe the specific of these requirements.
 
-## Building an application
+## Building an Application
 
 The Maison framework is using the following libraries and, through its library configuration, automate their retrieval through the PlatformIO ecosystem:
 
@@ -141,18 +141,20 @@ The use of `process_state` and `mqtt_msg_callback` is optional.
 
 In the following sections, we describe the specific aspects of this code example.
 
-### Include file
+### Include File
 
 The `#include <Maison.h>` integrates the Maison header into the user application. This will import the Maison class declaration and a bunch of definitions that are documentated below. All required libraries needed by the framework are also imported by this call.
 
-### Maison declaration
+### Maison Declaration
 
 The `Maison maison(...)` declaration create an instance of the framework. This declaration accepts the following parameters:
 
-* An optional feature mask, to enable some aspects of the framework (see table below).
-* An optional user application memory structure (here named `my_state`) and it's size to be automatically saved in non-volatile memory when DeepSleep is enabled. 
+* An optional [feature mask](#feature-mask), to enable some aspects of the framework (see table below).
+* An optional [user application memory structure](#user-application-memory-structure) (here named `my_state`) and it's size to be automatically saved in non-volatile memory when DeepSleep is enabled. 
 
-The following table show the current features supported through the feature mask:
+#### Feature Mask
+
+The following table show the current features supported through the feature mask (They are part of the Maison::Feature enum definition):
 
 Feature Name  | Description
 --------------|------------------
@@ -161,5 +163,26 @@ VOLTAGE_CHECK | Chip A2D voltage readout will be sent on status/watchdog message
 BATTERY_POWER | Using batteries -> deep_sleep will then be used by the framework to limit power usage
 WATCHDOG_24H  | A Watchdog message will be sent every 24 hours
 
+To use them, you have to prefix them with `Maison::` or `Maison::Feature::` as shown in the code example.
+
+#### User Application Memory Structure
+
 The user application memory structure **shall** have a `uint32_t` item as the first element in the structure. This is used by the framework to verify that the content saved in non-volatile memory is valid using a CRC-32 checksum. The content will be initialized (zeroed) if the checksum is bad. The checksum is computed by the framework, the user application just need to supplied the space in the structure.
 
+## Configuration Parameters
+
+The Maison framework is automating access to the MQTT message broker through the WiFi connection. As such, parameters are required to link the device to the WiFi network and the MQTT broker server. A file named "/config.json" must be created on a SPIFFS file system in flash memory. This is a json structured file. Here is an example of such a file:
+
+```json
+{
+  "version" : 1,
+  "device_name" : "WATER_SPILL",
+  "ssid" : "the wifi ssid",
+  "wifi_password" : "the wifi password",
+  "mqtt_server_name" : "server_name",
+  "mqtt_user_name" : "the user name",
+  "mqtt_password" : "password",
+  "mqtt_port" : 8883,
+  "mqtt_fingerprint" : [12,24,126,43,13,42,125,75,76,34,21,53,66,152,173,23,63,47,221,23]
+}
+```
