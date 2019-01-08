@@ -46,7 +46,7 @@ bool Maison::setup()
   SHOW("\nMaison::setup()\n");
 
   DO {
-    if (! load_mems()) ERROR("Unable to load states");
+    if (!   load_mems()) ERROR("Unable to load states");
     if (! load_config()) ERROR("Unable to load config");
 
     if (hard_reset()) {
