@@ -148,11 +148,19 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
     else if (strncmp(buffer, "STATE?", 6) == 0) {
       send_msg(
         MAISON_STATUS_TOPIC, 
-        "{\"device\":\"%s\",\"msg_type\":\"STATE\",\"state\":%u,\"hours\":%u,\"millis\":%u}",
+        "{"
+        "\"device\":\"%s\","
+        "\"msg_type\":\"STATE\","
+        "\"state\":%u,"
+        "\"hours\":%u,"
+        "\"millis\":%u,
+        "\"heap\":%u"
+        "}",
         config.device_name,
         mem.state,
         mem.hours_24_count,
-        mem.one_hour_step_count);
+        mem.one_hour_step_count,
+        ESP.getFreeHeap());
     }
     else if (strncmp(buffer, "RESTART!", 8) == 0) {
       DEBUGLN("Device is restarting");
