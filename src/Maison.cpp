@@ -81,7 +81,7 @@ void maison_callback(const char * topic, byte * payload, unsigned int length)
 
 void Maison::process_callback(const char * topic, byte * payload, unsigned int length)
 {
-  static char buffer[1024];
+  static char buffer[512];
 
   SHOW("process_callback()");
 
@@ -90,7 +90,7 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
 
     DEBUG(" Received MQTT Message: ");
     
-    memcpy(buffer, payload, len = (length > 1023) ? 1023 : length);
+    memcpy(buffer, payload, len = (length >= sizeof(buffer)) ? (sizeof(buffer) - 1) : length);
     buffer[len] = 0;
     DEBUGLN(buffer);
 
@@ -633,7 +633,7 @@ bool Maison::mqtt_connect()
       }
       else { 
         long now = millis();
-        if ((now - last_reconnect_attempt) > 2000) {
+        if ((now - last_reconnect_attempt) > 3000) {
           last_reconnect_attempt = now;
           if (mqtt_reconnect()) {
             last_reconnect_attempt = 0;
