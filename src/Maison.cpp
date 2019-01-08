@@ -49,7 +49,7 @@ bool Maison::setup()
     if (!   load_mems()) ERROR("Unable to load states");
     if (! load_config()) ERROR("Unable to load config");
 
-    if (hard_reset()) {
+    if (is_hard_reset()) {
       mem.state = mem.sub_state = STARTUP;
       mem.hours_24_count      = 0;
       mem.one_hour_step_count = 0;
@@ -169,8 +169,7 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
     }
     else if (strncmp(buffer, "RESTART!", 8) == 0) {
       DEBUGLN("Device is restarting");
-      ESP.restart();
-      delay(200);
+      restart();
     }
   }
   else if (user_cb != NULL) {
@@ -493,14 +492,14 @@ bool Maison::save_config()
     JsonArray & arr = root.createNestedArray("mqtt_fingerprint");
     if (!arr.success()) ERROR("Unable to create JSON array object");
 
-    PUT (config.version,          root["version"         ]    );
-    PUT (config.device_name,      root["device_name"     ]    );
-    PUT (config.wifi_ssid,        root["ssid"            ]    );
-    PUT (config.wifi_password,    root["wifi_password"   ]    );
-    PUT (config.mqtt_server,      root["mqtt_server_name"]    );
-    PUT (config.mqtt_username,    root["mqtt_user_name"  ]    );
-    PUT (config.mqtt_password,    root["mqtt_password"   ]    );
-    PUT (config.mqtt_port,        root["mqtt_port"       ]    );
+    PUT (config.version,          root["version"         ]);
+    PUT (config.device_name,      root["device_name"     ]);
+    PUT (config.wifi_ssid,        root["ssid"            ]);
+    PUT (config.wifi_password,    root["wifi_password"   ]);
+    PUT (config.mqtt_server,      root["mqtt_server_name"]);
+    PUT (config.mqtt_username,    root["mqtt_user_name"  ]);
+    PUT (config.mqtt_password,    root["mqtt_password"   ]);
+    PUT (config.mqtt_port,        root["mqtt_port"       ]);
     PUTA(config.mqtt_fingerprint, arr, 20);
 
     if (!root.printTo(file)) ERROR("Unable to send JSON content to file /config.json");
@@ -663,9 +662,8 @@ bool Maison::mqtt_connect()
             if (++retry_count >= 5) {
               if (++retry_count_2 >= 3) {
                 DEBUGLN(F(" Reseting... internal problem"));
-                ESP.restart();
-                delay(1000);
-              }
+                restart();
+          }
               DEBUGLN(F(" Too many trials, reconnecting WiFi..."));
               wifi_client.stop();
               WiFi.disconnect();
