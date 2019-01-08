@@ -26,9 +26,9 @@ The framework is to be used with the [PlarformIO](https://platformio.org/) ecosy
 
 The Maison framework, to be functional, requires the following:
 
-* Proper application setup parameters in file `platformio.ini`. Look at the *Building an application* section;
-* Code in the user application to setup and use the framework. Look at the *Code usage* section;
-* Configuration parameters located in SPIFFS (file `/config.json`). Look at the *Configuration parameters* section.
+* Proper application setup parameters in file `platformio.ini`. Look at the [Building an application](#building-an-application) section;
+* Code in the user application to setup and use the framework. Look at the [Code usage](#code-usage) section;
+* Configuration parameters located in SPIFFS (file `/config.json`). Look at the [Configuration parameters](#configuration-parameters) section.
 
 The sections below describe the specific of these requirements.
 
@@ -55,6 +55,23 @@ The following options in `platformio.ini` **shall** also be used:
 framework = arduino
 platform = espressif8266
 ```
+### Compilation Options
+
+The Maison framework allow for some defined options to be modified through -D compilation parameters (PlatformIO: build_flags). The following are the compilation options available to change some library behavior:
+
+Option              | Default   | Description
+--------------------|-----------|------------------------------------------------------------------------
+MAISON_TESTING      |    0      | If = 1, enable debuging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any Maison function. 
+QUICK_TURN          |    0      | If = 1, WATCHDOG messages are sent every 2 minutes instead of 24 hours. This is automatically the case when *MAISON_TESTING* is set to 1.
+MAISON_PREFIX_TOPIC | maison/   | All topics used by the framework are prefixed with this text   
+MAISON_STATUS_TOPIC | maison/status | Topic where the framework status are sent
+MAISON_CTRL_TOPIC   | maison/ctrl   | Topic where the framework config control are sent
+CTRL_SUFFIX_TOPIC   | /ctrl         | This is the topic suffix used to identify device-related control topic
+
+Note that for *MAISON_STATUS_TOPIC* and *MAISON_CTRL_TOPIC*, they will be modifified automatically if *MAISON_PREFIX_TOPIC* is changed. For example, if you change *MAISON_PREFIX_TOPIC* to be `home/`, *MAISON_STATUS_TOPIC* will become `home/status` and *MAISON_CTRL_TOPIC* will become `maison/ctrl`.
+
+The framework will subscribe to MQTT messages coming from the server on a topic built using *MAISON_PREFIX_TOPIC*, the device name and *CTRL_SUFFIX_TOPIC*. For example, if the device name is "WATER_SPILL", the subsribed topic would be `maison/WATER_SPILL/ctrl`.
+
 ## Code Usage
 
 Here is a minimal piece of code to initialize and start the framework:
@@ -146,19 +163,3 @@ WATCHDOG_24H  | A Watchdog message will be sent every 24 hours
 
 The user application memory structure **shall** have a `uint32_t` item as the first element in the structure. This is used by the framework to verify that the content saved in non-volatile memory is valid using a CRC-32 checksum. The content will be initialized (zeroed) if the checksum is bad. The checksum is computed by the framework, the user application just need to supplied the space in the structure.
 
-## Compilation Options
-
-The Maison framework allow for some defined options to be modified through -D compilation parameters (PlatformIO: build_flags). The following are the compilation options available to change some library behavior:
-
-Option              | Default   | Description
---------------------|-----------|------------------------------------------------------------------------
-MAISON_TESTING      |    0      | If = 1, enable debuging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any Maison function. 
-QUICK_TURN          |    0      | If = 1, WATCHDOG messages are sent every 2 minutes instead of 24 hours. This is automatically the case when *MAISON_TESTING* is set to 1.
-MAISON_PREFIX_TOPIC | maison/   | All topics used by the framework are prefixed with this text   
-MAISON_STATUS_TOPIC | maison/status | Topic where the framework status are sent
-MAISON_CTRL_TOPIC   | maison/ctrl   | Topic where the framework config control are sent
-CTRL_SUFFIX_TOPIC   | /ctrl         | This is the topic suffix used to identify device-related control topic
-
-Note that for *MAISON_STATUS_TOPIC* and *MAISON_CTRL_TOPIC*, they will be modifified automatically if *MAISON_PREFIX_TOPIC* is changed. For example, if you change *MAISON_PREFIX_TOPIC* to be `home/`, *MAISON_STATUS_TOPIC* will become `home/status` and *MAISON_CTRL_TOPIC* will become `maison/ctrl`.
-
-The framework will subscribe to MQTT messages coming from the server on a topic built using *MAISON_PREFIX_TOPIC*, the device name and *CTRL_SUFFIX_TOPIC*. For example, if the device name is "WATER_SPILL", the subsribed topic would be `maison/WATER_SPILL/ctrl`.
