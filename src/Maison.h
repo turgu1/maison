@@ -172,7 +172,8 @@ class Maison
     inline bool       hard_reset() { return reset_reason() != REASON_DEEP_SLEEP_AWAKE; }
 
     inline bool network_required() { 
-      return (mem.state & (STARTUP|PROCESS_EVENT|END_EVENT|HOURS_24)) != 0;
+      return (!on_battery_power()) || 
+             ((mem.state & (STARTUP|PROCESS_EVENT|END_EVENT|HOURS_24)) != 0);
     }
 
     char * my_topic(const char * topic, char * buffer, uint16_t buffer_length);
