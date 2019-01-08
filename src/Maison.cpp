@@ -153,7 +153,7 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
         "\"msg_type\":\"STATE\","
         "\"state\":%u,"
         "\"hours\":%u,"
-        "\"millis\":%u,
+        "\"millis\":%u,"
         "\"heap\":%u"
         "}",
         config.device_name,
