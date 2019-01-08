@@ -67,12 +67,12 @@
 //
 // 1) MAISON_PREFIX_TOPIC
 // 2) The device name from config or MAC address if device name is empty
-// 3) MAISON_DEVICE_CTRL_SUFFIX_TOPIC
+// 3) CTRL_SUFFIX_TOPIC
 //
 // For example: maison/DEV_TEST/crtl
 
-#ifndef MAISON_DEVICE_CTRL_SUFFIX_TOPIC
-  #define MAISON_DEVICE_CTRL_SUFFIX_TOPIC   "/ctrl"
+#ifndef CTRL_SUFFIX_TOPIC
+  #define CTRL_SUFFIX_TOPIC   "/ctrl"
 #endif
 
 // ----- END OPTIONS -----

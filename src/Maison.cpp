@@ -86,7 +86,7 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
 
   SHOW("process_callback()");
 
-  if (strcmp(topic, my_topic(MAISON_DEVICE_CTRL_SUFFIX_TOPIC, buffer, 40)) == 0) {
+  if (strcmp(topic, my_topic(CTRL_SUFFIX_TOPIC, buffer, 40)) == 0) {
     int len;
 
     DEBUG(" Received MQTT Message: ");
@@ -603,7 +603,7 @@ bool Maison::mqtt_reconnect()
     if (mqtt_connected()) {
       static char buffer[40];
       mqtt_client.setCallback(maison_callback);
-      if (!mqtt_client.subscribe(my_topic(MAISON_DEVICE_CTRL_SUFFIX_TOPIC, buffer, 40))) {
+      if (!mqtt_client.subscribe(my_topic(CTRL_SUFFIX_TOPIC, buffer, 40))) {
         DEBUG(F("Hum... unable to subscribe to topic (State:"));
         DEBUG(mqtt_client.state());
         DEBUG("): ");
