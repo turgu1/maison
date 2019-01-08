@@ -7,8 +7,8 @@ This library implement a small, secure, IOT Framework for embedded ESP8266 / (so
 Here are the main characteristics:
 
 * Framework configuration saved in file through SPIFFS
-* WiFi MQTT based communications
-* TLS encryption: All communication with encryption
+* WiFi MQTT based communications. Nothing else.
+* TLS encryption: All MQTT communication with encryption
 * Server authentification through fingerprinting
 * User/Password identification
 * JSON based data transmission with server
@@ -22,7 +22,9 @@ Here are the main characteristics:
 
 The MQTT based transmission architecture is specific to this implementation and is describe below.
 
-The framework is to be used with the [PlarformIO](https://platformio.org/) ecosystem. Some (soon to be supplied) examples are to be compiled through PlatformIO. Note that the library maybe useable through the Arduino IDE, but this is not supported. It is known to be a challenge to set compiling options and access Maison defined types from .ino source code.
+The framework is to be used with the [PlarformIO](https://platformio.org/) ecosystem. Some (soon to be supplied) examples are to be compiled through PlatformIO. 
+
+Note that the library maybe useable through the Arduino IDE, but this is not supported. It is known to be a challenge to set compiling options and access Maison defined types from .ino source code.
 
 The Maison framework, to be functional, requires the following:
 

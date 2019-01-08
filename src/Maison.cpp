@@ -637,7 +637,8 @@ bool Maison::mqtt_connect()
 
   static bool counting_lost_connection = false;
 
-  uint8_t retry_count = 0;
+  uint8_t retry_count   = 0;
+  uint8_t retry_count_2 = 0;
 
   DO {
     if (wifi_connected()) {
@@ -651,7 +652,7 @@ bool Maison::mqtt_connect()
           counting_lost_connection = false;
         }
         long now = millis();
-        if ((now - last_reconnect_attempt) > 3000) {
+        if ((now - last_reconnect_attempt) > 4000) {
           last_reconnect_attempt = now;
           if (mqtt_reconnect()) {
             last_reconnect_attempt = 0;
@@ -660,6 +661,11 @@ bool Maison::mqtt_connect()
           }
           else {
             if (++retry_count > 5) {
+              if (++retry_count_2 > 3) {
+                DEBUGLN(F(" Reseting... internal problem"));
+                ESP.reset();
+                delay(1000);
+              }
               DEBUGLN(F(" Too many trials, reconnecting WiFi..."));
               wifi_client.stop();
               WiFi.disconnect();
