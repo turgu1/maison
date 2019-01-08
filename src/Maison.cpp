@@ -169,7 +169,7 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
     }
     else if (strncmp(buffer, "RESTART!", 8) == 0) {
       DEBUGLN("Device is restarting");
-      ESP.reset();
+      ESP.restart();
       delay(200);
     }
   }
