@@ -584,9 +584,6 @@ bool Maison::mqtt_reconnect()
       mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
 
     }
-    else {
-      mqtt_client.disconnect();
-    }    
 
     DEBUGLN(F("connect..."));
     
@@ -633,6 +630,8 @@ bool Maison::mqtt_connect()
 {
   SHOW("mqtt_connect()");
 
+  uint8_t retry_count = 0;
+
   DO {
     if (wifi_connected()) {
       if (mqtt_connected()) {
@@ -647,6 +646,12 @@ bool Maison::mqtt_connect()
             OK_DO;
           }
           else {
+            if (++retry_count > 5) {
+              DEBUGLN(F(" Too many trials, resetting WiFi..."));
+              WiFi.end();
+              retry_count = 0;
+              continue;
+            }
             DEBUG("!");
           }
         }
