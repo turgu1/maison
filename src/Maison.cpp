@@ -648,7 +648,7 @@ bool Maison::mqtt_connect()
           else {
             if (++retry_count > 5) {
               DEBUGLN(F(" Too many trials, resetting WiFi..."));
-              WiFi.end();
+              WiFi.disconnect();
               retry_count = 0;
               continue;
             }
