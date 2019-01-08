@@ -660,10 +660,10 @@ bool Maison::mqtt_connect()
             OK_DO;
           }
           else {
-            if (++retry_count > 5) {
-              if (++retry_count_2 > 3) {
+            if (++retry_count >= 5) {
+              if (++retry_count_2 >= 3) {
                 DEBUGLN(F(" Reseting... internal problem"));
-                ESP.reset();
+                ESP.restart();
                 delay(1000);
               }
               DEBUGLN(F(" Too many trials, reconnecting WiFi..."));
