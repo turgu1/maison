@@ -820,11 +820,11 @@ bool Maison::read_mem(uint32_t * data, uint16_t length, uint16_t addr)
   DEBUG(F("  pos in rtc: ")); DEBUGLN(addr);
 
   DO {
-    if (!ESP.rtcUserMemoryRead(addr, (uint32_t *) data, length)) {
+    if (!ESP.rtcUserMemoryRead((addr + 3) >> 2, (uint32_t *) data, length)) {
       ERROR("Unable to read from rtc memory");
     }
 
-    uint32_t csum = CRC32((uint8_t *)(data + 4), length - 4);
+    uint32_t csum = CRC32((uint8_t *)(&data[1]), length - 4);
     
     if (data[0] != csum) ERROR("Data in RTC memory with bad checksum!");
 
@@ -844,10 +844,10 @@ bool Maison::write_mem(uint32_t * data, uint16_t length, uint16_t addr)
   DEBUG(F("  length: "));     DEBUGLN(length);
   DEBUG(F("  pos in rtc: ")); DEBUGLN(addr);
 
-  data[0] = CRC32((uint8_t *)(data + 4), length - 4);
+  data[0] = CRC32((uint8_t *)(&data[1]), length - 4);
 
   DO {     
-    if (!ESP.rtcUserMemoryWrite(addr, (uint32_t *) data, length)) {
+    if (!ESP.rtcUserMemoryWrite((addr + 3) >> 2, (uint32_t *) data, length)) {
       ERROR("Unable to write to rtc memory");
     }
 
