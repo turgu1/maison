@@ -212,9 +212,9 @@ class Maison
       uint32_t magic;
     } mem;
 
-    static BearSSL::WiFiClientSecure * wifi_client;
-    static PubSubClient                mqtt_client;
-
+    PubSubClient                mqtt_client;
+    BearSSL::WiFiClientSecure * wifi_client;
+    
     long         last_reconnect_attempt;
     int          connect_retry_count;
     bool         first_connect_trial;

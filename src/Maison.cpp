@@ -1,11 +1,9 @@
 #include <Maison.h>
 
-BearSSL::WiFiClientSecure * Maison::wifi_client = NULL;
-PubSubClient  Maison::mqtt_client;
-
 static Maison * maison;
 
 Maison::Maison() :
+  wifi_client(NULL),
   last_reconnect_attempt(0),
   connect_retry_count(0),
   first_connect_trial(true),
@@ -22,6 +20,7 @@ Maison::Maison() :
 }
 
 Maison::Maison(uint8_t _feature_mask) :
+  wifi_client(NULL),
   last_reconnect_attempt(0),
   connect_retry_count(0),
   first_connect_trial(true),
@@ -38,6 +37,7 @@ Maison::Maison(uint8_t _feature_mask) :
 }
 
 Maison::Maison(uint8_t _feature_mask, void * _user_mem, uint8_t _user_mem_length) :
+  wifi_client(NULL),
   last_reconnect_attempt(0),
   connect_retry_count(0),
   first_connect_trial(true),
