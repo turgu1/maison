@@ -2,7 +2,7 @@
 
 Note: This is still work in progress. This code is working on an ESP8266 and under heavy development. The documentation is also a work in progress... ESP32 support soon to be added.
 
-This library implement a small, secure, IOT Framework for embedded ESP8266 / (soon to be added) ESP32 devices to serve into a Home IOT environment. It diminishes the amount of code to be put in the targeted app source code. The app interact with the framework through a finite state machine algorithm allowing for specific usage at every stage. 
+This library implement a small, secure, IOT Framework for embedded ESP8266 / (soon to be added) ESP32 devices to serve into a Home IOT environment. It diminishes the amount of code to be put in the targeted app source code. The app interact with the framework through a finite state machine algorithm allowing for specific usage at every stage.
 
 Here are the main characteristics:
 
@@ -22,7 +22,7 @@ Here are the main characteristics:
 
 The MQTT based transmission architecture is specific to this implementation and is describe below.
 
-The framework is to be used with the [PlarformIO](https://platformio.org/) ecosystem. Some (soon to be supplied) examples are to be compiled through PlatformIO. 
+The framework is to be used with the [PlarformIO](https://platformio.org/) ecosystem. Some (soon to be supplied) examples are to be compiled through PlatformIO.
 
 Note that the library maybe useable through the Arduino IDE, but this is not supported. It is known to be a challenge to set compiling options and access Maison defined types from .ino source code.
 
@@ -63,7 +63,7 @@ The Maison framework allow for some defined options to be modified through -D co
 
 Option              | Default   | Description
 --------------------|-----------|------------------------------------------------------------------------
-MAISON_TESTING      |    0      | If = 1, enable debuging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any Maison function. 
+MAISON_TESTING      |    0      | If = 1, enable debuging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any Maison function.
 QUICK_TURN          |    0      | If = 1, WATCHDOG messages are sent every 2 minutes instead of 24 hours. This is automatically the case when *MAISON_TESTING* is set to 1.
 MAISON_PREFIX_TOPIC | maison/   | All topics used by the framework are prefixed with this text   
 MAISON_STATUS_TOPIC | maison/status | Topic where the framework status are sent
@@ -108,11 +108,11 @@ struct user_data {
 } my_state;
 
 Maison maison(Maison::Feature::WATCHDOG_24H|
-              Maison::Feature::VOLTAGE_CHECK, 
+              Maison::Feature::VOLTAGE_CHECK,
               &my_state, sizeof(my_state));
 
-void mqtt_msg_callback(const char  * topic, 
-                       byte        * payload, 
+void mqtt_msg_callback(const char  * topic,
+                       byte        * payload,
                        unsigned int  length)
 {
 
@@ -152,7 +152,7 @@ The `#include <Maison.h>` integrates the Maison header into the user application
 The `Maison maison(...)` declaration create an instance of the framework. This declaration accepts the following parameters:
 
 * An optional [feature mask](#feature-mask), to enable some aspects of the framework (see table below).
-* An optional [user application memory structure](#user-application-memory-structure) (here named `my_state`) and it's size to be automatically saved in non-volatile memory when DeepSleep is enabled. 
+* An optional [user application memory structure](#user-application-memory-structure) (here named `my_state`) and it's size to be automatically saved in non-volatile memory when DeepSleep is enabled.
 
 #### Feature Mask
 
@@ -172,6 +172,15 @@ To use them, you have to prefix them with `Maison::` or `Maison::Feature::` as s
 The user application memory structure **shall** have a `uint32_t` item as the first element in the structure. This is used by the framework to verify that the content saved in non-volatile memory is valid using a CRC-32 checksum. The content will be initialized (zeroed) if the checksum is bad. The checksum is computed by the framework, the user application just need to supplied the space in the structure.
 
 #### maison.loop
+
+The Maison::loop function must be called regularly in your main loop function to permit the execution of the finite state machine and receiving new MQTT messages. As a parameter the Maison::loop function accepts a processing function that will be called by Maison inside the finite state machine. The function will receive the current state value as a parameter. It must return a status value from the following list:
+
+Value         | Description
+--------------|----------------
+COMPLETED     |  Returned when the processing for the current state is considered completed. This is used mainly for all states.           
+NOT_COMPLETED | The reverse of *COMPLETED*. Mainly used with *PROCESS_EVENT* in the case that it must be fired again to complete the processing
+ABORTED       | Return in the case of *PROCESS_EVENT* when the event vanished before processing, such that the finite state machine return to the *WAIT_FOR_EVENT* state instead of going to the *WAIT_END_EVENT* state.
+NEW_EVENT     | Returned when processing a *WAIT_FOR_EVENT* state to indicate that an event must be processed.
 
 Note: if the *DEEP_SLEEP* feature was enabled, the loop will almost never return as the processor will wait for further processing through a call to ESP.deep_sleep function. The processor, after the wait time, will restart the code from the beginning. In this context, the loop will return back to the application code only when it was not able to connect to the network if required by the current state of the finite state machine.
 
