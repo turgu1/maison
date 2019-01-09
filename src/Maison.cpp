@@ -240,7 +240,7 @@ void Maison::loop(Process * process)
         counting_lost_connection = false;
       }
       if (use_deep_sleep()) {
-        DEBUGLN(F("Unable to connect to MQTT Server. Deep Sleep for 5 seconds."))
+        DEBUGLN(F("Unable to connect to MQTT Server. Deep Sleep for 5 seconds."));
         deep_sleep(true, 5);
       }
       else {
