@@ -650,6 +650,8 @@ bool Maison::mqtt_connect()
         break;
       }
     }
+
+    connect_retry_count = 0;
     OK_DO;
   }
 
@@ -783,6 +785,8 @@ bool Maison::init_user_mem()
 
   SHOW("init_user_mem()");
 
+  memset(user_mem, 0, user_mem_length);
+  
   bool result = write_mem((uint32_t *) &user_mem, user_mem_length, (sizeof(mem) + 3) >> 2);
 
   SHOW_RESULT("init_user_mem()");
