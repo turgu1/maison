@@ -7,6 +7,8 @@ static Maison * maison;
 
 Maison::Maison() :
   last_reconnect_attempt(0),
+  connect_retry_count(0),
+  first_connect_trial(true),
   user_cb(NULL),
   user_topic(NULL),
   user_qos(0),
@@ -19,6 +21,8 @@ Maison::Maison() :
 
 Maison::Maison(uint8_t _feature_mask) :
   last_reconnect_attempt(0),
+  connect_retry_count(0),
+  first_connect_trial(true),
   user_cb(NULL),
   user_topic(NULL),
   user_qos(0),
@@ -31,6 +35,8 @@ Maison::Maison(uint8_t _feature_mask) :
 
 Maison::Maison(uint8_t _feature_mask, void * _user_mem, uint8_t _user_mem_length) :
   last_reconnect_attempt(0),
+  connect_retry_count(0),
+  first_connect_trial(true),
   user_cb(NULL),
   user_topic(NULL),
   user_qos(0),
@@ -59,6 +65,10 @@ bool Maison::setup()
     if (network_required()) {
       if (!wifi_connect()) ERROR("WiFi");
       update_device_name();
+
+      mqtt_client.setClient(wifi_client);    
+      mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
+      wifi_client.setFingerprint(config.mqtt_fingerprint);
     }
     
     DEBUG(F("MQTT_MAX_PACKET_SIZE = ")); DEBUGLN(MQTT_MAX_PACKET_SIZE);
@@ -82,11 +92,9 @@ void maison_callback(const char * topic, byte * payload, unsigned int length)
 
 void Maison::process_callback(const char * topic, byte * payload, unsigned int length)
 {
-  static char buffer[512];
-
   SHOW("process_callback()");
 
-  if (strcmp(topic, my_topic(CTRL_SUFFIX_TOPIC, buffer, 40)) == 0) {
+  if (strcmp(topic, my_topic(CTRL_SUFFIX_TOPIC, buffer, sizeof(buffer))) == 0) {
     int len;
 
     DEBUG(" Received MQTT Message: ");
@@ -213,29 +221,45 @@ void Maison::loop(Process * process)
 { 
   State new_state, new_sub_state;
   static long last_time_count = 0;
+  static bool counting_lost_connection = true;
 
   DEBUG(F("Maison::loop(): Current state: "));
   DEBUGLN(mem.state);
 
   if (network_required()) {
+
+    if (first_connect_trial) {
+      first_connect_trial    = false;
+      last_reconnect_attempt = millis();
+      mqtt_connect();
+    }
+
     if (!mqtt_connected()) {
-      if (!mqtt_connect()) {
-        DEBUGLN(F("No connecton to mqtt server. Waiting 5 seconds to retry..."));
-        if (on_battery_power()) {
-          deep_sleep(true, 5);
-          delay(1000);
-        } 
+      if (counting_lost_connection) {
+        mem.lost_count += 1;
+        counting_lost_connection = false;
+      }
+      if (use_deep_sleep()) {
+        DEBUGLN(F("Unable to connect to MQTT Server. Deep Sleep for 5 seconds."))
+        deep_sleep(true, 5);
+      }
+      else {
+        long now = millis();
+        if ((now - last_reconnect_attempt) > 5000) {
+          last_reconnect_attempt = now;
+          if (!mqtt_connect()) return;
+        }
         else {
-          delay(5000);
           return;
         }
       }
     }
+
+    counting_lost_connection = true;
+
+    DEBUGLN(F("MQTT Connected."));
+    mqtt_loop();
   }
- 
-  if (mqtt_connected()) mqtt_loop();
-  
-  DEBUG(F("MQTT Connected: ")); DEBUGLN(mqtt_connected() ? "Yes" : "No");
 
   new_state     = mem.state;
   new_sub_state = mem.sub_state;
@@ -341,16 +365,9 @@ void Maison::loop(Process * process)
 
   DEBUG(" Next state: "); DEBUGLN(mem.state);
 
-  if (on_battery_power()) {
-    uint16_t wait_count = is_short_reboot_time_needed() ? 5 : ONE_HOUR;
-
-    mem.one_hour_step_count += (wait_count * 1000) + millis();
-    
-    DEBUGLN(" Prepare for deep sleep");
-    save_mems();
-    deep_sleep(network_required(), wait_count);
-    delay(1000);
-    DEBUGLN(" HUM... Not suppose to come here after deep_sleep call...");
+  if (use_deep_sleep()) {
+    deep_sleep(network_required(), 
+               is_short_reboot_time_needed() ? 5 : ONE_HOUR);
   }
   else {
     mem.one_hour_step_count += millis() - last_time_count;
@@ -577,112 +594,59 @@ bool Maison::wifi_connect()
   return result;
 }
 
-bool Maison::mqtt_reconnect()
-{
-  SHOW("mqtt_reconnect()");
-
-  if (!mqtt_connected()) {
-
-    DEBUGLN(F("setClient..."));
-    mqtt_client.setClient(wifi_client);
-    
-    DEBUGLN(F("setServer..."));
-    mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
-
-    wifi_client.setFingerprint(config.mqtt_fingerprint);
-
-    DEBUGLN(F("connect..."));
-    
-    if (!mqtt_client.connect(config.device_name, config.mqtt_username, config.mqtt_password)) {
-      DEBUG(F("Unable to connect to mqtt. State: "));
-      DEBUGLN(mqtt_client.state());
-    }
-    if (mqtt_connected()) {
-      static char buffer[40];
-      mqtt_client.setCallback(maison_callback);
-      if (!mqtt_client.subscribe(my_topic(CTRL_SUFFIX_TOPIC, buffer, 40))) {
-        DEBUG(F("Hum... unable to subscribe to topic (State:"));
-        DEBUG(mqtt_client.state());
-        DEBUG("): ");
-      }
-      else {
-        DEBUG(F("Subscription completed to topic "));
-      }
-      DEBUGLN(buffer);
-      if (user_topic != NULL) {
-        if (!mqtt_client.subscribe(user_topic, user_qos)) {
-          DEBUG(F("Hum... unable to subscribe to user topic (State:"));
-          DEBUG(mqtt_client.state());
-          DEBUG("): ");
-        }
-        else {
-          DEBUG(F("Subscription completed to user topic "));
-        }
-        DEBUGLN(user_topic);        
-      }
-    }
-  }
-  
-  bool result = mqtt_connected();
-
-  SHOW_RESULT("mqtt_reconnect()");
-
-  return result;
-}
-
 bool Maison::mqtt_connect()
 {
   SHOW("mqtt_connect()");
 
-  static bool counting_lost_connection = false;
-
-  uint8_t retry_count   = 0;
-  uint8_t retry_count_2 = 0;
-
   DO {
-    if (wifi_connected()) {
+    if (!wifi_connect()) ERROR("WiFi");
+
+    if (!mqtt_connected()) {
+
+      mqtt_client.connect(config.device_name, config.mqtt_username, config.mqtt_password);
+
       if (mqtt_connected()) {
-        counting_lost_connection = true;
-        OK_DO;
-      }
-      else { 
-        if (counting_lost_connection) {
-          mem.lost_count += 1;
-          counting_lost_connection = false;
-        }
-        long now = millis();
-        if ((now - last_reconnect_attempt) > 4000) {
-          last_reconnect_attempt = now;
-          if (mqtt_reconnect()) {
-            last_reconnect_attempt = 0;
-            counting_lost_connection = true;
-            OK_DO;
-          }
-          else {
-            if (++retry_count >= 5) {
-              if (++retry_count_2 >= 3) {
-                DEBUGLN(F(" Reseting... internal problem"));
-                restart();
-          }
-              DEBUGLN(F(" Too many trials, reconnecting WiFi..."));
-              wifi_client.stop();
-              WiFi.disconnect();
-              retry_count = 0;
-              continue;
-            }
-            DEBUG("!");
-          }
+
+        mqtt_client.setCallback(maison_callback);
+        if (!mqtt_client.subscribe(my_topic(CTRL_SUFFIX_TOPIC, buffer, sizeof(buffer)))) {
+          DEBUG(F("Hum... unable to subscribe to topic (State:"));
+          DEBUG(mqtt_client.state());
+          DEBUG("): ");
+          DEBUGLN(buffer);
+          break;
         }
         else {
-          delay(100);
-          DEBUG(F("-"));
+          DEBUG(F("Subscription completed to topic "));
+        }
+
+        DEBUGLN(buffer);
+        if (user_topic != NULL) {
+          if (!mqtt_client.subscribe(user_topic, user_qos)) {
+            DEBUG(F("Hum... unable to subscribe to user topic (State:"));
+            DEBUG(mqtt_client.state());
+            DEBUG("): ");
+            DEBUGLN(user_topic);        
+            break;
+          }
+          else {
+            DEBUG(F("Subscription completed to user topic "));
+            DEBUGLN(user_topic);        
+          }
         }
       }
-    } 
-    else {
-      if (!wifi_connect()) ERROR("WiFi");
+      else {
+        DEBUG(F("Unable to connect to mqtt. State: "));
+        DEBUGLN(mqtt_client.state());
+
+        if (++connect_retry_count > 5) {          
+          DEBUGLN(F(" Too many trials, reconnecting WiFi..."));
+          wifi_client.stop();
+          WiFi.disconnect();
+          connect_retry_count = 0;
+        }
+      }
     }
-    // Loop
+    OK_DO;
   }
 
   SHOW_RESULT("mqtt_connect()");
@@ -704,7 +668,7 @@ bool Maison::send_msg(const char * _topic, const char * format, ...)
   DO {
     DEBUG(F(" Sending msg to ")); DEBUG(_topic); DEBUG(F(": ")); DEBUGLN(msg);
 
-    if (!mqtt_connect()) ERROR("Unable to connect to mqtt server"); 
+    if (!mqtt_connected()) ERROR("Unable to connect to mqtt server"); 
     
     if (!mqtt_client.publish(_topic, msg)) {
       ERROR("Unable to publish message");
@@ -720,14 +684,22 @@ bool Maison::send_msg(const char * _topic, const char * format, ...)
 
 void Maison::deep_sleep(bool back_with_wifi, int sleep_time_in_sec)
 {
+  SHOW("deep_sleep()");
+
+  save_mems();
   mqtt_client.disconnect();
   WiFi.mode(WIFI_OFF);
   
   delay(10);
   
+  mem.one_hour_step_count += millis() + (sleep_time_in_sec * 1000);
+    
   ESP.deepSleep(
     sleep_time_in_sec * 1e6, 
     back_with_wifi ? WAKE_RF_DEFAULT : WAKE_RF_DISABLED);  
+
+  delay(1000);
+  DEBUGLN(" HUM... Not suppose to come here after deep_sleep call...");
 }
 
 // ---- RTC Memory Data Management ----
@@ -905,6 +877,7 @@ char * Maison::my_topic(const char * topic, char * buffer, uint16_t buffer_lengt
   void Maison::show_config(Config & config)
   {
     DEBUGLN(F("\nConfiguration:\n-------------"));
+
     DEBUG(F("Version          : ")); DEBUGLN(config.version         );
     DEBUG(F("Device Name      : ")); DEBUGLN(config.device_name     );
     DEBUG(F("WiFi SSID        : ")); DEBUGLN(config.wifi_ssid       );

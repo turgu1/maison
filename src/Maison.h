@@ -118,7 +118,7 @@ class Maison
     enum Feature : uint8_t {
       NONE          = 0x00, // No special feature
       VOLTAGE_CHECK = 0x01, // Chip A2D voltage readout will be sent on status/watchdog messages
-      BATTERY_POWER = 0x02, // Using batteries -> deep_sleep will be used then
+      DEEP_SLEEP    = 0x02, // Using batteries -> deep_sleep will be used then
       WATCHDOG_24H  = 0x04  // Watchdog status sent every 24 hours
     };
 
@@ -173,7 +173,7 @@ class Maison
     inline void          restart() { save_mems(); ESP.restart(); delay(1000); }
 
     inline bool network_required() { 
-      return (!on_battery_power()) || 
+      return (!use_deep_sleep()) || 
              ((mem.state & (STARTUP|PROCESS_EVENT|END_EVENT|HOURS_24)) != 0);
     }
 
@@ -210,15 +210,18 @@ class Maison
     } mem;
 
     static BearSSL::WiFiClientSecure wifi_client;
-    static PubSubClient     mqtt_client;
+    static PubSubClient              mqtt_client;
 
     long         last_reconnect_attempt;
+    int          connect_retry_count;
+    bool         first_connect_trial;
     Callback   * user_cb;
     const char * user_topic;
     uint8_t      user_qos;
     uint8_t      feature_mask;
     void       * user_mem;
     uint8_t      user_mem_length;
+    char         buffer[MQTT_MAX_PACKET_SIZE];
 
     bool wifi_connect();
     bool mqtt_connect();
@@ -232,7 +235,7 @@ class Maison
     inline void        mqtt_loop() { mqtt_client.loop();                               }
 
     inline bool     show_voltage() { return (feature_mask & VOLTAGE_CHECK) != 0;       }
-    inline bool on_battery_power() { return (feature_mask & BATTERY_POWER) != 0;       }
+    inline bool   use_deep_sleep() { return (feature_mask & DEEP_SLEEP)    != 0;       }
     inline bool watchdog_enabled() { return (feature_mask & WATCHDOG_24H ) != 0;       }
 
     inline State check_if_24_hours_time(State default_state) {
@@ -269,7 +272,6 @@ class Maison
 
     char * mac_to_str(uint8_t * mac, char * buff);
     bool update_device_name();
-    bool     mqtt_reconnect();
 
     bool     load_mems();
     bool     save_mems();

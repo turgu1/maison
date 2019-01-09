@@ -160,10 +160,10 @@ The following table show the current features supported through the feature mask
 
 Feature Name  | Description
 --------------|------------------
-NONE          | No feature selected
-VOLTAGE_CHECK | Chip A2D voltage readout will be sent on status/watchdog messages
-BATTERY_POWER | Using batteries -> deep_sleep will then be used by the framework to limit power usage
-WATCHDOG_24H  | A Watchdog message will be sent every 24 hours
+NONE          | No feature selected.
+VOLTAGE_CHECK | Chip A2D voltage readout will be sent on status/watchdog messages.
+DEEP_SLEEP    | deep_sleep will be used by the framework to limit power usage (e.g. on batteries). RESET/RST and WAKE/GPIO16 pins need to be wired together.
+WATCHDOG_24H  | A Watchdog message will be sent every 24 hours.
 
 To use them, you have to prefix them with `Maison::` or `Maison::Feature::` as shown in the code example.
 
