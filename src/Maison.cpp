@@ -735,7 +735,7 @@ void Maison::deep_sleep(bool back_with_wifi, int sleep_time_in_sec)
   DEBUGLN(" HUM... Not suppose to come here after deep_sleep call...");
 }
 
-State Maison::check_if_24_hours_time(State default_state) 
+Maison::State Maison::check_if_24_hours_time(Maison::State default_state) 
 {
   DEBUG("24 hours wait time check: ");
   DEBUG(mem.hours_24_count);
