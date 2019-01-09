@@ -171,6 +171,10 @@ To use them, you have to prefix them with `Maison::` or `Maison::Feature::` as s
 
 The user application memory structure **shall** have a `uint32_t` item as the first element in the structure. This is used by the framework to verify that the content saved in non-volatile memory is valid using a CRC-32 checksum. The content will be initialized (zeroed) if the checksum is bad. The checksum is computed by the framework, the user application just need to supplied the space in the structure.
 
+#### maison.loop
+
+Note: if the *DEEP_SLEEP* feature was enabled, the loop will almost never return as the processor will wait for further processing through a call to ESP.deep_sleep function. The processor, after the wait time, will restart the code from the beginning. In this context, the loop will return back to the application code only when it was not able to connect to the network if required by the current state of the finite state machine.
+
 ## Configuration Parameters
 
 The Maison framework is automating access to the MQTT message broker through the WiFi connection. As such, parameters are required to link the device to the WiFi network and the MQTT broker server. A file named "/config.json" must be created on a SPIFFS file system in flash memory. This is a json structured file. Here is an example of such a file:
