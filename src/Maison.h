@@ -165,15 +165,15 @@ class Maison
     bool setup();
     bool send_msg(const char * _topic, const char * format, ...);
     int  reset_reason();
+    void restart();
 
     void deep_sleep(bool back_with_wifi, int sleep_time_in_sec);
 
     inline void  enable_feature(Feature _feature) { feature_mask |= _feature;  }
     inline void disable_feature(Feature _feature) { feature_mask &= ~_feature; }
-    
+
     inline float battery_voltage() { return (ESP.getVcc() * (1.0 / 1024.0)); }    
     inline bool    is_hard_reset() { return reset_reason() != REASON_DEEP_SLEEP_AWAKE; }
-    inline void          restart() { save_mems(); ESP.restart(); delay(1000); }
 
     inline bool network_required() { 
       return (!use_deep_sleep()) || 

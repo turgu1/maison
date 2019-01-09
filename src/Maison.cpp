@@ -703,16 +703,22 @@ void Maison::deep_sleep(bool back_with_wifi, int sleep_time_in_sec)
 {
   SHOW("deep_sleep()");
 
+  DEBUG(" Sleep Duration: "); 
+  DEBUGLN(sleep_time_in_sec);
+  
+  DEBUG(" Network enabled on return: ");
+  DEBUGLN(back_with_wifi ? F("YES") : F("NO"));
+
   save_mems();
   mqtt_client.disconnect();
   WiFi.mode(WIFI_OFF);
   
   delay(10);
   
-  mem.one_hour_step_count += millis() + (sleep_time_in_sec * 1000);
+  mem.one_hour_step_count += millis() + (1000 * sleep_time_in_sec);
     
   ESP.deepSleep(
-    sleep_time_in_sec * 1e6, 
+    1e6 * sleep_time_in_sec, 
     back_with_wifi ? WAKE_RF_DEFAULT : WAKE_RF_DISABLED);  
 
   delay(1000);
@@ -890,6 +896,12 @@ char * Maison::my_topic(const char * topic, char * buffer, uint16_t buffer_lengt
   return buffer;
 }
 
+void Maison::restart() 
+{ 
+  save_mems(); 
+  ESP.restart(); 
+  delay(1000); 
+}
 
 #if MAISON_TESTING
 
