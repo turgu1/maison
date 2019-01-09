@@ -710,8 +710,11 @@ void Maison::deep_sleep(bool back_with_wifi, int sleep_time_in_sec)
   DEBUGLN(back_with_wifi ? F("YES") : F("NO"));
 
   save_mems();
-  mqtt_client.disconnect();
-  WiFi.mode(WIFI_OFF);
+
+  if (mqtt_connected()) {
+    mqtt_client.disconnect();
+    WiFi.mode(WIFI_OFF);
+  }
   
   delay(10);
   
@@ -881,6 +884,9 @@ uint32_t Maison::CRC32(const uint8_t * data, size_t length)
       }
     }
   }
+
+  DEBUG(F(" Computed CRC: "));
+  DEBUGLN(crc);
 
   return crc;
 }
