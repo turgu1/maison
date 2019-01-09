@@ -1,6 +1,6 @@
 #include <Maison.h>
 
-BearSSL::WiFiClientSecure Maison::wifi_client;
+BearSSL::WiFiClientSecure * Maison::wifi_client = NULL;
 PubSubClient  Maison::mqtt_client;
 
 static Maison * maison;
@@ -609,8 +609,15 @@ bool Maison::mqtt_connect()
 
     if (!mqtt_connected()) {
 
-      wifi_client.setFingerprint(config.mqtt_fingerprint);
-      mqtt_client.setClient(wifi_client);    
+      if (wifi_client != NULL) {
+        delete wifi_client;
+        wifi_client = NULL;
+      }
+
+      wifi_client = new BearSSL::WifiClientSecure;
+
+      wifi_client->setFingerprint(config.mqtt_fingerprint);
+      mqtt_client.setClient(*wifi_client);    
       mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
 
       mqtt_client.connect(config.device_name, config.mqtt_username, config.mqtt_password);
@@ -651,7 +658,7 @@ bool Maison::mqtt_connect()
         if (++connect_retry_count >= 5) {          
           DEBUGLN(F(" Too many trials, reconnecting WiFi..."));
           mqtt_client.disconnect();
-          wifi_client.stop();
+          wifi_client->stop();
           WiFi.disconnect();
           connect_retry_count = 0;
         }
@@ -726,6 +733,24 @@ void Maison::deep_sleep(bool back_with_wifi, int sleep_time_in_sec)
 
   delay(1000);
   DEBUGLN(" HUM... Not suppose to come here after deep_sleep call...");
+}
+
+State Maison::check_if_24_hours_time(State default_state) 
+{
+  DEBUG("24 hours wait time check: ");
+  DEBUG(mem.hours_24_count);
+  DEBUG(", ");
+  DEBUGLN(mem.one_hour_step_count);
+
+  if (mem.one_hour_step_count >= (ONE_HOUR * 1000)) {
+    mem.one_hour_step_count = 0;
+    if (++mem.hours_24_count >= 24) {
+      mem.hours_24_count = 0;
+      DEBUGLN(F("HOURS_24 reached..."));
+      return HOURS_24;
+    }
+  }
+  return default_state;
 }
 
 // ---- RTC Memory Data Management ----

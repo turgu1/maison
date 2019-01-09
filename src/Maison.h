@@ -244,17 +244,6 @@ class Maison
     inline bool   use_deep_sleep() { return (feature_mask & DEEP_SLEEP)    != 0;       }
     inline bool watchdog_enabled() { return (feature_mask & WATCHDOG_24H ) != 0;       }
 
-    inline State check_if_24_hours_time(State default_state) {
-      if (mem.one_hour_step_count >= (ONE_HOUR * 1000)) {
-        mem.one_hour_step_count = 0;
-        if (++mem.hours_24_count >= 24) {
-          mem.hours_24_count = 0;
-          return HOURS_24;
-        }
-      }
-      return default_state;
-    }
-
     inline bool is_short_reboot_time_needed() { 
       return (mem.state & (PROCESS_EVENT|WAIT_END_EVENT|END_EVENT)) != 0;
     }
@@ -269,6 +258,7 @@ class Maison
       }
     }
 
+    State check_if_24_hours_time(State default_state);
     bool retrieve_config(JsonObject & root, Config & config);
     bool load_config(int version = 0);
     bool save_config();
