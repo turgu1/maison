@@ -638,6 +638,8 @@ bool Maison::mqtt_connect()
         DEBUG(F("Unable to connect to mqtt. State: "));
         DEBUGLN(mqtt_client.state());
 
+        mqtt_client.disconnect();
+        
         if (++connect_retry_count > 5) {          
           DEBUGLN(F(" Too many trials, reconnecting WiFi..."));
           wifi_client.stop();
