@@ -863,6 +863,11 @@ uint32_t Maison::CRC32(const uint8_t * data, size_t length)
 {
   uint32_t crc = 0xffffffff;
 
+  DEBUG(F("Computing CRC: data addr: "));
+  DEBUG(data);
+  DEBUG(F(", length: "));
+  DEBUGLN(length);
+
   while (length--) {
     uint8_t c = *data++;
     for (uint32_t i = 0x80; i > 0; i >>= 1) {
