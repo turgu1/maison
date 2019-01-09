@@ -709,8 +709,6 @@ void Maison::deep_sleep(bool back_with_wifi, int sleep_time_in_sec)
   DEBUG(" Network enabled on return: ");
   DEBUGLN(back_with_wifi ? F("YES") : F("NO"));
 
-  save_mems();
-
   if (mqtt_connected()) {
     mqtt_client.disconnect();
     WiFi.mode(WIFI_OFF);
@@ -720,6 +718,8 @@ void Maison::deep_sleep(bool back_with_wifi, int sleep_time_in_sec)
   
   mem.one_hour_step_count += millis() + (1000 * sleep_time_in_sec);
     
+  save_mems();
+
   ESP.deepSleep(
     1e6 * sleep_time_in_sec, 
     back_with_wifi ? WAKE_RF_DEFAULT : WAKE_RF_DISABLED);  
