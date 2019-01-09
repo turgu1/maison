@@ -168,6 +168,9 @@ class Maison
 
     void deep_sleep(bool back_with_wifi, int sleep_time_in_sec);
 
+    inline void  enable_feature(Feature _feature) { feature_mask |= _feature;  }
+    inline void disable_feature(Feature _feature) { feature_mask &= ~_feature; }
+    
     inline float battery_voltage() { return (ESP.getVcc() * (1.0 / 1024.0)); }    
     inline bool    is_hard_reset() { return reset_reason() != REASON_DEEP_SLEEP_AWAKE; }
     inline void          restart() { save_mems(); ESP.restart(); delay(1000); }
@@ -221,6 +224,9 @@ class Maison
     uint8_t      feature_mask;
     void       * user_mem;
     uint8_t      user_mem_length;
+    long         last_time_count;
+    bool         counting_lost_connection;
+
     char         buffer[MQTT_MAX_PACKET_SIZE];
 
     bool wifi_connect();

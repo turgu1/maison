@@ -14,7 +14,9 @@ Maison::Maison() :
   user_qos(0),
   feature_mask(NONE),
   user_mem(NULL),
-  user_mem_length(0)
+  user_mem_length(0),
+  last_time_count(0),
+  counting_lost_connection(true)
 {
   maison = this;
 }
@@ -28,7 +30,9 @@ Maison::Maison(uint8_t _feature_mask) :
   user_qos(0),
   feature_mask(_feature_mask),
   user_mem(NULL),
-  user_mem_length(0)
+  user_mem_length(0),
+  last_time_count(0),
+  counting_lost_connection(true)
 {
   maison = this;
 }
@@ -42,7 +46,9 @@ Maison::Maison(uint8_t _feature_mask, void * _user_mem, uint8_t _user_mem_length
   user_qos(0),
   feature_mask(_feature_mask),
   user_mem(_user_mem),
-  user_mem_length(_user_mem_length)
+  user_mem_length(_user_mem_length),
+  last_time_count(0),
+  counting_lost_connection(true)
 {
   maison = this;
 }
@@ -216,8 +222,6 @@ bool Maison::setUserCallback(Callback * _cb, const char * _topic, uint8_t _qos)
 void Maison::loop(Process * process) 
 { 
   State new_state, new_sub_state;
-  static long last_time_count = 0;
-  static bool counting_lost_connection = true;
 
   DEBUG(F("Maison::loop(): Current state: "));
   DEBUGLN(mem.state);
@@ -227,14 +231,19 @@ void Maison::loop(Process * process)
     if (first_connect_trial) {
       first_connect_trial    = false;
       last_reconnect_attempt = millis();
+      DEBUGLN(F("First Connection Trial"));
       mqtt_connect();
     }
 
     if (!mqtt_connected()) {
+
       if (counting_lost_connection) {
         mem.lost_count += 1;
         counting_lost_connection = false;
+        DEBUG(F(" Connection Lost Count: "));
+        DEBUGLN(mem.lost_count);
       }
+
       if (use_deep_sleep()) {
         DEBUGLN(F("Unable to connect to MQTT Server. Deep Sleep for 5 seconds."));
         deep_sleep(true, 5);
@@ -376,7 +385,7 @@ void Maison::loop(Process * process)
   DEBUG("): "); 
   DEBUGLN(mem.one_hour_step_count);
   
-  DEBUGLN("End of loop()");
+  DEBUGLN("End of Maison::loop()");
 }
 
 #define GETS(dst, src, size) \
@@ -610,39 +619,38 @@ bool Maison::mqtt_connect()
 
         mqtt_client.setCallback(maison_callback);
         if (!mqtt_client.subscribe(my_topic(CTRL_SUFFIX_TOPIC, buffer, sizeof(buffer)))) {
-          DEBUG(F("Hum... unable to subscribe to topic (State:"));
+          DEBUG(F(" Hum... unable to subscribe to topic (State:"));
           DEBUG(mqtt_client.state());
-          DEBUG("): ");
+          DEBUG(F("): "));
           DEBUGLN(buffer);
           break;
         }
         else {
-          DEBUG(F("Subscription completed to topic "));
+          DEBUG(F(" Subscription completed to topic "));
         }
 
         DEBUGLN(buffer);
         if (user_topic != NULL) {
           if (!mqtt_client.subscribe(user_topic, user_qos)) {
-            DEBUG(F("Hum... unable to subscribe to user topic (State:"));
+            DEBUG(F(" Hum... unable to subscribe to user topic (State:"));
             DEBUG(mqtt_client.state());
-            DEBUG("): ");
+            DEBUG(F("): "));
             DEBUGLN(user_topic);        
             break;
           }
           else {
-            DEBUG(F("Subscription completed to user topic "));
+            DEBUG(F(" Subscription completed to user topic "));
             DEBUGLN(user_topic);        
           }
         }
       }
       else {
-        DEBUG(F("Unable to connect to mqtt. State: "));
+        DEBUG(F(" Unable to connect to mqtt. State: "));
         DEBUGLN(mqtt_client.state());
-
-        mqtt_client.disconnect();
 
         if (++connect_retry_count >= 5) {          
           DEBUGLN(F(" Too many trials, reconnecting WiFi..."));
+          mqtt_client.disconnect();
           wifi_client.stop();
           WiFi.disconnect();
           connect_retry_count = 0;
@@ -664,19 +672,22 @@ bool Maison::send_msg(const char * _topic, const char * format, ...)
 {
   SHOW("send_msg()");
 
-  static char msg[512];
-
   va_list args;
   va_start (args, format);
 
-  vsnprintf(msg, 512, format, args);
+  vsnprintf(buffer, 512, format, args);
   
   DO {
-    DEBUG(F(" Sending msg to ")); DEBUG(_topic); DEBUG(F(": ")); DEBUGLN(msg);
+    DEBUG(F(" Sending msg to ")); 
+    DEBUG(_topic); 
+    DEBUG(F(": ")); 
+    DEBUGLN(buffer);
 
-    if (!mqtt_connected()) ERROR("Unable to connect to mqtt server"); 
+    if (!mqtt_connected()) {
+      ERROR("Unable to connect to mqtt server");
+    }
     
-    if (!mqtt_client.publish(_topic, msg)) {
+    if (!mqtt_client.publish(_topic, buffer)) {
       ERROR("Unable to publish message");
     }
 
@@ -786,7 +797,7 @@ bool Maison::init_user_mem()
   SHOW("init_user_mem()");
 
   memset(user_mem, 0, user_mem_length);
-  
+
   bool result = write_mem((uint32_t *) &user_mem, user_mem_length, (sizeof(mem) + 3) >> 2);
 
   SHOW_RESULT("init_user_mem()");
