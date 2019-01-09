@@ -644,6 +644,7 @@ bool Maison::mqtt_connect()
           WiFi.disconnect();
           connect_retry_count = 0;
         }
+        break;
       }
     }
     OK_DO;
