@@ -65,10 +65,6 @@ bool Maison::setup()
     if (network_required()) {
       if (!wifi_connect()) ERROR("WiFi");
       update_device_name();
-
-      mqtt_client.setClient(wifi_client);    
-      mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
-      wifi_client.setFingerprint(config.mqtt_fingerprint);
     }
     
     DEBUG(F("MQTT_MAX_PACKET_SIZE = ")); DEBUGLN(MQTT_MAX_PACKET_SIZE);
@@ -250,6 +246,7 @@ void Maison::loop(Process * process)
           if (!mqtt_connect()) return;
         }
         else {
+          DEBUG("-");
           return;
         }
       }
@@ -603,6 +600,10 @@ bool Maison::mqtt_connect()
 
     if (!mqtt_connected()) {
 
+      wifi_client.setFingerprint(config.mqtt_fingerprint);
+      mqtt_client.setClient(wifi_client);    
+      mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
+
       mqtt_client.connect(config.device_name, config.mqtt_username, config.mqtt_password);
 
       if (mqtt_connected()) {
@@ -639,8 +640,8 @@ bool Maison::mqtt_connect()
         DEBUGLN(mqtt_client.state());
 
         mqtt_client.disconnect();
-        
-        if (++connect_retry_count > 5) {          
+
+        if (++connect_retry_count >= 5) {          
           DEBUGLN(F(" Too many trials, reconnecting WiFi..."));
           wifi_client.stop();
           WiFi.disconnect();
