@@ -68,7 +68,7 @@ bool Maison::setup()
       mem.lost_count          = 0;
     }
 
-    if (network_required()) {
+    if (network_is_available()) {
       if (!wifi_connect()) ERROR("WiFi");
       update_device_name();
     }
@@ -234,7 +234,7 @@ void Maison::loop(Process * process)
   DEBUG(F("Maison::loop(): Current state: "));
   DEBUGLN(mem.state);
 
-  if (network_required()) {
+  if (network_is_available()) {
 
     if (first_connect_trial) {
       first_connect_trial    = false;
@@ -377,7 +377,7 @@ void Maison::loop(Process * process)
   DEBUG(" Next state: "); DEBUGLN(mem.state);
 
   if (use_deep_sleep()) {
-    deep_sleep(network_required(), 
+    deep_sleep(network_is_available(), 
                is_short_reboot_time_needed() ? 5 : ONE_HOUR);
   }
   else {

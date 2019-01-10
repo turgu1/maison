@@ -175,7 +175,7 @@ class Maison
     inline float battery_voltage() { return (ESP.getVcc() * (1.0 / 1024.0)); }    
     inline bool    is_hard_reset() { return reset_reason() != REASON_DEEP_SLEEP_AWAKE; }
 
-    inline bool network_required() { 
+    inline bool network_is_available() { 
       return (!use_deep_sleep()) || 
              ((mem.state & (STARTUP|PROCESS_EVENT|END_EVENT|HOURS_24)) != 0);
     }

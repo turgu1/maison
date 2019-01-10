@@ -186,7 +186,7 @@ Note: if the *DEEP_SLEEP* feature was enabled, the loop will almost never return
 
 ## Configuration Parameters
 
-The Maison framework is automating access to the MQTT message broker through the WiFi connection. As such, parameters are required to link the device to the WiFi network and the MQTT broker server. A file named "/config.json" must be created on a SPIFFS file system in flash memory. This is a json structured file. Here is an example of such a file:
+The Maison framework is automating access to the MQTT message broker through the WiFi connection. As such, parameters are required to link the device to the WiFi network and the MQTT broker server. A file named "/config.json" must be created on a SPIFFS file system in flash memory. This is a JSON structured file. Here is an example of such a file:
 
 ```json
 {
@@ -216,7 +216,7 @@ mqtt_fingerprint | This is the fingerprint associated with the MQTT service cert
 
 ## Messages sent by the framework
 
-The Maison framework automate some messages that are sent to the maison/status topic. All messages are sent using a JSON formatted string. 
+The Maison framework automate some messages that are sent to the **maison/status** topic. All messages are sent using a JSON formatted string. 
 
 Here is a description of each message sent, namely:
 
@@ -271,6 +271,10 @@ msg_type  | This content the string "CONFIG".
 content   | This is the configuration of the device in a JSON format. See the [Configuration Parameters](#configuration-parameters) section for the format details.
 
 ## The Finite State Machine
+
+The finite state machine is processed inside the `Maison::loop()` function.
+
+When using the *DEEP_SLEEP* [feature](#feature-mask), networking is disabled for some of the states to minimize battery usage. If the *DEEP_SLEEP* feature is not used, networking is available all the time. The `Maison::network_is_available()` function can be used to check network availability.
 
 State          | Value | Network | Description
 ---------------|:-----:|:-------:|-------------
