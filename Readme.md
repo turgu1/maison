@@ -1,24 +1,24 @@
 # Maison - Minimally Secure ESP8266 IOT MQTT based Framework
 
-Note: This is still work in progress. This code is working on an ESP8266 and is under heavy development. The documentation is also a work in progress...
+Note: This is still work in progress. This code is working on an ESP8266. The documentation is also a work in progress. The code is working and must be considered of a Beta level.
 
-This library implements a small, minimally secure, IOT Framework for embedded ESP8266 devices to serve into a Home IOT environment. It diminishes the amount of code to be put in the targeted app source code. The app interacts with the framework through a finite state machine algorithm allowing for specific usage at every stage.
+This library implements a small, minimally secure, IOT Framework for embedded ESP8266 devices to serve into a Home IOT environment. It diminishes the amount of code to be put in the targeted app source code. The app interacts with the framework through a Finite State Machine algorithm allowing for specific usage at every stage.
 
 Here are the main characteristics:
 
-* Framework configuration saved in file through SPIFFS
+* Framework configuration saved in file through SPIFFS.
 * WiFi MQTT based communications. Nothing else.
-* TLS encryption: All MQTT communication with encryption
-* Server authentification through fingerprinting
-* User/Password identification
-* JSON based data transmission with server
-* Configuration updates through MQTT
-* Option: Automated Watchdog transmission every 24 hours
-* Option: Battery voltage transmission
-* Option: DeepSleep or continuous power
-* Option: Application specific mqtt topic subscription
-* Option: Application specific automatic state saving in RTC memory
-* Option: Verbose/Silent debugging output through compilation
+* TLS encryption: All MQTT communication with encryption.
+* Server authentification through fingerprinting.
+* User/Password identification.
+* JSON based data transmission with server.
+* Configuration updates through MQTT.
+* Option: Automated Watchdog transmission every 24 hours.
+* Option: Battery voltage transmission.
+* Option: DeepSleep or continuous power.
+* Option: Application specific mqtt topic subscription.
+* Option: Application specific automatic state saving in RTC memory.
+* Option: Verbose/Silent debugging output through compilation.
 
 The MQTT based transmission architecture is specific to this implementation and is describe below.
 
