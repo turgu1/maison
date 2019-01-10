@@ -1,8 +1,8 @@
-# Maison - Secure ESP8266 IOT MQTT based Framework
+# Maison - Minimally Secure ESP8266 IOT MQTT based Framework
 
-Note: This is still work in progress. This code is working on an ESP8266 and under heavy development. The documentation is also a work in progress...
+Note: This is still work in progress. This code is working on an ESP8266 and is under heavy development. The documentation is also a work in progress...
 
-This library implement a small, secure, IOT Framework for embedded ESP8266 devices to serve into a Home IOT environment. It diminishes the amount of code to be put in the targeted app source code. The app interacts with the framework through a finite state machine algorithm allowing for specific usage at every stage.
+This library implements a small, minimally secure, IOT Framework for embedded ESP8266 devices to serve into a Home IOT environment. It diminishes the amount of code to be put in the targeted app source code. The app interacts with the framework through a finite state machine algorithm allowing for specific usage at every stage.
 
 Here are the main characteristics:
 
@@ -178,7 +178,7 @@ ADC_MODE(ADC_VCC);
 
 #### User Application Memory Structure
 
-The user application memory structure **shall** have a `uint32_t` item as the first element in the structure. This is used by the framework to verify that the content saved in non-volatile memory is valid using a CRC-32 checksum. The content will be initialized (zeroed) if the checksum is bad. The checksum is computed by the framework, the user application just need to supplied the space in the structure.
+The user application memory structure **shall** have a `uint32_t` item as the first element in the structure. This is used by the framework to verify that the content saved in non-volatile memory is valid using a CRC-32 checksum. The whole content will be initialized (zeroed) if the checksum is bad. The checksum is computed by the framework, the user application just need to supplied the space in the structure.
 
 #### maison.loop
 
@@ -300,8 +300,12 @@ The Maison framework can be tailored to use Deep Sleep when on battery power, th
 
 In this context, the finite state machine will cause a call to the `ESP.deep_sleep()` function at the end of each of its processing cycle (function `Maison::loop()`) to put the processor in a dormant state. The deep sleep duration, by default, is set to 5 seconds before entry to the states *PROCESS_EVENT*, *WAIT_END_EVENT*, *END_EVENT* and *HOURS_24*; it is 3600 seconds for *WAIT_FOR_EVENT*.
 
-It is expected that a hardware interrupt will wake up the device to signifiate the arrival of a new event. If it's not the case, it will be then required to modulate the amount of time to wait for the next *WAIT_FOR_EVENT* state to occurs. This must be used with caution as it will have an impact on the battery capacity.
+If the deep sleep feature is enabled, the call to `Maison::loop()` never return to the caller as the processor will reset after the deep sleep period.
+
+It is expected that a hardware interrupt will wake up the device to signifiate the arrival of a new event. If it's not the case, it will be then be required to modulate the amount of time to wait for the next *WAIT_FOR_EVENT* state to occurs. This must be used with caution as it will have an impact on the battery capacity.
 
 The application process can change the amount of seconds for the next deep sleep period using the `Maison::set_deep_sleep_wait_time()` function. This can be called inside the application `process_state()` function before returning control to the framework. 
 
 The ESP8266 does not allow for a sleep period longer than 4294967295 microseconds, that corresponds to around 4294 seconds or 71 minutes.
+
+If *DEEP_SLEEP* is not used, there is no wait time other than the code processing time in the Maison::loop(). Internally, the framework compute the duration of execution for the next *HOURS_24* state to occur.

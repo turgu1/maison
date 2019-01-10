@@ -43,7 +43,7 @@
 // This is prepended to all topics used by the framework
 
 #ifndef MAISON_PREFIX_TOPIC
-  #define MAISON_PREFIX_TOPIC "maison/"
+  #define MAISON_PREFIX_TOPIC "maison/" ///< Prefix for all Maison framework MQTT topics
 #endif
 
 // This is the topic name to send status information to
@@ -51,7 +51,7 @@
 // For example: maison/status
 
 #ifndef MAISON_STATUS_TOPIC
-  #define MAISON_STATUS_TOPIC MAISON_PREFIX_TOPIC "status"
+  #define MAISON_STATUS_TOPIC MAISON_PREFIX_TOPIC "status" ///< maison server status MQTT topic
 #endif
 
 // This is the topic name to send control information to
@@ -59,7 +59,7 @@
 // For example: maison/ctrl
 
 #ifndef MAISON_CTRL_TOPIC
-  #define MAISON_CTRL_TOPIC   MAISON_PREFIX_TOPIC "ctrl"
+  #define MAISON_CTRL_TOPIC   MAISON_PREFIX_TOPIC "ctrl" ///< maison server control MQTT topic
 #endif
 
 // This is the topic name suffix where the device wait for control commands from site
@@ -72,11 +72,11 @@
 // For example: maison/DEV_TEST/crtl
 
 #ifndef CTRL_SUFFIX_TOPIC
-  #define CTRL_SUFFIX_TOPIC   "/ctrl"
+  #define CTRL_SUFFIX_TOPIC   "/ctrl" ///< Suffix for device control topic
 #endif
 
 #ifndef DEFAULT_SHORT_REBOOT_TIME
-  #define DEFAULT_SHORT_REBOOT_TIME 5
+  #define DEFAULT_SHORT_REBOOT_TIME 5  ///< DeepSleep time in seconds for short time states
 #endif
 
 // ----- END OPTIONS -----
@@ -96,112 +96,136 @@
 
 // Syntaxic sugar
 
-#define DO        bool result = false; while (true)
-#define OK_DO     { result = true; break; }
-#define ERROR(m)  { DEBUGLN(F(" ERROR: " m)); break; }
+#define DO        bool result = false; while (true)    ///< Beginning of a DO loop
+#define OK_DO     { result = true; break; }            ///< Successfull exit of a DO loop
+#define ERROR(m)  { DEBUGLN(F(" ERROR: " m)); break; } ///< Exit the loop with an ERROR message
 
 // To get WATCHDOG Time faster during tests
 
 #if QUICK_TURN
-  #define ONE_HOUR 6   // In seconds. So HOURS_24 fired every 2.2 minutes.
+  #define ONE_HOUR 6   ///< In seconds. So HOURS_24 fired every 2.2 minutes.
 #else
-  #define ONE_HOUR 3600 // In seconds. Normal is one hour x 24 = 24 hours.
+  #define ONE_HOUR 3600 ///< In seconds. Normal is one hour x 24 = 24 hours.
 #endif
+
+/// Maison Framework Class
 
 class Maison
 {
   public:
 
-    // Features in feature_mask
-    //
-    // Note: if VOLTAGE_CHECK is requested and the internal battery readout is targeted, the main
-    //       user sketch must add the following line at the beginning of the sketch source code file:
-    //
-    //    ADC_MODE(ADC_VCC);
+    /// Features in feature_mask
+    ///
+    /// Note: if VOLTAGE_CHECK is requested and the internal battery readout is targeted, the main
+    ///       user sketch must add the following line at the beginning of the sketch source code file:
+    ///
+    ///    ADC_MODE(ADC_VCC);
 
     enum Feature : uint8_t {
-      NONE          = 0x00, // No special feature
-      VOLTAGE_CHECK = 0x01, // Chip A2D voltage readout will be sent on status/watchdog messages
-      DEEP_SLEEP    = 0x02, // Using batteries -> deep_sleep will be used then
-      WATCHDOG_24H  = 0x04  // Watchdog status sent every 24 hours
+      NONE          = 0x00, ///< No special feature
+      VOLTAGE_CHECK = 0x01, ///< Chip A2D voltage readout will be sent on status/watchdog messages
+      DEEP_SLEEP    = 0x02, ///< Using batteries -> deep_sleep will be used then
+      WATCHDOG_24H  = 0x04  ///< Watchdog status sent every 24 hours
     };
 
-    // States of the finite state machine
-    //
-    // On battery power, only the following states will have networking capability:
-    //
-    //    STARTUP, PROCESS_EVENT, END_EVENT, HOURS_24
+    /// States of the finite state machine
+    ///
+    /// On battery power, only the following states will have networking capability:
+    ///
+    ///    STARTUP, PROCESS_EVENT, END_EVENT, HOURS_24
 
     enum State : uint8_t {
-      STARTUP        =  1,
-      WAIT_FOR_EVENT =  2,
-      PROCESS_EVENT  =  4,
-      WAIT_END_EVENT =  8,
-      END_EVENT      = 16,
-      HOURS_24       = 32
+      STARTUP        =  1, ///< The device has just been reset
+      WAIT_FOR_EVENT =  2, ///< Wait for an event to occur
+      PROCESS_EVENT  =  4, ///< An event is being processed
+      WAIT_END_EVENT =  8, ///< The device is waiting for the end of the event to occur
+      END_EVENT      = 16, ///< The end of an event has been detected
+      HOURS_24       = 32  ///< This event occurs every 24 hours
     };
 
-    // The UserResult is returned by the user process function to indicate
-    // how to proceed with the finite state machine transformation:
-    //
-    // COMPLETED: Returned when the processing for the current state is
-    //            considered completed. This is used mainly for all states.
-    //            
-    // NOT_COMPLETED: The reverse of COMPLETED. Mainly used with PROCESS_EVENT in the
-    //                case that it must be fired again to complete the processing
-    //
-    // ABORTED: Return in the case of PROCESS_EVENT when the event vanished before
-    //          processing, such that the finite state machine return to the
-    //          WAIT_FOR_EVENT state instead of going to the WAIT_END_EVENT state.
-    //
-    // NEW_EVENT: Returned when processing a WAIT_FOR_EVENT state to indicate that
-    //            an event must be processed.
+    /// A UserResult is returned by the user process function to indicate
+    /// how to proceed with the finite state machine transformation.
+    ///
 
-    enum UserResult : uint8_t { COMPLETED = 1, NOT_COMPLETED, ABORTED, NEW_EVENT };
+    enum UserResult : uint8_t { 
+      COMPLETED = 1, ///< The processing for the current state is considered completed
+      NOT_COMPLETED, ///< The current state still requier some processing in calls to come
+      ABORTED,       ///< The event vanished and requires no more processing (in a PROCESS_EVENT state)
+      NEW_EVENT      ///< A new event occured (in a WAIT_FOR_EVENT state)
+    };
 
+    /// Application defined process function. To be supplied as a parameter 
+    /// to the Maison::loop() function.
     typedef UserResult Process(State state);
+
+    /// Application defined MQTT message callback function. Will be called by the framework
+    /// when receiving topics not managed by the framework itself.
     typedef void Callback(const char * topic, byte * payload, unsigned int length);
 
     Maison();
     Maison(uint8_t _feature_mask);
     Maison(uint8_t _feature_mask, void * _user_mem, uint8_t _user_mem_length);
 
+    /// The Maison setup function. Normally to be called inside the application setup() 
+    /// function.
     bool setup();
+
+    /// Send a MQTT message using printf like construction syntax.
     bool send_msg(const char * _topic, const char * format, ...);
+
+    /// Returns the ESP8266 reason for reset.
     int  reset_reason();
+
+    /// Will restart the ESP8266
     void restart();
 
+    /// Initiates a ESP.deep_sleep() call.
     void deep_sleep(bool back_with_wifi, uint16_t sleep_time_in_sec);
 
+    /// Enable a feature dynamically.
     inline void  enable_feature(Feature _feature) { 
       feature_mask |= _feature;  
     }
     
+    /// Disable a feature dynamically.
     inline void disable_feature(Feature _feature) { 
       feature_mask &= ~_feature; 
     }
 
+    /// Returns the battery voltage. Requires ADC_MODE(ADC_VCC); at the
+    /// beginning of the application sketch.
     inline float battery_voltage() { 
       return (ESP.getVcc() * (1.0 / 1024.0)); 
     }    
     
+    /// True if a reset occured that is not comming from a deep sleep return.
     inline bool is_hard_reset() { 
       return reset_reason() != REASON_DEEP_SLEEP_AWAKE; 
     }
 
+    /// Set the deep_sleep period inside an application process function.
     inline void set_deep_sleep_wait_time(uint16_t seconds) { 
       deep_sleep_wait_time = (seconds > 4294) ? 4294 : seconds; 
     }
 
+    /// True if networking is currently available. Always true if DEEP_SLEEP 
+    /// is not set in the features.
     inline bool network_is_available() { 
       return (!use_deep_sleep()) || 
              ((mem.state & (STARTUP|PROCESS_EVENT|END_EVENT|HOURS_24)) != 0);
     }
 
+    /// Returns a complete topic name
     char * my_topic(const char * topic, char * buffer, uint16_t buffer_length);
+
+    /// Compute a CRC-32 checksum
     uint32_t CRC32(const uint8_t * data, size_t length);
+
+    /// Set the MQTT msg callback for the application
     void set_msg_callback(Callback * _cb, const char * _topic, uint8_t _qos = 0);
 
+    /// Function to be called by the application in the main loop to insure 
+    /// proper actions by the framework.
     void loop(Process * process = NULL);
 
   private:
