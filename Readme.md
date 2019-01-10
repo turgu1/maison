@@ -67,7 +67,7 @@ MAISON_TESTING      |    0      | If = 1, enable debuging output through the sta
 QUICK_TURN          |    0      | If = 1, WATCHDOG messages are sent every 2 minutes instead of 24 hours. This is automatically the case when *MAISON_TESTING* is set to 1.
 MAISON_PREFIX_TOPIC | maison/   | All topics used by the framework are prefixed with this text   
 MAISON_STATUS_TOPIC | maison/status | Topic where the framework status are sent
-MAISON_CTRL_TOPIC   | maison/ctrl   | Topic where the framework config control are sent
+MAISON_CTRL_TOPIC   | maison/ctrl   | Topic where the framework event controls are sent
 CTRL_SUFFIX_TOPIC   | /ctrl         | This is the topic suffix used to identify device-related control topic
 
 Note that for *MAISON_STATUS_TOPIC* and *MAISON_CTRL_TOPIC*, they will be modifified automatically if *MAISON_PREFIX_TOPIC* is changed. For example, if you change *MAISON_PREFIX_TOPIC* to be `home/`, *MAISON_STATUS_TOPIC* will become `home/status` and *MAISON_CTRL_TOPIC* will become `maison/ctrl`.
@@ -222,7 +222,8 @@ Here is a description of each message sent, namely:
 
 * The Startup message
 * The Status message
-* THe Watchdog message
+* The Watchdog message
+* The Config message
 
 ### The Startup message
 
@@ -259,6 +260,15 @@ device    | The device name as stated in the configuration parameters. If the co
 msg_type  | This content the string "WATCHDOG".
 VBAT      | This is the Battery voltage. This parameter is optional. Its presence depend on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
 
+### The Config message
+
+This message is sent to the MQTT topic **maison/status** when a message sent to the device ctrl topic (e.g. **maison/device_name/ctrl**) containing the string "CONFIG?" is received.
+
+Parameter | Description
+----------|------------------
+device    | The device name as stated in the configuration parameters. If the configuration parameter is empty, the MAC address of the device WiFi interface is used.
+msg_type  | This content the string "CONFIG".
+content   | This is the configuration of the device in a JSON format. See the [Configuration Parameters](#configuration-parameters) section for the format details.
 
 ## The Finite State Machine
 
