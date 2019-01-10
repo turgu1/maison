@@ -200,8 +200,8 @@ class Maison
 
     char * my_topic(const char * topic, char * buffer, uint16_t buffer_length);
     uint32_t CRC32(const uint8_t * data, size_t length);
-    bool set_msg_callback(Callback * _cb, const char * _topic, uint8_t _qos = 0);
-    
+    void set_msg_callback(Callback * _cb, const char * _topic, uint8_t _qos = 0);
+
     void loop(Process * process = NULL);
 
   private:
