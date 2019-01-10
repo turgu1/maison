@@ -247,15 +247,15 @@ VBAT      | This is the Battery voltage. This parameter is optional. Its presenc
 
 The harware reset reason come from the ESP8266 reset information:
 
-    value | description
-    :----:|------------
-       0  | Power Reboot
-       1  | Hardware WDT Reset
-       2  | Fatal Exception
-       3  | Software Watchdog Reset
-       4  | Software Reset
-       5  | Deep Sleep Reset
-       6  | Hardware Reset
+value | description
+:----:|------------
+   0  | Power Reboot
+   1  | Hardware WDT Reset
+   2  | Fatal Exception
+   3  | Software Watchdog Reset
+   4  | Software Reset
+   5  | Deep Sleep Reset
+   6  | Hardware Reset
 
 ### The Status message
 
