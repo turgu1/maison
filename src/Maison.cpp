@@ -83,25 +83,25 @@ bool Maison::setup()
   return result;
 }
 
-void maison_callback(const char * topic, byte * payload, unsigned int length)
+void maison_callback(const char * _topic, byte * _payload, unsigned int _length)
 {
   SHOW("---------- maison_callback() ---------------");
 
-  if (maison != NULL) maison->process_callback(topic, payload, length);
+  if (maison != NULL) maison->process_callback(_topic, _payload, _length);
   
   DEBUGLN(F(" End of maison_callback()"));
 }
 
-void Maison::process_callback(const char * topic, byte * payload, unsigned int length)
+void Maison::process_callback(const char * _topic, byte * _payload, unsigned int _length)
 {
   SHOW("process_callback()");
 
-  if (strcmp(topic, my_topic(CTRL_SUFFIX_TOPIC, buffer, sizeof(buffer))) == 0) {
+  if (strcmp(_topic, my_topic(CTRL_SUFFIX_TOPIC, buffer, sizeof(buffer))) == 0) {
     int len;
 
     DEBUG(" Received MQTT Message: ");
     
-    memcpy(buffer, payload, len = (length >= sizeof(buffer)) ? (sizeof(buffer) - 1) : length);
+    memcpy(buffer, _payload, len = (_length >= sizeof(buffer)) ? (sizeof(buffer) - 1) : _length);
     buffer[len] = 0;
     DEBUGLN(buffer);
 
@@ -192,7 +192,7 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
   }
   else if (user_cb != NULL) {
     DEBUGLN(F(" Calling user callback"));
-    (*user_cb)(topic, payload, length);
+    (*user_cb)(_topic, _payload, _length);
   }
 }
 
@@ -203,7 +203,7 @@ void Maison::set_msg_callback(Callback * _cb, const char * _topic, uint8_t _qos)
   user_qos   = _qos;
 }
 
-void Maison::loop(Process * process) 
+void Maison::loop(Process * _process) 
 { 
   State new_state, new_sub_state;
 
@@ -257,7 +257,7 @@ void Maison::loop(Process * process)
   set_deep_sleep_wait_time(
     is_short_reboot_time_needed() ? DEFAULT_SHORT_REBOOT_TIME : ONE_HOUR);
 
-  UserResult res = call_user_process(process);
+  UserResult res = call_user_process(_process);
 
   DEBUG(F("User process result: ")); DEBUGLN(res);
 
@@ -395,22 +395,22 @@ void Maison::loop(Process * process)
   if (src.as<JsonArray>().copyTo(dst) != size) \
     ERROR(" Copy To " STRINGIZE(dst) " with inconsistent size")
 
-bool Maison::retrieve_config(JsonObject & root, Config & config)
+bool Maison::retrieve_config(JsonObject & _root, Config & _config)
 {
   SHOW("retrieve_config()");
 
   DO {
     const char * tmp;
 
-    GETI(config.version,          root["version"         ]);
-    GETS(config.device_name,      root["device_name"     ], sizeof(config.device_name     ));
-    GETS(config.wifi_ssid,        root["ssid"            ], sizeof(config.wifi_ssid       ));
-    GETS(config.wifi_password,    root["wifi_password"   ], sizeof(config.wifi_password   ));
-    GETS(config.mqtt_server,      root["mqtt_server_name"], sizeof(config.mqtt_server     ));
-    GETS(config.mqtt_username,    root["mqtt_user_name"  ], sizeof(config.mqtt_username   ));
-    GETS(config.mqtt_password,    root["mqtt_password"   ], sizeof(config.mqtt_password   ));
-    GETI(config.mqtt_port,        root["mqtt_port"       ]);
-    GETA(config.mqtt_fingerprint, root["mqtt_fingerprint"], 20);
+    GETI(_config.version,          _root["version"         ]);
+    GETS(_config.device_name,      _root["device_name"     ], sizeof(_config.device_name     ));
+    GETS(_config.wifi_ssid,        _root["ssid"            ], sizeof(_config.wifi_ssid       ));
+    GETS(_config.wifi_password,    _root["wifi_password"   ], sizeof(_config.wifi_password   ));
+    GETS(_config.mqtt_server,      _root["mqtt_server_name"], sizeof(_config.mqtt_server     ));
+    GETS(_config.mqtt_username,    _root["mqtt_user_name"  ], sizeof(_config.mqtt_username   ));
+    GETS(_config.mqtt_password,    _root["mqtt_password"   ], sizeof(_config.mqtt_password   ));
+    GETI(_config.mqtt_port,        _root["mqtt_port"       ]);
+    GETA(_config.mqtt_fingerprint, _root["mqtt_fingerprint"], 20);
 
     OK_DO;
   }
@@ -420,7 +420,7 @@ bool Maison::retrieve_config(JsonObject & root, Config & config)
   return result;
 }
 
-bool Maison::load_config(int version)
+bool Maison::load_config(int _version)
 {
   File file;
   char filename[32];
@@ -428,12 +428,12 @@ bool Maison::load_config(int version)
 
   SHOW("load_config()");
 
-  if (version == 0) {
+  if (_version == 0) {
     strcpy(filename, "/config.json");
   }
   else {
     strcpy(filename, "/config_");
-    strcat(filename, itoa(version, str, 10));
+    strcat(filename, itoa(_version, str, 10));
     strcat(filename, ".json");
   }
 
@@ -520,17 +520,17 @@ bool Maison::save_config()
   return result;
 }
 
-char * Maison::mac_to_str(uint8_t * mac, char * buff)
+char * Maison::mac_to_str(uint8_t * _mac, char * _buff)
 { 
   const char * hex = "0123456789ABCDEF";
-  char * ptr = buff;
+  char * ptr = _buff;
   for (int i = 0; i < 6; i++) {
-    *ptr++ = hex[mac[i] >> 4];
-    *ptr++ = hex[mac[i] & 0x0F];
+    *ptr++ = hex[_mac[i] >> 4];
+    *ptr++ = hex[_mac[i] & 0x0F];
   }
   *ptr = 0;
 
-  return buff; 
+  return _buff; 
 }
 
 bool Maison::update_device_name()
@@ -658,14 +658,14 @@ bool Maison::mqtt_connect()
   return result;
 }
 
-bool Maison::send_msg(const char * _topic, const char * format, ...)
+bool Maison::send_msg(const char * _topic, const char * _format, ...)
 {
   SHOW("send_msg()");
 
   va_list args;
-  va_start (args, format);
+  va_start (args, _format);
 
-  vsnprintf(buffer, 512, format, args);
+  vsnprintf(buffer, 512, _format, args);
   
   DO {
     DEBUG(F(" Sending msg to ")); 
@@ -689,15 +689,15 @@ bool Maison::send_msg(const char * _topic, const char * format, ...)
   return result;
 }
 
-void Maison::deep_sleep(bool back_with_wifi, uint16_t sleep_time_in_sec)
+void Maison::deep_sleep(bool _back_with_wifi, uint16_t _sleep_time_in_sec)
 {
   SHOW("deep_sleep()");
 
   DEBUG(" Sleep Duration: "); 
-  DEBUGLN(sleep_time_in_sec);
+  DEBUGLN(_sleep_time_in_sec);
   
   DEBUG(" Network enabled on return: ");
-  DEBUGLN(back_with_wifi ? F("YES") : F("NO"));
+  DEBUGLN(_back_with_wifi ? F("YES") : F("NO"));
 
   if (mqtt_connected()) {
     mqtt_client.disconnect();
@@ -706,19 +706,19 @@ void Maison::deep_sleep(bool back_with_wifi, uint16_t sleep_time_in_sec)
   
   delay(10);
   
-  mem.one_hour_step_count += millis() + (1000u * sleep_time_in_sec);
+  mem.one_hour_step_count += millis() + (1000u * _sleep_time_in_sec);
     
   save_mems();
 
   ESP.deepSleep(
-    1e6 * sleep_time_in_sec, 
-    back_with_wifi ? WAKE_RF_DEFAULT : WAKE_RF_DISABLED);  
+    1e6 * _sleep_time_in_sec, 
+    _back_with_wifi ? WAKE_RF_DEFAULT : WAKE_RF_DISABLED);  
 
   delay(1000);
   DEBUGLN(" HUM... Not suppose to come here after deep_sleep call...");
 }
 
-Maison::State Maison::check_if_24_hours_time(Maison::State default_state) 
+Maison::State Maison::check_if_24_hours_time(Maison::State _default_state) 
 {
   DEBUG("24 hours wait time check: ");
   DEBUG(mem.hours_24_count);
@@ -733,7 +733,7 @@ Maison::State Maison::check_if_24_hours_time(Maison::State default_state)
       return HOURS_24;
     }
   }
-  return default_state;
+  return _default_state;
 }
 
 // ---- RTC Memory Data Management ----
@@ -822,22 +822,22 @@ bool Maison::init_user_mem()
   return result;
 }
 
-bool Maison::read_mem(uint32_t * data, uint16_t length, uint16_t addr)
+bool Maison::read_mem(uint32_t * _data, uint16_t _length, uint16_t _addr)
 {
   SHOW("read_mem()");
 
-  DEBUG(F("  data addr: "));  DEBUGLN((int)data);
-  DEBUG(F("  length: "));     DEBUGLN(length);
-  DEBUG(F("  pos in rtc: ")); DEBUGLN(addr);
+  DEBUG(F("  data addr: "));  DEBUGLN((int)_data);
+  DEBUG(F("  length: "));     DEBUGLN(_length);
+  DEBUG(F("  pos in rtc: ")); DEBUGLN(_addr);
 
   DO {
-    if (!ESP.rtcUserMemoryRead((addr + 3) >> 2, (uint32_t *) data, length)) {
+    if (!ESP.rtcUserMemoryRead((_addr + 3) >> 2, (uint32_t *) _data, _length)) {
       ERROR("Unable to read from rtc memory");
     }
 
-    uint32_t csum = CRC32((uint8_t *)(&data[1]), length - 4);
+    uint32_t csum = CRC32((uint8_t *)(&_data[1]), _length - 4);
     
-    if (data[0] != csum) ERROR("Data in RTC memory with bad checksum!");
+    if (_data[0] != csum) ERROR("Data in RTC memory with bad checksum!");
 
     OK_DO;
   }
@@ -847,18 +847,18 @@ bool Maison::read_mem(uint32_t * data, uint16_t length, uint16_t addr)
   return result;
 }
 
-bool Maison::write_mem(uint32_t * data, uint16_t length, uint16_t addr)
+bool Maison::write_mem(uint32_t * _data, uint16_t _length, uint16_t _addr)
 {
   SHOW("write_mem()");
 
-  DEBUG(F("  data addr: "));  DEBUGLN((int)data);
-  DEBUG(F("  length: "));     DEBUGLN(length);
-  DEBUG(F("  pos in rtc: ")); DEBUGLN(addr);
+  DEBUG(F("  data addr: "));  DEBUGLN((int)_data);
+  DEBUG(F("  length: "));     DEBUGLN(_length);
+  DEBUG(F("  pos in rtc: ")); DEBUGLN(_addr);
 
-  data[0] = CRC32((uint8_t *)(&data[1]), length - 4);
+  _data[0] = CRC32((uint8_t *)(&_data[1]), _length - 4);
 
   DO {     
-    if (!ESP.rtcUserMemoryWrite((addr + 3) >> 2, (uint32_t *) data, length)) {
+    if (!ESP.rtcUserMemoryWrite((_addr + 3) >> 2, (uint32_t *) _data, _length)) {
       ERROR("Unable to write to rtc memory");
     }
 
@@ -870,17 +870,17 @@ bool Maison::write_mem(uint32_t * data, uint16_t length, uint16_t addr)
   return result;
 }
 
-uint32_t Maison::CRC32(const uint8_t * data, size_t length)
+uint32_t Maison::CRC32(const uint8_t * _data, size_t _length)
 {
   uint32_t crc = 0xffffffff;
 
   DEBUG(F("Computing CRC: data addr: "));
-  DEBUG((int)data);
+  DEBUG((int)_data);
   DEBUG(F(", length: "));
-  DEBUGLN(length);
+  DEBUGLN(_length);
 
-  while (length--) {
-    uint8_t c = *data++;
+  while (_length--) {
+    uint8_t c = *_data++;
     for (uint32_t i = 0x80; i > 0; i >>= 1) {
       bool bit = crc & 0x80000000;
       if (c & i) {
@@ -899,20 +899,21 @@ uint32_t Maison::CRC32(const uint8_t * data, size_t length)
   return crc;
 }
 
-char * Maison::my_topic(const char * topic, char * buffer, uint16_t buffer_length) 
+char * Maison::my_topic(const char * _topic_suffix, char * _buffer, uint16_t _length) 
 {
-  if (buffer_length > (strlen(MAISON_PREFIX_TOPIC) + strlen(config.device_name) + strlen(topic))) {
-    strcpy(buffer, MAISON_PREFIX_TOPIC);
-    strcat(buffer, config.device_name);
-    strcat(buffer, topic);
-    DEBUG(F("my_topic() result: ")); DEBUGLN(buffer);
+  if (_length > (strlen(MAISON_PREFIX_TOPIC) + strlen(config.device_name) + strlen(_topic_suffix) + 1)) {
+    strcpy(_buffer, MAISON_PREFIX_TOPIC);
+    strcat(_buffer, config.device_name);
+    strcat(_buffer, "/");
+    strcat(_buffer, _topic_suffix);
+    DEBUG(F("my_topic() result: ")); DEBUGLN(_buffer);
   }
   else {
     DEBUGLN(F("ERROR: my_topic(): Buffer too small!"));
-    buffer[0] = 0;
+    _buffer[0] = 0;
   }
 
-  return buffer;
+  return _buffer;
 }
 
 void Maison::restart() 
@@ -924,22 +925,22 @@ void Maison::restart()
 
 #if MAISON_TESTING
 
-  void Maison::show_config(Config & config)
+  void Maison::show_config(Config & _config)
   {
     DEBUGLN(F("\nConfiguration:\n-------------"));
 
-    DEBUG(F("Version          : ")); DEBUGLN(config.version         );
-    DEBUG(F("Device Name      : ")); DEBUGLN(config.device_name     );
-    DEBUG(F("WiFi SSID        : ")); DEBUGLN(config.wifi_ssid       );
-    DEBUG(F("WiFi Password    : ")); DEBUGLN(F("<Hidden>")          );
-    DEBUG(F("MQTT Server      : ")); DEBUGLN(config.mqtt_server     );
-    DEBUG(F("MQTT Username    : ")); DEBUGLN(config.mqtt_username   );
-    DEBUG(F("MQTT Password    : ")); DEBUGLN(F("<Hidden>")          );
-    DEBUG(F("MQTT Port        : ")); DEBUGLN(config.mqtt_port       );
+    DEBUG(F("Version          : ")); DEBUGLN(_config.version         );
+    DEBUG(F("Device Name      : ")); DEBUGLN(_config.device_name     );
+    DEBUG(F("WiFi SSID        : ")); DEBUGLN(_config.wifi_ssid       );
+    DEBUG(F("WiFi Password    : ")); DEBUGLN(F("<Hidden>")           );
+    DEBUG(F("MQTT Server      : ")); DEBUGLN(_config.mqtt_server     );
+    DEBUG(F("MQTT Username    : ")); DEBUGLN(_config.mqtt_username   );
+    DEBUG(F("MQTT Password    : ")); DEBUGLN(F("<Hidden>")           );
+    DEBUG(F("MQTT Port        : ")); DEBUGLN(_config.mqtt_port       );
 
     DEBUG(F("MQTT Fingerprint : [")); 
     for (int i = 0; i < 20; i++) { 
-      DEBUG(config.mqtt_fingerprint[i]); 
+      DEBUG(_config.mqtt_fingerprint[i]); 
       if (i < 19) DEBUG(F(",")); 
     }
     DEBUGLN(F("]"));

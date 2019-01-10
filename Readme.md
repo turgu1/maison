@@ -191,7 +191,7 @@ NOT_COMPLETED | The reverse of *COMPLETED*. Mainly used with *PROCESS_EVENT* in 
 ABORTED       | Return in the case of *PROCESS_EVENT* when the event vanished before processing, such that the finite state machine return to the *WAIT_FOR_EVENT* state instead of going to the *WAIT_END_EVENT* state.
 NEW_EVENT     | Returned when processing a *WAIT_FOR_EVENT* state to indicate that an event must be processed.
 
-Note: if the *DEEP_SLEEP* feature was enabled, the loop will almost never return as the processor will wait for further processing through a call to ESP.deep_sleep function. The processor, after the wait time, will restart the code from the beginning. In this context, the loop will return back to the application code only when it was not able to connect to the network if required by the current state of the finite state machine.
+Note: if the *DEEP_SLEEP* feature was enabled, the loop will almost never return as the processor will wait for further processing through a call to ESP.deep_sleep function. The processor, after the wait time, will restart the code from the beginning. 
 
 ## Configuration Parameters
 

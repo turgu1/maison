@@ -72,7 +72,7 @@
 // For example: maison/DEV_TEST/crtl
 
 #ifndef CTRL_SUFFIX_TOPIC
-  #define CTRL_SUFFIX_TOPIC   "/ctrl" ///< Suffix for device control topic
+  #define CTRL_SUFFIX_TOPIC   "ctrl" ///< Suffix for device control topic
 #endif
 
 #ifndef DEFAULT_SHORT_REBOOT_TIME
@@ -156,11 +156,17 @@ class Maison
 
     /// Application defined process function. To be supplied as a parameter 
     /// to the Maison::loop() function.
-    typedef UserResult Process(State state);
+    /// @param[in] _state The current state of the Finate State Machine.
+    /// @return The status of the user process execution.
+    typedef UserResult Process(State _state);
 
     /// Application defined MQTT message callback function. Will be called by the framework
     /// when receiving topics not managed by the framework itself.
-    typedef void Callback(const char * topic, byte * payload, unsigned int length);
+    ///
+    /// @param[in] _topic The topic related to the received payload
+    /// @param[in] _payload The message content. May not have a zero byte at the end...
+    /// @param[in] _length The payload size in bytes.
+    typedef void Callback(const char * _topic, byte * _payload, unsigned int _length);
 
     Maison();
     Maison(uint8_t _feature_mask);
@@ -168,65 +174,124 @@ class Maison
 
     /// The Maison setup function. Normally to be called inside the application setup() 
     /// function.
+    /// @return True if setup completed successfully. 
     bool setup();
 
     /// Send a MQTT message using printf like construction syntax.
-    bool send_msg(const char * _topic, const char * format, ...);
+    ///
+    /// @param[in] _topic The message topic
+    /// @param[in] _format The format string, as for printf
+    /// @param[in] ... The arguments required by the format string
+    /// @return True if the message was sent successfully
+    bool send_msg(const char * _topic, const char * _format, ...);
 
-    /// Returns the ESP8266 reason for reset.
+    /// Returns the ESP8266 reason for reset. The following table lists the ESP8266
+    /// potential reasons for reset:
+    ///
+    ///  value | description
+    ///  :----:|------------
+    ///     0  | Power Reboot
+    ///     1  | Hardware WDT Reset
+    ///     2  | Fatal Exception
+    ///     3  | Software Watchdog Reset
+    ///     4  | Software Reset
+    ///     5  | Deep Sleep Reset
+    ///     6  | Hardware Reset
+    ///
+    /// @return The raison of the reset as a number.
     int  reset_reason();
 
     /// Will restart the ESP8266
     void restart();
 
-    /// Initiates a ESP.deep_sleep() call.
-    void deep_sleep(bool back_with_wifi, uint16_t sleep_time_in_sec);
+    /// Initiates a ESP.deep_sleep() call. This function never suppose to return...
+    ///
+    /// @param[in] _back_with_wifi True if WiFi networking enabled on restart
+    /// @param[in] _sleep_time_in_sec The number of second to wait before restart
+    void deep_sleep(bool _back_with_wifi, uint16_t _sleep_time_in_sec);
 
     /// Enable a feature dynamically.
+    ///
+    /// @param[in] _feature The feature to be enabled.
     inline void  enable_feature(Feature _feature) { 
       feature_mask |= _feature;  
     }
     
     /// Disable a feature dynamically.
+    ///
+    /// @param[in] _feature The feature to be disabled.
     inline void disable_feature(Feature _feature) { 
       feature_mask &= ~_feature; 
     }
 
     /// Returns the battery voltage. Requires ADC_MODE(ADC_VCC); at the
     /// beginning of the application sketch.
+    ///
+    /// @return The battery voltage as read from the ESP8266 ESP.getVcc() call
     inline float battery_voltage() { 
       return (ESP.getVcc() * (1.0 / 1024.0)); 
     }    
     
-    /// True if a reset occured that is not comming from a deep sleep return.
+    /// Check if a reset is due to something else than Deep Sleep return.
+    ///
+    /// @return True if a reset occured that is not coming from a deep sleep return.
     inline bool is_hard_reset() { 
       return reset_reason() != REASON_DEEP_SLEEP_AWAKE; 
     }
 
     /// Set the deep_sleep period inside an application process function.
-    inline void set_deep_sleep_wait_time(uint16_t seconds) { 
-      deep_sleep_wait_time = (seconds > 4294) ? 4294 : seconds; 
+    ///
+    /// @param[in] _seconds The number of seconds to wait inside the next Deep Sleep call.
+    inline void set_deep_sleep_wait_time(uint16_t _seconds) { 
+      deep_sleep_wait_time = (_seconds > 4294) ? 4294 : _seconds; 
     }
 
-    /// True if networking is currently available. Always true if DEEP_SLEEP 
+    /// Checks if networking is currently available. Always true if DEEP_SLEEP 
     /// is not set in the features.
+    ///
+    /// @return True if the network is enabled.
     inline bool network_is_available() { 
       return (!use_deep_sleep()) || 
              ((mem.state & (STARTUP|PROCESS_EVENT|END_EVENT|HOURS_24)) != 0);
     }
 
-    /// Returns a complete topic name
-    char * my_topic(const char * topic, char * buffer, uint16_t buffer_length);
+    /// Returns a complete device related topic name, built using the default prefix and
+    /// the device_name. The string will contain a zero byte at the end. If the buffer is too
+    /// small, it will return a zero-length string.
+    ///
+    /// For example, a call with topic_suffix = "hello" will result to the following topic:
+    ///
+    ///   ```
+    ///   maison/device_name/hello
+    ///   ```
+    ///
+    /// @param[in] _topic_suffix The topic suffix portion to build the complete topic from.
+    /// @param[out] _buffer Where the topic name will be built.
+    /// @param[in] _length The size of the buffer.
+    /// @return pointer to the beginning of the buffer
+    char * my_topic(const char * _topic_suffix, char * _buffer, uint16_t _length);
 
     /// Compute a CRC-32 checksum
-    uint32_t CRC32(const uint8_t * data, size_t length);
+    ///
+    /// @param[in] _data The data vector to compute the checksum on.
+    /// @param[in] _length The size of the data vector.
+    /// @return The computed CRC-32 cheksum.
+    uint32_t CRC32(const uint8_t * _data, size_t _length);
 
-    /// Set the MQTT msg callback for the application
+    /// Set the MQTT msg callback for the user application.
+    ///
+    /// @param[in] _cb The Callback function address
+    /// @param[in] _topic The topic to subscribe to
+    /// @param[in] _qos The QOS for the subscription
     void set_msg_callback(Callback * _cb, const char * _topic, uint8_t _qos = 0);
 
     /// Function to be called by the application in the main loop to insure 
     /// proper actions by the framework.
-    void loop(Process * process = NULL);
+    ///
+    /// @param[in] _process The application processing function. This function will be 
+    ///                    called every time the Maison::loop function will be processing
+    ///                    the finite state machine (once every time the loop function is called).
+    void loop(Process * _process = NULL);
 
   private:
     // The configuration is read at setup time from file "/config.json" in the SPIFFS flash
@@ -276,8 +341,8 @@ class Maison
     bool wifi_connect();
     bool mqtt_connect();
 
-    friend void maison_callback(const char * topic, byte * payload, unsigned int length);
-    void process_callback(const char * topic, byte * payload, unsigned int length);
+    friend void maison_callback(const char * _topic, byte * _payload, unsigned int _length);
+    void process_callback(const char * _topic, byte * _payload, unsigned int _length);
 
     inline bool   wifi_connected() { return WiFi.status() == WL_CONNECTED;             }
     inline bool   mqtt_connected() { return mqtt_client.connected();                   }
@@ -292,33 +357,33 @@ class Maison
       return (mem.state & (PROCESS_EVENT|WAIT_END_EVENT|END_EVENT|HOURS_24)) != 0;
     }
 
-    inline UserResult call_user_process(Process * process) {
+    inline UserResult call_user_process(Process * _process) {
       if (process == NULL) {
         return COMPLETED;
       }
       else {
         DEBUGLN("Calling user process...");
-        return (*process)(mem.state);
+        return (*_process)(mem.state);
       }
     }
 
-    State check_if_24_hours_time(State default_state);
-    bool retrieve_config(JsonObject & root, Config & config);
-    bool load_config(int version = 0);
+    State check_if_24_hours_time(State _default_state);
+    bool retrieve_config(JsonObject & _root, Config & _config);
+    bool load_config(int _version = 0);
     bool save_config();
     #if MAISON_TESTING
-      void show_config(Config & config);
+      void show_config(Config & _config);
     #endif
 
-    char * mac_to_str(uint8_t * mac, char * buff);
+    char * mac_to_str(uint8_t * _mac, char * _buff);
     bool update_device_name();
 
     bool     load_mems();
     bool     save_mems();
     bool      init_mem();
     bool init_user_mem();
-    bool      read_mem(uint32_t * data, uint16_t length, uint16_t addr);
-    bool     write_mem(uint32_t * data, uint16_t length, uint16_t addr);
+    bool      read_mem(uint32_t * _data, uint16_t _length, uint16_t _addr);
+    bool     write_mem(uint32_t * _data, uint16_t _length, uint16_t _addr);
 };
 
 #endif

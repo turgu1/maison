@@ -123,10 +123,10 @@ Public Types</h2></td></tr>
 <a class="el" href="classMaison.html#af939aa6abb28e19cace161a1398e4995ae21a162a40bf1dc8d1218d3b69c16e51">NEW_EVENT</a>
  }</td></tr>
 <tr class="separator:af939aa6abb28e19cace161a1398e4995"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a33a370c89cd10dfbda4dc158655fd0d5"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classMaison.html#af939aa6abb28e19cace161a1398e4995">UserResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a33a370c89cd10dfbda4dc158655fd0d5">Process</a>(<a class="el" href="classMaison.html#a36a00785b7fadfcb17bfd25641cbfb45">State</a> state)</td></tr>
-<tr class="separator:a33a370c89cd10dfbda4dc158655fd0d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3ce8c8f2304554e71e2fa9f59f339c0a"><td class="memItemLeft" align="right" valign="top">typedef void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a3ce8c8f2304554e71e2fa9f59f339c0a">Callback</a>(const char *topic, byte *payload, unsigned int length)</td></tr>
-<tr class="separator:a3ce8c8f2304554e71e2fa9f59f339c0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2bd1f83b2706b8a2672d315634c0154"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classMaison.html#af939aa6abb28e19cace161a1398e4995">UserResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#af2bd1f83b2706b8a2672d315634c0154">Process</a>(<a class="el" href="classMaison.html#a36a00785b7fadfcb17bfd25641cbfb45">State</a> _state)</td></tr>
+<tr class="separator:af2bd1f83b2706b8a2672d315634c0154"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1602abfdefdb32c79b6caf49790a4503"><td class="memItemLeft" align="right" valign="top">typedef void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a1602abfdefdb32c79b6caf49790a4503">Callback</a>(const char *_topic, byte *_payload, unsigned int _length)</td></tr>
+<tr class="separator:a1602abfdefdb32c79b6caf49790a4503"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -138,89 +138,83 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:abe2911128eba68c95a9ecf66c400cfff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a82233f7ee65191feaecb9d2846278acc"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a82233f7ee65191feaecb9d2846278acc">setup</a> ()</td></tr>
 <tr class="separator:a82233f7ee65191feaecb9d2846278acc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a73182d6639eeaf6d9fd48252db8015a3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a73182d6639eeaf6d9fd48252db8015a3"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a73182d6639eeaf6d9fd48252db8015a3">send_msg</a> (const char *_topic, const char *format,...)</td></tr>
-<tr class="memdesc:a73182d6639eeaf6d9fd48252db8015a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a MQTT message using printf like construction syntax. <br /></td></tr>
-<tr class="separator:a73182d6639eeaf6d9fd48252db8015a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acda2e5b68e5cce2e8705d005f087ead7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acda2e5b68e5cce2e8705d005f087ead7"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#acda2e5b68e5cce2e8705d005f087ead7">reset_reason</a> ()</td></tr>
-<tr class="memdesc:acda2e5b68e5cce2e8705d005f087ead7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the ESP8266 reason for reset. <br /></td></tr>
+<tr class="memitem:a28fd8bac036c0c39ab208de51d24d36a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a28fd8bac036c0c39ab208de51d24d36a">send_msg</a> (const char *_topic, const char *_format,...)</td></tr>
+<tr class="separator:a28fd8bac036c0c39ab208de51d24d36a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acda2e5b68e5cce2e8705d005f087ead7"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#acda2e5b68e5cce2e8705d005f087ead7">reset_reason</a> ()</td></tr>
 <tr class="separator:acda2e5b68e5cce2e8705d005f087ead7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acf2f1aa6722ace5dd1d9d7b7092e7859"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acf2f1aa6722ace5dd1d9d7b7092e7859"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#acf2f1aa6722ace5dd1d9d7b7092e7859">restart</a> ()</td></tr>
 <tr class="memdesc:acf2f1aa6722ace5dd1d9d7b7092e7859"><td class="mdescLeft">&#160;</td><td class="mdescRight">Will restart the ESP8266. <br /></td></tr>
 <tr class="separator:acf2f1aa6722ace5dd1d9d7b7092e7859"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a815cd2df5858903abab541c7bf63318d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a815cd2df5858903abab541c7bf63318d"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a815cd2df5858903abab541c7bf63318d">deep_sleep</a> (bool back_with_wifi, uint16_t sleep_time_in_sec)</td></tr>
-<tr class="memdesc:a815cd2df5858903abab541c7bf63318d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initiates a ESP.deep_sleep() call. <br /></td></tr>
-<tr class="separator:a815cd2df5858903abab541c7bf63318d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a92070c8667b57f416370ea72fabaf54e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a92070c8667b57f416370ea72fabaf54e"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a92070c8667b57f416370ea72fabaf54e">enable_feature</a> (<a class="el" href="classMaison.html#a78d9ef41e0b19f1018697766cf7d47d7">Feature</a> _feature)</td></tr>
-<tr class="memdesc:a92070c8667b57f416370ea72fabaf54e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable a feature dynamically. <br /></td></tr>
+<tr class="memitem:a5d8da7ebd4d1d54f613a8c5bcead689e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a5d8da7ebd4d1d54f613a8c5bcead689e">deep_sleep</a> (bool _back_with_wifi, uint16_t _sleep_time_in_sec)</td></tr>
+<tr class="separator:a5d8da7ebd4d1d54f613a8c5bcead689e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92070c8667b57f416370ea72fabaf54e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a92070c8667b57f416370ea72fabaf54e">enable_feature</a> (<a class="el" href="classMaison.html#a78d9ef41e0b19f1018697766cf7d47d7">Feature</a> _feature)</td></tr>
 <tr class="separator:a92070c8667b57f416370ea72fabaf54e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a901a346952a38f34a627c6cffc0fed62"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a901a346952a38f34a627c6cffc0fed62"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a901a346952a38f34a627c6cffc0fed62">disable_feature</a> (<a class="el" href="classMaison.html#a78d9ef41e0b19f1018697766cf7d47d7">Feature</a> _feature)</td></tr>
-<tr class="memdesc:a901a346952a38f34a627c6cffc0fed62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disable a feature dynamically. <br /></td></tr>
+<tr class="memitem:a901a346952a38f34a627c6cffc0fed62"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a901a346952a38f34a627c6cffc0fed62">disable_feature</a> (<a class="el" href="classMaison.html#a78d9ef41e0b19f1018697766cf7d47d7">Feature</a> _feature)</td></tr>
 <tr class="separator:a901a346952a38f34a627c6cffc0fed62"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2825137a92b791325e0b2c1c54a3f474"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a2825137a92b791325e0b2c1c54a3f474">battery_voltage</a> ()</td></tr>
 <tr class="separator:a2825137a92b791325e0b2c1c54a3f474"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a23c10f853d29ee5a72ad282f7c40fda3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a23c10f853d29ee5a72ad282f7c40fda3"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a23c10f853d29ee5a72ad282f7c40fda3">is_hard_reset</a> ()</td></tr>
-<tr class="memdesc:a23c10f853d29ee5a72ad282f7c40fda3"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if a reset occured that is not comming from a deep sleep return. <br /></td></tr>
+<tr class="memitem:a23c10f853d29ee5a72ad282f7c40fda3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a23c10f853d29ee5a72ad282f7c40fda3">is_hard_reset</a> ()</td></tr>
 <tr class="separator:a23c10f853d29ee5a72ad282f7c40fda3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aba474000cfa02b5458c1bd103582fd35"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aba474000cfa02b5458c1bd103582fd35"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#aba474000cfa02b5458c1bd103582fd35">set_deep_sleep_wait_time</a> (uint16_t seconds)</td></tr>
-<tr class="memdesc:aba474000cfa02b5458c1bd103582fd35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the deep_sleep period inside an application process function. <br /></td></tr>
-<tr class="separator:aba474000cfa02b5458c1bd103582fd35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20db75bbcbdca7c2b07316c5115db0aa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a20db75bbcbdca7c2b07316c5115db0aa">set_deep_sleep_wait_time</a> (uint16_t _seconds)</td></tr>
+<tr class="separator:a20db75bbcbdca7c2b07316c5115db0aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a737fc95f3204808f969b025eb3a76d5c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a737fc95f3204808f969b025eb3a76d5c">network_is_available</a> ()</td></tr>
 <tr class="separator:a737fc95f3204808f969b025eb3a76d5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a089732adbd2a96f5f72a24131f5baf38"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a089732adbd2a96f5f72a24131f5baf38"></a>
-char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a089732adbd2a96f5f72a24131f5baf38">my_topic</a> (const char *topic, char *buffer, uint16_t buffer_length)</td></tr>
-<tr class="memdesc:a089732adbd2a96f5f72a24131f5baf38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a complete topic name. <br /></td></tr>
-<tr class="separator:a089732adbd2a96f5f72a24131f5baf38"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9d9fa4ab9744e5a45bd72cf3ac7e3d3f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9d9fa4ab9744e5a45bd72cf3ac7e3d3f"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a9d9fa4ab9744e5a45bd72cf3ac7e3d3f">CRC32</a> (const uint8_t *data, size_t length)</td></tr>
-<tr class="memdesc:a9d9fa4ab9744e5a45bd72cf3ac7e3d3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a CRC-32 checksum. <br /></td></tr>
-<tr class="separator:a9d9fa4ab9744e5a45bd72cf3ac7e3d3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6e8ec6ea4164f33001e4791d3d7adce7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6e8ec6ea4164f33001e4791d3d7adce7"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a6e8ec6ea4164f33001e4791d3d7adce7">set_msg_callback</a> (<a class="el" href="classMaison.html#a3ce8c8f2304554e71e2fa9f59f339c0a">Callback</a> *_cb, const char *_topic, uint8_t _qos=0)</td></tr>
-<tr class="memdesc:a6e8ec6ea4164f33001e4791d3d7adce7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the MQTT msg callback for the application. <br /></td></tr>
+<tr class="memitem:a65cde93be7582956e277e8642f07eda4"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a65cde93be7582956e277e8642f07eda4">my_topic</a> (const char *_topic_suffix, char *_buffer, uint16_t _length)</td></tr>
+<tr class="separator:a65cde93be7582956e277e8642f07eda4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af413280ce9313153225211813e89db84"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#af413280ce9313153225211813e89db84">CRC32</a> (const uint8_t *_data, size_t _length)</td></tr>
+<tr class="separator:af413280ce9313153225211813e89db84"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e8ec6ea4164f33001e4791d3d7adce7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a6e8ec6ea4164f33001e4791d3d7adce7">set_msg_callback</a> (<a class="el" href="classMaison.html#a1602abfdefdb32c79b6caf49790a4503">Callback</a> *_cb, const char *_topic, uint8_t _qos=0)</td></tr>
 <tr class="separator:a6e8ec6ea4164f33001e4791d3d7adce7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a754e43a71c6632cf44ccdfd1d9579fad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a754e43a71c6632cf44ccdfd1d9579fad">loop</a> (<a class="el" href="classMaison.html#a33a370c89cd10dfbda4dc158655fd0d5">Process</a> *process=NULL)</td></tr>
-<tr class="separator:a754e43a71c6632cf44ccdfd1d9579fad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a975d3487e9cc05a3f17ca2b22d8343eb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">loop</a> (<a class="el" href="classMaison.html#af2bd1f83b2706b8a2672d315634c0154">Process</a> *_process=NULL)</td></tr>
+<tr class="separator:a975d3487e9cc05a3f17ca2b22d8343eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="friends"></a>
 Friends</h2></td></tr>
-<tr class="memitem:a79886cbea4680891aebfc5b1fd2e68f1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a79886cbea4680891aebfc5b1fd2e68f1"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>maison_callback</b> (const char *topic, byte *payload, unsigned int length)</td></tr>
-<tr class="separator:a79886cbea4680891aebfc5b1fd2e68f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6cc499cc2cea90dfdeeafd3fec243bb0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6cc499cc2cea90dfdeeafd3fec243bb0"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>maison_callback</b> (const char *_topic, byte *_payload, unsigned int _length)</td></tr>
+<tr class="separator:a6cc499cc2cea90dfdeeafd3fec243bb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> Framework Class. </p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
-<a class="anchor" id="a3ce8c8f2304554e71e2fa9f59f339c0a"></a>
+<a class="anchor" id="a1602abfdefdb32c79b6caf49790a4503"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef void Maison::Callback(const char *topic, byte *payload, unsigned int length)</td>
+          <td class="memname">typedef void Maison::Callback(const char *_topic, byte *_payload, unsigned int _length)</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Application defined MQTT message callback function. Will be called by the framework when receiving topics not managed by the framework itself. </p>
+<p>Application defined MQTT message callback function. Will be called by the framework when receiving topics not managed by the framework itself.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">_topic</td><td>The topic related to the received payload </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">_payload</td><td>The message content. May not have a zero byte at the end... </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">_length</td><td>The payload size in bytes. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
-<a class="anchor" id="a33a370c89cd10dfbda4dc158655fd0d5"></a>
+<a class="anchor" id="af2bd1f83b2706b8a2672d315634c0154"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef <a class="el" href="classMaison.html#af939aa6abb28e19cace161a1398e4995">UserResult</a> Maison::Process(<a class="el" href="classMaison.html#a36a00785b7fadfcb17bfd25641cbfb45">State</a> state)</td>
+          <td class="memname">typedef <a class="el" href="classMaison.html#af939aa6abb28e19cace161a1398e4995">UserResult</a> Maison::Process(<a class="el" href="classMaison.html#a36a00785b7fadfcb17bfd25641cbfb45">State</a> _state)</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Application defined process function. To be supplied as a parameter to the <a class="el" href="classMaison.html#a754e43a71c6632cf44ccdfd1d9579fad">Maison::loop()</a> function. </p>
+<p>Application defined process function. To be supplied as a parameter to the <a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">Maison::loop()</a> function. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">_state</td><td>The current state of the Finate State Machine. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The status of the user process execution. </dd></dl>
 
 </div>
 </div>
@@ -337,24 +331,230 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>maison_callback</b> (
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns the battery voltage. Requires ADC_MODE(ADC_VCC); at the beginning of the application sketch. </p>
+<p>Returns the battery voltage. Requires ADC_MODE(ADC_VCC); at the beginning of the application sketch.</p>
+<dl class="section return"><dt>Returns</dt><dd>The battery voltage as read from the ESP8266 ESP.getVcc() call </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="a754e43a71c6632cf44ccdfd1d9579fad"></a>
+<a class="anchor" id="af413280ce9313153225211813e89db84"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t Maison::CRC32 </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>_length</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Compute a CRC-32 checksum</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">_data</td><td>The data vector to compute the checksum on. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">_length</td><td>The size of the data vector. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The computed CRC-32 cheksum. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a5d8da7ebd4d1d54f613a8c5bcead689e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Maison::deep_sleep </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>_back_with_wifi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>_sleep_time_in_sec</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Initiates a ESP.deep_sleep() call. This function never suppose to return...</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">_back_with_wifi</td><td>True if WiFi networking enabled on restart </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">_sleep_time_in_sec</td><td>The number of second to wait before restart </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a901a346952a38f34a627c6cffc0fed62"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Maison::disable_feature </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classMaison.html#a78d9ef41e0b19f1018697766cf7d47d7">Feature</a>&#160;</td>
+          <td class="paramname"><em>_feature</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Disable a feature dynamically.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">_feature</td><td>The feature to be disabled. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a92070c8667b57f416370ea72fabaf54e"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Maison::enable_feature </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classMaison.html#a78d9ef41e0b19f1018697766cf7d47d7">Feature</a>&#160;</td>
+          <td class="paramname"><em>_feature</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Enable a feature dynamically.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">_feature</td><td>The feature to be enabled. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a23c10f853d29ee5a72ad282f7c40fda3"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Maison::is_hard_reset </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Check if a reset is due to something else than Deep Sleep return.</p>
+<dl class="section return"><dt>Returns</dt><dd>True if a reset occured that is not coming from a deep sleep return. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a975d3487e9cc05a3f17ca2b22d8343eb"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">void Maison::loop </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classMaison.html#a33a370c89cd10dfbda4dc158655fd0d5">Process</a> *&#160;</td>
-          <td class="paramname"><em>process</em> = <code>NULL</code></td><td>)</td>
+          <td class="paramtype"><a class="el" href="classMaison.html#af2bd1f83b2706b8a2672d315634c0154">Process</a> *&#160;</td>
+          <td class="paramname"><em>_process</em> = <code>NULL</code></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Function to be called by the application in the main loop to insure proper actions by the framework. </p>
+<p>Function to be called by the application in the main loop to insure proper actions by the framework.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">_process</td><td>The application processing function. This function will be called every time the <a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">Maison::loop</a> function will be processing the finite state machine (once every time the loop function is called). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a65cde93be7582956e277e8642f07eda4"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* Maison::my_topic </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>_topic_suffix</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>_buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>_length</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Returns a complete device related topic name, built using the default prefix and the device_name. The string will contain a zero byte at the end. If the buffer is too small, it will return a zero-length string.</p>
+<p>For example, a call with topic_suffix = "hello" will result to the following topic:</p>
+<div class="fragment"><div class="line">maison/device_name/hello</div></div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">_topic_suffix</td><td>The topic suffix portion to build the complete topic from. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">_buffer</td><td>Where the topic name will be built. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">_length</td><td>The size of the buffer. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>pointer to the beginning of the buffer </dd></dl>
 
 </div>
 </div>
@@ -378,7 +578,157 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>maison_callback</b> (
   </tr>
 </table>
 </div><div class="memdoc">
-<p>True if networking is currently available. Always true if DEEP_SLEEP is not set in the features. </p>
+<p>Checks if networking is currently available. Always true if DEEP_SLEEP is not set in the features.</p>
+<dl class="section return"><dt>Returns</dt><dd>True if the network is enabled. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="acda2e5b68e5cce2e8705d005f087ead7"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Maison::reset_reason </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Returns the ESP8266 reason for reset. The following table lists the ESP8266 potential reasons for reset:</p>
+<table class="doxtable">
+<tr>
+<th align="center">value </th><th>description  </th></tr>
+<tr>
+<td align="center">0 </td><td>Power Reboot </td></tr>
+<tr>
+<td align="center">1 </td><td>Hardware WDT Reset </td></tr>
+<tr>
+<td align="center">2 </td><td>Fatal Exception </td></tr>
+<tr>
+<td align="center">3 </td><td>Software Watchdog Reset </td></tr>
+<tr>
+<td align="center">4 </td><td>Software Reset </td></tr>
+<tr>
+<td align="center">5 </td><td>Deep Sleep Reset </td></tr>
+<tr>
+<td align="center">6 </td><td>Hardware Reset </td></tr>
+</table>
+<dl class="section return"><dt>Returns</dt><dd>The raison of the reset as a number. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a28fd8bac036c0c39ab208de51d24d36a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Maison::send_msg </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>_topic</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>_format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Send a MQTT message using printf like construction syntax.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">_topic</td><td>The message topic </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">_format</td><td>The format string, as for printf </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">...</td><td>The arguments required by the format string </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if the message was sent successfully </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a20db75bbcbdca7c2b07316c5115db0aa"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Maison::set_deep_sleep_wait_time </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>_seconds</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Set the deep_sleep period inside an application process function.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">_seconds</td><td>The number of seconds to wait inside the next Deep Sleep call. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a6e8ec6ea4164f33001e4791d3d7adce7"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Maison::set_msg_callback </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classMaison.html#a1602abfdefdb32c79b6caf49790a4503">Callback</a> *&#160;</td>
+          <td class="paramname"><em>_cb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>_topic</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>_qos</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set the MQTT msg callback for the user application.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">_cb</td><td>The Callback function address </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">_topic</td><td>The topic to subscribe to </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">_qos</td><td>The QOS for the subscription </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -394,7 +744,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>maison_callback</b> (
         </tr>
       </table>
 </div><div class="memdoc">
-<p>The <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> setup function. Normally to be called inside the application <a class="el" href="classMaison.html#a82233f7ee65191feaecb9d2846278acc">setup()</a> function. </p>
+<p>The <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> setup function. Normally to be called inside the application <a class="el" href="classMaison.html#a82233f7ee65191feaecb9d2846278acc">setup()</a> function. </p><dl class="section return"><dt>Returns</dt><dd>True if setup completed successfully. </dd></dl>
 
 </div>
 </div>
