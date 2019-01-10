@@ -62,7 +62,7 @@ platform = espressif8266
 The Maison framework allow for some defined options to be modified through -D compilation parameters (PlatformIO: build_flags). The following are the compilation options available to change some library behavior:
 
 Option              | Default   | Description
---------------------|:---------:|------------------------------------------------------------------------
+:------------------:|:---------:|------------------------------------------------------------------------
 MAISON_TESTING      |    0      | If = 1, enable debuging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any Maison function.
 QUICK_TURN          |    0      | If = 1, WATCHDOG messages are sent every 2 minutes instead of 24 hours. This is automatically the case when *MAISON_TESTING* is set to 1.
 MAISON_PREFIX_TOPIC | maison/   | All topics used by the framework are prefixed with this text   
@@ -162,7 +162,7 @@ The `Maison maison(...)` declaration create an instance of the framework. This d
 The following table show the current features supported through the feature mask (They are part of the Maison::Feature enum definition):
 
 Feature Name  | Description
---------------|------------------
+:------------:|------------------
 NONE          | No feature selected.
 VOLTAGE_CHECK | Chip A2D voltage readout will be sent on status/watchdog messages.
 DEEP_SLEEP    | deep_sleep will be used by the framework to limit power usage (e.g. on batteries). RESET/RST and WAKE/GPIO16 pins need to be wired together.
@@ -185,7 +185,7 @@ The user application memory structure **shall** have a `uint32_t` item as the fi
 The Maison::loop function must be called regularly in your main loop function to permit the execution of the finite state machine and receiving new MQTT messages. As a parameter the Maison::loop function accepts a processing function that will be called by Maison inside the finite state machine. The function will receive the current state value as a parameter. It must return a status value from the following list:
 
 Value         | Description
---------------|----------------
+:------------:|----------------
 COMPLETED     |  Returned when the processing for the current state is considered completed. This is used mainly for all states.           
 NOT_COMPLETED | The reverse of *COMPLETED*. Mainly used with *PROCESS_EVENT* in the case that it must be fired again to complete the processing
 ABORTED       | Return in the case of *PROCESS_EVENT* when the event vanished before processing, such that the finite state machine return to the *WAIT_FOR_EVENT* state instead of going to the *WAIT_END_EVENT* state.
@@ -214,7 +214,7 @@ The Maison framework is automating access to the MQTT message broker through the
 All parameters must be present in the file to be considered valid by the framework. Here is a description of each parameter:
 
 Parameter | Description
-----------|------------------------------
+:--------:|------------------------------
 version | This is the sequential version number. This is the property of the Server responsible of transmitting new configuration files to the device. It must be incremented every time a new config file is sent to the device. The device will not update its configuration if the version number is not greather than the current one. 
 device_name | A unique identifier for the device. This identifier is used inside messages sent through MQTT. It is also used to generate the topics related to the device. It can be an empty string: the MAC address of the device WiFi interface will then be used as the identifier. Use letters, underscore, numbers to compose the identifier (no space or other special characters).
 ssid / wifi_password | The WiFi SSID and password. Required to reach the network.
@@ -239,7 +239,7 @@ Here is a description of each message sent, namely:
 This message is sent to the MQTT topic **maison/status** when the device is reset (Usually because of a Power-On action or a reset button being pressed). It is not sent when a DeepSleep wake-up action is taken by the device.
 
 Parameter | Description
-----------|------------------
+:--------:|------------------
 device    | The device name as stated in the configuration parameters. If the configuration parameter is empty, the MAC address of the device WiFi interface is used.
 msg_type  | This content the string "STARTUP".
 reason    | The reason for startup (hardware reset type).
@@ -262,7 +262,7 @@ value | description
 This message is sent to the MQTT topic **maison/status** when a message sent to the device ctrl topic (e.g. **maison/device_name/ctrl**) containing the string "STATE?" is received.
 
 Parameter | Description
-----------|------------------
+:--------:|------------------
 device    | The device name as stated in the configuration parameters. If the configuration parameter is empty, the MAC address of the device WiFi interface is used.
 msg_type  | This content the string "STATE".
 state     | The current state of the finite state machine, as a number. Look into the [Finite State Machine](#the-finite-state-machine) section for details.
@@ -277,7 +277,7 @@ VBAT      | This is the Battery voltage. This parameter is optional. Its presenc
 This message is sent to the MQTT topic **maison/status** every 24 hours. Its transmission depends on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
 
 Parameter | Description
-----------|------------------
+:--------:|------------------
 device    | The device name as stated in the configuration parameters. If the configuration parameter is empty, the MAC address of the device WiFi interface is used.
 msg_type  | This content the string "WATCHDOG".
 VBAT      | This is the Battery voltage. This parameter is optional. Its presence depend on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
@@ -287,7 +287,7 @@ VBAT      | This is the Battery voltage. This parameter is optional. Its presenc
 This message is sent to the MQTT topic **maison/status** when a message sent to the device ctrl topic (e.g. **maison/device_name/ctrl**) containing the string "CONFIG?" is received.
 
 Parameter | Description
-----------|------------------
+:--------:|------------------
 device    | The device name as stated in the configuration parameters. If the configuration parameter is empty, the MAC address of the device WiFi interface is used.
 msg_type  | This content the string "CONFIG".
 content   | This is the configuration of the device in a JSON format. See the [Configuration Parameters](#configuration-parameters) section for the format details.
@@ -299,7 +299,7 @@ The finite state machine is processed inside the `Maison::loop()` function.
 When using the *DEEP_SLEEP* [feature](#feature-mask), networking is disabled for some of the states to minimize battery usage. If the *DEEP_SLEEP* feature is not used, networking is available all the time. The `Maison::network_is_available()` function can be used to check network availability.
 
 State          | Value | Network | Description
----------------|:-----:|:-------:|-------------
+:-------------:|:-----:|:-------:|-------------
 STARTUP        |   1   |   YES   | The device has just been reset
 WAIT_FOR_EVENT |   2   |   NO    | This is the state waiting for an event to occur. The event is application specific.
 PROCESS_EVENT  |   4   |   YES   | An event is being processed by the application. This will usually send a message to the MQTT broker.
