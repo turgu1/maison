@@ -75,6 +75,10 @@
   #define CTRL_SUFFIX_TOPIC   "/ctrl"
 #endif
 
+#ifndef DEFAULT_SHORT_REBOOT_TIME
+  #define DEFAULT_SHORT_REBOOT_TIME 5
+#endif
+
 // ----- END OPTIONS -----
 
 #if MAISON_TESTING
@@ -137,7 +141,7 @@ class Maison
       HOURS_24       = 32
     };
 
-    // The ProcessResult is returned by the user process function to indicate
+    // The UserResult is returned by the user process function to indicate
     // how to proceed with the finite state machine transformation:
     //
     // COMPLETED: Returned when the processing for the current state is
@@ -169,11 +173,25 @@ class Maison
 
     void deep_sleep(bool back_with_wifi, int sleep_time_in_sec);
 
-    inline void  enable_feature(Feature _feature) { feature_mask |= _feature;  }
-    inline void disable_feature(Feature _feature) { feature_mask &= ~_feature; }
+    inline void  enable_feature(Feature _feature) { 
+      feature_mask |= _feature;  
+    }
+    
+    inline void disable_feature(Feature _feature) { 
+      feature_mask &= ~_feature; 
+    }
 
-    inline float battery_voltage() { return (ESP.getVcc() * (1.0 / 1024.0)); }    
-    inline bool    is_hard_reset() { return reset_reason() != REASON_DEEP_SLEEP_AWAKE; }
+    inline float battery_voltage() { 
+      return (ESP.getVcc() * (1.0 / 1024.0)); 
+    }    
+    
+    inline bool    is_hard_reset() { 
+      return reset_reason() != REASON_DEEP_SLEEP_AWAKE; 
+    }
+
+    inline void set_deep_sleep_wait_time(int seconds) { 
+      deep_sleep_wait_time = (seconds > 4294) ? 4294 : seconds; 
+    }
 
     inline bool network_is_available() { 
       return (!use_deep_sleep()) || 
@@ -182,7 +200,8 @@ class Maison
 
     char * my_topic(const char * topic, char * buffer, uint16_t buffer_length);
     uint32_t CRC32(const uint8_t * data, size_t length);
-    bool setUserCallback(Callback * _cb, const char * _topic, uint8_t _qos = 0);
+    bool set_msg_callback(Callback * _cb, const char * _topic, uint8_t _qos = 0);
+    
     void loop(Process * process = NULL);
 
   private:
@@ -226,6 +245,7 @@ class Maison
     uint8_t      user_mem_length;
     long         last_time_count;
     bool         counting_lost_connection;
+    int          deep_sleep_wait_time;
 
     char         buffer[MQTT_MAX_PACKET_SIZE];
 
@@ -245,7 +265,7 @@ class Maison
     inline bool watchdog_enabled() { return (feature_mask & WATCHDOG_24H ) != 0;       }
 
     inline bool is_short_reboot_time_needed() { 
-      return (mem.state & (PROCESS_EVENT|WAIT_END_EVENT|END_EVENT)) != 0;
+      return (mem.state & (PROCESS_EVENT|WAIT_END_EVENT|END_EVENT|HOURS_24)) != 0;
     }
 
     inline UserResult call_user_process(Process * process) {

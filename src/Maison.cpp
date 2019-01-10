@@ -196,35 +196,11 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
   }
 }
 
-bool Maison::setUserCallback(Callback * _cb, const char * _topic, uint8_t _qos)
+void Maison::set_msg_callback(Callback * _cb, const char * _topic, uint8_t _qos)
 {
   user_cb    = _cb;
   user_topic = _topic;
   user_qos   = _qos;
-
-  bool result = false;
-
-  SHOW("setUserCallback()");
-
-  if (mqtt_client.connected()) {
-    if (!mqtt_client.subscribe(user_topic, user_qos)) {
-      DEBUG(F("Hum... unable to subscribe to user topic (State:"));
-      DEBUG(mqtt_client.state());
-      DEBUG("): ");
-    }
-    else {
-      DEBUG(F("Subscription completed to user topic "));
-      result = true;
-    }
-    DEBUGLN(user_topic);            
-  }
-  else {
-    result = true;
-  }
-
-  SHOW_RESULT("setUserCallback()");
-
-  return result;
 }
 
 void Maison::loop(Process * process) 
@@ -277,6 +253,9 @@ void Maison::loop(Process * process)
 
   new_state     = mem.state;
   new_sub_state = mem.sub_state;
+
+  set_deep_sleep_wait_time(
+    is_short_reboot_time_needed() ? DEFAULT_SHORT_REBOOT_TIME : ONE_HOUR);
 
   UserResult res = call_user_process(process);
 
@@ -377,8 +356,7 @@ void Maison::loop(Process * process)
   DEBUG(" Next state: "); DEBUGLN(mem.state);
 
   if (use_deep_sleep()) {
-    deep_sleep(network_is_available(), 
-               is_short_reboot_time_needed() ? 5 : ONE_HOUR);
+    deep_sleep(network_is_available(), deep_sleep_wait_time);
   }
   else {
     mem.one_hour_step_count += millis() - last_time_count;

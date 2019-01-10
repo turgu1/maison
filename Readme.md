@@ -69,6 +69,7 @@ MAISON_PREFIX_TOPIC | maison/   | All topics used by the framework are prefixed 
 MAISON_STATUS_TOPIC | maison/status | Topic where the framework status are sent
 MAISON_CTRL_TOPIC   | maison/ctrl   | Topic where the framework event controls are sent
 CTRL_SUFFIX_TOPIC   | /ctrl         | This is the topic suffix used to identify device-related control topic
+DEFAULT_SHORT_REBOOT_TIME |  5  | This is the default reboot time in seconds when deep sleep is enable. This is used at the end of the following states: *PROCESS_EVENT*, *WAIT_END_EVENT*, *END_EVENT*. For the other states, the wait time is 60 minutes (3600 seconds).
 
 Note that for *MAISON_STATUS_TOPIC* and *MAISON_CTRL_TOPIC*, they will be modifified automatically if *MAISON_PREFIX_TOPIC* is changed. For example, if you change *MAISON_PREFIX_TOPIC* to be `home/`, *MAISON_STATUS_TOPIC* will become `home/status` and *MAISON_CTRL_TOPIC* will become `maison/ctrl`.
 
@@ -99,6 +100,8 @@ This piece of code won't do much at the user application level, but it will set 
 Here is a more complete example of code to be used to initialize the framework with optional features and integrate it in the loop() function. It shows both option parameters, calls to the framework with message callback and finite state machine functions:
 
 ```C++
+ADC_MODE(ADC_VCC);
+
 #include <Maison.h>
 
 struct user_data {
@@ -111,9 +114,9 @@ Maison maison(Maison::Feature::WATCHDOG_24H|
               Maison::Feature::VOLTAGE_CHECK,
               &my_state, sizeof(my_state));
 
-void mqtt_msg_callback(const char  * topic,
-                       byte        * payload,
-                       unsigned int  length)
+void msg_callback(const char  * topic,
+                  byte        * payload,
+                  unsigned int  length)
 {
 
 }
@@ -130,7 +133,7 @@ Maison::UserResult process_state(Maison::State state)
 void setup()
 {
   maison.setup();
-  maison.setUserCallback("my_topic", mqtt_msg_callback, 0);
+  maison.set_msg_callback("my_topic", msg_callback, 0);
 }
 
 void loop()
@@ -139,13 +142,13 @@ void loop()
 }
 ```
 
-The use of `process_state` and `mqtt_msg_callback` is optional.
+The use of `process_state` and `set_msg_callback` is optional.
 
 In the following sections, we describe the specific aspects of this code example.
 
 ### Include File
 
-The `#include <Maison.h>` integrates the Maison header into the user application. This will import the Maison class declaration and a bunch of definitions that are documentated below. All required libraries needed by the framework are also imported by this call.
+The `#include <Maison.h>` integrates the Maison header into the user application. This will import the Maison class declaration and a bunch of definitions that are documentated below. All required libraries needed by the framework are also included by this call.
 
 ### Maison Declaration
 
@@ -166,6 +169,12 @@ DEEP_SLEEP    | deep_sleep will be used by the framework to limit power usage (e
 WATCHDOG_24H  | A Watchdog message will be sent every 24 hours.
 
 To use them, you have to prefix them with `Maison::` or `Maison::Feature::` as shown in the code example.
+
+Note: if the *VOLTAGE_CHECK* feature is selected, the following line is required to be put at the beginning of the main application sketch:
+
+```C++
+ADC_MODE(ADC_VCC);
+```
 
 #### User Application Memory Structure
 
@@ -284,3 +293,15 @@ PROCESS_EVENT  |   4   |   YES   | An event is being processed by the applicatio
 WAIT_END_EVENT |   8   |   NO    | The device is waiting for the end of the event to occur.
 END_EVENT      |  16   |   YES   | The end of an event has been detected. It's time to do an event rundown. This will usually send a message to the MQTT broker.
 HOURS_24       |  32   |   YES   | This event occurs every 24 hours. It permits the transmission of a Watchdog message if enabled with the  *WATCHDOG_24H* feature. The state is required to have at least one state per day for which the network interface is energized to allow for the reception of config/control messages.
+
+## Usage on battery power
+
+The Maison framework can be tailored to use Deep Sleep when on battery power, throught the *DEEP_SLEEP* [feature](#feature-mask). 
+
+In this context, the finite state machine will cause a call to the `ESP.deep_sleep()` function at the end of each of its processing cycle (function `Maison::loop()`) to put the processor in a dormant state. The deep sleep duration, by default, is set to 5 seconds before entry to the states *PROCESS_EVENT*, *WAIT_END_EVENT*, *END_EVENT* and *HOURS_24*; it is 3600 seconds for *WAIT_FOR_EVENT*.
+
+It is expected that a hardware interrupt will wake up the device to signifiate the arrival of a new event. If it's not the case, it will be then required to modulate the amount of time to wait for the next *WAIT_FOR_EVENT* state to occurs. This must be used with caution as it will have an impact on the battery capacity.
+
+The application process can change the amount of seconds for the next deep sleep period using the `Maison::set_deep_sleep_wait_time()` function. This can be called inside the application `process_state()` function before returning control to the framework. 
+
+The ESP8266 does not allow for a sleep period longer than 4294967295 microseconds, that corresponds to around 4294 seconds or 71 minutes.
