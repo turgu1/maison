@@ -1,8 +1,8 @@
 # Maison - Secure ESP8266 IOT MQTT based Framework
 
-Note: This is still work in progress. This code is working on an ESP8266 and under heavy development. The documentation is also a work in progress... ESP32 support soon to be added.
+Note: This is still work in progress. This code is working on an ESP8266 and under heavy development. The documentation is also a work in progress...
 
-This library implement a small, secure, IOT Framework for embedded ESP8266 / (soon to be added) ESP32 devices to serve into a Home IOT environment. It diminishes the amount of code to be put in the targeted app source code. The app interacts with the framework through a finite state machine algorithm allowing for specific usage at every stage.
+This library implement a small, secure, IOT Framework for embedded ESP8266 devices to serve into a Home IOT environment. It diminishes the amount of code to be put in the targeted app source code. The app interacts with the framework through a finite state machine algorithm allowing for specific usage at every stage.
 
 Here are the main characteristics:
 
