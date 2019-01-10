@@ -358,7 +358,7 @@ class Maison
     }
 
     inline UserResult call_user_process(Process * _process) {
-      if (process == NULL) {
+      if (_process == NULL) {
         return COMPLETED;
       }
       else {
