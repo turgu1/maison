@@ -242,7 +242,20 @@ Parameter | Description
 ----------|------------------
 device    | The device name as stated in the configuration parameters. If the configuration parameter is empty, the MAC address of the device WiFi interface is used.
 msg_type  | This content the string "STARTUP".
+reason    | The reason for startup (hardware reset type).
 VBAT      | This is the Battery voltage. This parameter is optional. Its presence depend on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
+
+The harware reset reason come from the ESP8266 reset information:
+
+    value | description
+    :----:|------------
+       0  | Power Reboot
+       1  | Hardware WDT Reset
+       2  | Fatal Exception
+       3  | Software Watchdog Reset
+       4  | Software Reset
+       5  | Deep Sleep Reset
+       6  | Hardware Reset
 
 ### The Status message
 

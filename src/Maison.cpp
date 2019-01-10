@@ -273,9 +273,15 @@ void Maison::loop(Process * _process)
       }
 
       if (!send_msg(MAISON_STATUS_TOPIC, 
-                    "{\"device\":\"%s\",\"msg_type\":\"%s\"%s}", 
+                    "{"
+                    "\"device\":\"%s\","
+                    "\"msg_type\":\"%s\","
+                    "\"reason\":%d"
+                    "%s"
+                    "}", 
                     config.device_name, 
-                    "STARTUP", 
+                    "STARTUP",
+                    reset_reason(),
                     vbat)) {
         ERROR("Unable to send startup message");
       }
