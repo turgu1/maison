@@ -194,7 +194,7 @@ The Maison framework is automating access to the MQTT message broker through the
   "device_name" : "WATER_SPILL",
   "ssid" : "the wifi ssid",
   "wifi_password" : "the wifi password",
-  "mqtt_server_name" : "server_name",
+  "mqtt_server_name" : "the server name or IP address",
   "mqtt_user_name" : "the user name",
   "mqtt_password" : "password",
   "mqtt_port" : 8883,
@@ -209,7 +209,7 @@ Parameter | Description
 version | This is the sequential version number. This is the property of the Server responsible of transmitting new configuration files to the device. It must be incremented every time a new config file is sent to the device. The device will not update its configuration if the version number is not greather than the current one. 
 device_name | A unique identifier for the device. This identifier is used inside messages sent through MQTT. It is also used to generate the topics related to the device. It can be an empty string: the MAC address of the device WiFi interface will then be used as the identifier. Use letters, underscore, numbers to compose the identifier (no space or other special characters).
 ssid / wifi_password | The WiFi SSID and password. Required to reach the network.
-mqtt_server_name | This is the MQTT server address (SQDN)
+mqtt_server_name | This is the MQTT server name (SQDN) or IP address.
 mqtt_user_name / mqtt_password | These are the credentials to connect to the MQTT server.
 mqtt_port | The TLS/SSL port number of the MQTT server.
 mqtt_fingerprint | This is the fingerprint associated with the MQTT service certificate. It must be a vector of 20 decimal values. Each value correspond to a byte part of the fingerprint. This is used to validate the MQTT server by the BearSSL library.
@@ -243,7 +243,20 @@ Parameter | Description
 device    | The device name as stated in the configuration parameters. If the configuration parameter is empty, the MAC address of the device WiFi interface is used.
 msg_type  | This content the string "STATE".
 state     | The current state of the finite state machine, as a number. Look into the [Finite State Machine](#the-finite-state-machine) section for details.
+hours     | Hours counter. Used to compute the next 24 hours period.
+millis    | Milliseconds in the last hour.
+lost      | Counter of the number of time the connection to the MQTT broker has been lost.
+heap      | The current value of the free heap space available on the device
+VBAT      | This is the Battery voltage. This parameter is optional. Its presence depends on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
 
+### The Watchdog Message
+
+This message is sent to the MQTT topic **maison/status** every 24 hours. Its transmission depends on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
+
+Parameter | Description
+----------|------------------
+device    | The device name as stated in the configuration parameters. If the configuration parameter is empty, the MAC address of the device WiFi interface is used.
+msg_type  | This content the string "WATCHDOG".
 VBAT      | This is the Battery voltage. This parameter is optional. Its presence depend on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
 
 
@@ -256,4 +269,4 @@ WAIT_FOR_EVENT |   2   |   NO    | This is the state waiting for an event to occ
 PROCESS_EVENT  |   4   |   YES   | An event is being processed by the application. This will usually send a message to the MQTT broker.
 WAIT_END_EVENT |   8   |   NO    | The device is waiting for the end of the event to occur.
 END_EVENT      |  16   |   YES   | The end of an event has been detected. It's time to do an event rundown. This will usually send a message to the MQTT broker.
-HOURS_24       |  32   |   YES   | This event occurs every ~24 hours. It permits the transmission of a Watchdog message if enabled with the  *WATCHDOG_24H* feature.
+HOURS_24       |  32   |   YES   | This event occurs every 24 hours. It permits the transmission of a Watchdog message if enabled with the  *WATCHDOG_24H* feature. The state is required to have at least one state per day for which the network interface is energized to allow for the reception of config/control messages.
