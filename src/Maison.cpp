@@ -689,7 +689,7 @@ bool Maison::send_msg(const char * _topic, const char * format, ...)
   return result;
 }
 
-void Maison::deep_sleep(bool back_with_wifi, int sleep_time_in_sec)
+void Maison::deep_sleep(bool back_with_wifi, uint16_t sleep_time_in_sec)
 {
   SHOW("deep_sleep()");
 
@@ -706,7 +706,7 @@ void Maison::deep_sleep(bool back_with_wifi, int sleep_time_in_sec)
   
   delay(10);
   
-  mem.one_hour_step_count += millis() + (1000 * sleep_time_in_sec);
+  mem.one_hour_step_count += millis() + (1000u * sleep_time_in_sec);
     
   save_mems();
 

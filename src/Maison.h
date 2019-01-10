@@ -171,7 +171,7 @@ class Maison
     int  reset_reason();
     void restart();
 
-    void deep_sleep(bool back_with_wifi, int sleep_time_in_sec);
+    void deep_sleep(bool back_with_wifi, uint16_t sleep_time_in_sec);
 
     inline void  enable_feature(Feature _feature) { 
       feature_mask |= _feature;  
@@ -185,11 +185,11 @@ class Maison
       return (ESP.getVcc() * (1.0 / 1024.0)); 
     }    
     
-    inline bool    is_hard_reset() { 
+    inline bool is_hard_reset() { 
       return reset_reason() != REASON_DEEP_SLEEP_AWAKE; 
     }
 
-    inline void set_deep_sleep_wait_time(int seconds) { 
+    inline void set_deep_sleep_wait_time(uint16_t seconds) { 
       deep_sleep_wait_time = (seconds > 4294) ? 4294 : seconds; 
     }
 
@@ -245,7 +245,7 @@ class Maison
     uint8_t      user_mem_length;
     long         last_time_count;
     bool         counting_lost_connection;
-    int          deep_sleep_wait_time;
+    uint16_t     deep_sleep_wait_time;
 
     char         buffer[MQTT_MAX_PACKET_SIZE];
 
