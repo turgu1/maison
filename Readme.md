@@ -62,7 +62,7 @@ platform = espressif8266
 The Maison framework allow for some defined options to be modified through -D compilation parameters (PlatformIO: build_flags). The following are the compilation options available to change some library behavior:
 
 Option              | Default   | Description
---------------------|-----------|------------------------------------------------------------------------
+--------------------|:---------:|------------------------------------------------------------------------
 MAISON_TESTING      |    0      | If = 1, enable debuging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any Maison function.
 QUICK_TURN          |    0      | If = 1, WATCHDOG messages are sent every 2 minutes instead of 24 hours. This is automatically the case when *MAISON_TESTING* is set to 1.
 MAISON_PREFIX_TOPIC | maison/   | All topics used by the framework are prefixed with this text   
@@ -263,7 +263,7 @@ VBAT      | This is the Battery voltage. This parameter is optional. Its presenc
 ## The Finite State Machine
 
 State          | Value | Network | Description
----------------|-------|---------|-------------
+---------------|:-----:|:-------:|-------------
 STARTUP        |   1   |   YES   | The device has just been reset
 WAIT_FOR_EVENT |   2   |   NO    | This is the state waiting for an event to occur. The event is application specific.
 PROCESS_EVENT  |   4   |   YES   | An event is being processed by the application. This will usually send a message to the MQTT broker.
