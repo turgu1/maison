@@ -113,7 +113,7 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
         DEBUGLN(" ERROR: Unable to open current config file");
       }
       else {
-        mqtt_client.beginPublish(MAISON_CTRL_TOPIC, 
+        mqtt_client.beginPublish(MAISON_STATUS_TOPIC, 
                                  file.size() + strlen(config.device_name) + 44, 
                                  false);
         mqtt_client.write((uint8_t *) "{\"device\":\"", 11);
@@ -157,6 +157,14 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
       }
     }
     else if (strncmp(buffer, "STATE?", 6) == 0) {
+      char vbat[15];
+      if (show_voltage()) {
+        snprintf(vbat, 14, ",\"VBAT\":%3.1f", battery_voltage());
+      }
+      else {
+        vbat[0] = 0;
+      }
+
       send_msg(
         MAISON_STATUS_TOPIC, 
         "{"
@@ -166,8 +174,8 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
         "\"hours\":%u,"
         "\"millis\":%u,"
         "\"lost\":%u,"
-        "\"heap\":%u,"
-        "\"VBAT\":%3.1f"
+        "\"heap\":%u"
+        "%s"
         "}",
         config.device_name,
         mem.state,
@@ -175,7 +183,7 @@ void Maison::process_callback(const char * topic, byte * payload, unsigned int l
         mem.one_hour_step_count,
         mem.lost_count,
         ESP.getFreeHeap(),
-        show_voltage() ? battery_voltage() : 0.0f);
+        vbat);
     }
     else if (strncmp(buffer, "RESTART!", 8) == 0) {
       DEBUGLN("Device is restarting");
@@ -274,25 +282,25 @@ void Maison::loop(Process * process)
 
   DEBUG(F("User process result: ")); DEBUGLN(res);
 
+  char vbat[15];
+
   switch (mem.state) {
     case STARTUP:
       if (show_voltage()) {
-        if (!send_msg(MAISON_STATUS_TOPIC, 
-                      "{\"device\":\"%s\",\"msg_type\":\"%s\",\"VBAT\":%3.1f}", 
-                      config.device_name, 
-                      "STARTUP", 
-                      battery_voltage())) {
-          ERROR("Unable to send startup message");
-        }
+        snprintf(vbat, 14, ",\"VBAT\":%3.1f", battery_voltage());
       }
       else {
-        if (!send_msg(MAISON_STATUS_TOPIC, 
-                      "{\"device\":\"%s\",\"msg_type\":\"%s\"}", 
-                      config.device_name,
-                      "STARTUP")) {
-          ERROR("Unable to send startup message");
-        }
+        vbat[0] = 0;
       }
+
+      if (!send_msg(MAISON_STATUS_TOPIC, 
+                    "{\"device\":\"%s\",\"msg_type\":\"%s\"%s}", 
+                    config.device_name, 
+                    "STARTUP", 
+                    vbat)) {
+        ERROR("Unable to send startup message");
+      }
+
       if (res != NOT_COMPLETED) {
         new_state     = WAIT_FOR_EVENT;
         new_sub_state = WAIT_FOR_EVENT;
@@ -344,21 +352,18 @@ void Maison::loop(Process * process)
       if (mqtt_connected()) mqtt_loop(); // Second chance to process received msgs
       if (watchdog_enabled()) {
         if (show_voltage()) {
-          if (!send_msg(MAISON_STATUS_TOPIC, 
-                        "{\"device\":\"%s\",\"msg_type\":\"%s\",\"VBAT\":%3.1f}", 
-                        config.device_name, 
-                        "WATCHDOG",
-                        battery_voltage())) {
-            ERROR("Unable to send watchdog message");
-          }
+          snprintf(vbat, 14, ",\"VBAT\":%3.1f", battery_voltage());
         }
         else {
-          if (!send_msg(MAISON_STATUS_TOPIC, 
-                        "{\"device\":\"%s\",\"msg_type\":\"%s\"}", 
-                        config.device_name,
-                        "WATCHDOG")) {
-            ERROR("Unable to send watchdog message");
-          }
+          vbat[0] = 0;
+        }
+
+        if (!send_msg(MAISON_STATUS_TOPIC, 
+                      "{\"device\":\"%s\",\"msg_type\":\"%s\"%s}", 
+                      config.device_name, 
+                      "WATCHDOG",
+                      vbat)) {
+          ERROR("Unable to send watchdog message");
         }
       }
 

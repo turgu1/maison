@@ -2,7 +2,7 @@
 
 Note: This is still work in progress. This code is working on an ESP8266 and under heavy development. The documentation is also a work in progress... ESP32 support soon to be added.
 
-This library implement a small, secure, IOT Framework for embedded ESP8266 / (soon to be added) ESP32 devices to serve into a Home IOT environment. It diminishes the amount of code to be put in the targeted app source code. The app interact with the framework through a finite state machine algorithm allowing for specific usage at every stage.
+This library implement a small, secure, IOT Framework for embedded ESP8266 / (soon to be added) ESP32 devices to serve into a Home IOT environment. It diminishes the amount of code to be put in the targeted app source code. The app interacts with the framework through a finite state machine algorithm allowing for specific usage at every stage.
 
 Here are the main characteristics:
 
@@ -201,3 +201,59 @@ The Maison framework is automating access to the MQTT message broker through the
   "mqtt_fingerprint" : [12,24,126,43,13,42,125,75,76,34,21,53,66,152,173,23,63,47,221,23]
 }
 ```
+
+All parameters must be present in the file to be considered valid by the framework. Here is a description of each parameter:
+
+Parameter | Description
+----------|------------------------------
+version | This is the sequential version number. This is the property of the Server responsible of transmitting new configuration files to the device. It must be incremented every time a new config file is sent to the device. The device will not update its configuration if the version number is not greather than the current one. 
+device_name | A unique identifier for the device. This identifier is used inside messages sent through MQTT. It is also used to generate the topics related to the device. It can be an empty string: the MAC address of the device WiFi interface will then be used as the identifier. Use letters, underscore, numbers to compose the identifier (no space or other special characters).
+ssid / wifi_password | The WiFi SSID and password. Required to reach the network.
+mqtt_server_name | This is the MQTT server address (SQDN)
+mqtt_user_name / mqtt_password | These are the credentials to connect to the MQTT server.
+mqtt_port | The TLS/SSL port number of the MQTT server.
+mqtt_fingerprint | This is the fingerprint associated with the MQTT service certificate. It must be a vector of 20 decimal values. Each value correspond to a byte part of the fingerprint. This is used to validate the MQTT server by the BearSSL library.
+
+## Messages sent by the framework
+
+The Maison framework automate some messages that are sent to the maison/status topic. All messages are sent using a JSON formatted string. 
+
+Here is a description of each message sent, namely:
+
+* The Startup message
+* The Status message
+* THe Watchdog message
+
+### The Startup message
+
+This message is sent to the MQTT topic **maison/status** when the device is reset (Usually because of a Power-On action or a reset button being pressed). It is not sent when a DeepSleep wake-up action is taken by the device.
+
+Parameter | Description
+----------|------------------
+device    | The device name as stated in the configuration parameters. If the configuration parameter is empty, the MAC address of the device WiFi interface is used.
+msg_type  | This content the string "STARTUP".
+VBAT      | This is the Battery voltage. This parameter is optional. Its presence depend on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
+
+### The Status message
+
+This message is sent to the MQTT topic **maison/status** when a message sent to the device ctrl topic (e.g. **maison/device_name/ctrl**) containing the string "STATE?" is received.
+
+Parameter | Description
+----------|------------------
+device    | The device name as stated in the configuration parameters. If the configuration parameter is empty, the MAC address of the device WiFi interface is used.
+msg_type  | This content the string "STATE".
+state     | The current state of the finite state machine, as a number. Look into the [Finite State Machine](#the-finite-state-machine) section for details.
+
+VBAT      | This is the Battery voltage. This parameter is optional. Its presence depend on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
+
+
+## The Finite State Machine
+
+State          | Value | Network | Description
+---------------|-------|---------|-------------
+STARTUP        |   1   |   YES   | The device has just been reset
+WAIT_FOR_EVENT |   2   |   NO    | This is the state waiting for an event to occur. The event is application specific.
+PROCESS_EVENT  |   4   |   YES   | An event is being processed by the application. This will usually send a message to the MQTT broker.
+WAIT_END_EVENT |   8   |   NO    | The device is waiting for the end of the event to occur.
+END_EVENT      |  16   |   YES   | The end of an event has been detected. It's time to do an event rundown. This will usually send a message to the MQTT broker.
+HOURS_24       |  32   |   YES   | This event occurs every ~24 hours. It permits the transmission of a Watchdog message if enabled with the  *WATCHDOG_24H* feature.
