@@ -308,4 +308,4 @@ The application process can change the amount of seconds for the next deep sleep
 
 The ESP8266 does not allow for a sleep period longer than 4294967295 microseconds, that corresponds to around 4294 seconds or 71 minutes.
 
-If *DEEP_SLEEP* is not used, there is no wait time other than the code processing time in the Maison::loop(). Internally, the framework compute the duration of execution for the next *HOURS_24* state to occur.
+If *DEEP_SLEEP* is not used, there is no wait time other than the code processing time in the `Maison::loop()`. Internally, the framework compute the duration of execution for the next *HOURS_24* state to occur.

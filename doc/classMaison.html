@@ -229,7 +229,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>maison_callback</b> (
       </table>
 </div><div class="memdoc">
 <p>Features in feature_mask</p>
-<p>Note: if VOLTAGE_CHECK is requested and the internal battery readout is targeted, the main user sketch must add the following line at the beginning of the sketch source code file:</p>
+<p>Note: if <em>VOLTAGE_CHECK</em> is requested and the internal battery readout is targeted, the main user sketch must add the following line at the beginning of the sketch source code file:</p>
 <p>ADC_MODE(ADC_VCC); </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a class="anchor" id="a78d9ef41e0b19f1018697766cf7d47d7a823a680e4b6a8861d19a9ecdbc325eff"></a>NONE&#160;</td><td class="fielddoc">
@@ -259,7 +259,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>maison_callback</b> (
 </div><div class="memdoc">
 <p>States of the finite state machine</p>
 <p>On battery power, only the following states will have networking capability:</p>
-<p>STARTUP, PROCESS_EVENT, END_EVENT, HOURS_24 </p>
+<p><em>STARTUP</em>, <em>PROCESS_EVENT</em>, <em>END_EVENT</em>, <em>HOURS_24</em> </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a class="anchor" id="a36a00785b7fadfcb17bfd25641cbfb45a20fee0cdfb7a179fafcc5db4af6db7c3"></a>STARTUP&#160;</td><td class="fielddoc">
 <p>The device has just been reset. </p>
@@ -301,10 +301,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>maison_callback</b> (
 <p>The current state still requier some processing in calls to come. </p>
 </td></tr>
 <tr><td class="fieldname"><a class="anchor" id="af939aa6abb28e19cace161a1398e4995abb10ead7bd9915d55e762f15e721f60d"></a>ABORTED&#160;</td><td class="fielddoc">
-<p>The event vanished and requires no more processing (in a PROCESS_EVENT state) </p>
+<p>The event vanished and requires no more processing (in a <em>PROCESS_EVENT</em> state) </p>
 </td></tr>
 <tr><td class="fieldname"><a class="anchor" id="af939aa6abb28e19cace161a1398e4995ae21a162a40bf1dc8d1218d3b69c16e51"></a>NEW_EVENT&#160;</td><td class="fielddoc">
-<p>A new event occured (in a WAIT_FOR_EVENT state) </p>
+<p>A new event occured (in a <em>WAIT_FOR_EVENT</em> state) </p>
 </td></tr>
 </table>
 
@@ -488,7 +488,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>maison_callback</b> (
 </table>
 </div><div class="memdoc">
 <p>Check if a reset is due to something else than Deep Sleep return.</p>
-<dl class="section return"><dt>Returns</dt><dd>True if a reset occured that is not coming from a deep sleep return. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>True if a reset occured that is not coming from a Deep Sleep return. </dd></dl>
 
 </div>
 </div>
@@ -578,7 +578,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>maison_callback</b> (
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Checks if networking is currently available. Always true if DEEP_SLEEP is not set in the features.</p>
+<p>Checks if networking is currently available. Always true if <em>DEEP_SLEEP</em> is not set in the features.</p>
 <dl class="section return"><dt>Returns</dt><dd>True if the network is enabled. </dd></dl>
 
 </div>

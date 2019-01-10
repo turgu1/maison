@@ -103,7 +103,7 @@
 // To get WATCHDOG Time faster during tests
 
 #if QUICK_TURN
-  #define ONE_HOUR 6   ///< In seconds. So HOURS_24 fired every 2.2 minutes.
+  #define ONE_HOUR 6   ///< In seconds. So *HOURS_24* fired every 2.2 minutes.
 #else
   #define ONE_HOUR 3600 ///< In seconds. Normal is one hour x 24 = 24 hours.
 #endif
@@ -116,11 +116,10 @@ class Maison
 
     /// Features in feature_mask
     ///
-    /// Note: if VOLTAGE_CHECK is requested and the internal battery readout is targeted, the main
+    /// Note: if *VOLTAGE_CHECK* is requested and the internal battery readout is targeted, the main
     ///       user sketch must add the following line at the beginning of the sketch source code file:
     ///
     ///    ADC_MODE(ADC_VCC);
-
     enum Feature : uint8_t {
       NONE          = 0x00, ///< No special feature
       VOLTAGE_CHECK = 0x01, ///< Chip A2D voltage readout will be sent on status/watchdog messages
@@ -130,10 +129,10 @@ class Maison
 
     /// States of the finite state machine
     ///
-    /// On battery power, only the following states will have networking capability:
+    /// On battery power (*DEEP_SLEEP* feature is set), only the following 
+    /// states will have networking capability:
     ///
-    ///    STARTUP, PROCESS_EVENT, END_EVENT, HOURS_24
-
+    ///    *STARTUP*, *PROCESS_EVENT*, *END_EVENT*, *HOURS_24*
     enum State : uint8_t {
       STARTUP        =  1, ///< The device has just been reset
       WAIT_FOR_EVENT =  2, ///< Wait for an event to occur
@@ -146,12 +145,11 @@ class Maison
     /// A UserResult is returned by the user process function to indicate
     /// how to proceed with the finite state machine transformation.
     ///
-
     enum UserResult : uint8_t { 
       COMPLETED = 1, ///< The processing for the current state is considered completed
       NOT_COMPLETED, ///< The current state still requier some processing in calls to come
-      ABORTED,       ///< The event vanished and requires no more processing (in a PROCESS_EVENT state)
-      NEW_EVENT      ///< A new event occured (in a WAIT_FOR_EVENT state)
+      ABORTED,       ///< The event vanished and requires no more processing (in a *PROCESS_EVENT* state)
+      NEW_EVENT      ///< A new event occured (in a *WAIT_FOR_EVENT* state)
     };
 
     /// Application defined process function. To be supplied as a parameter 
@@ -234,7 +232,7 @@ class Maison
     
     /// Check if a reset is due to something else than Deep Sleep return.
     ///
-    /// @return True if a reset occured that is not coming from a deep sleep return.
+    /// @return True if a reset occured that is not coming from a Deep Sleep return.
     inline bool is_hard_reset() { 
       return reset_reason() != REASON_DEEP_SLEEP_AWAKE; 
     }
@@ -246,7 +244,7 @@ class Maison
       deep_sleep_wait_time = (_seconds > 4294) ? 4294 : _seconds; 
     }
 
-    /// Checks if networking is currently available. Always true if DEEP_SLEEP 
+    /// Checks if networking is currently available. Always true if *DEEP_SLEEP* 
     /// is not set in the features.
     ///
     /// @return True if the network is enabled.
