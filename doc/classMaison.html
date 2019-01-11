@@ -209,7 +209,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>maison_callback</b> (
 </div><div class="memdoc">
 <p>Application defined process function. To be supplied as a parameter to the <a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">Maison::loop()</a> function. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">_state</td><td>The current state of the Finate State Machine. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">_state</td><td>The current state of the Finite State Machine. </td></tr>
   </table>
   </dd>
 </dl>
@@ -297,13 +297,13 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>maison_callback</b> (
 <p>The processing for the current state is considered completed. </p>
 </td></tr>
 <tr><td class="fieldname"><a class="anchor" id="af939aa6abb28e19cace161a1398e4995a96193193c07a8af6d352fe7917e005e3"></a>NOT_COMPLETED&#160;</td><td class="fielddoc">
-<p>The current state still requier some processing in calls to come. </p>
+<p>The current state still require some processing in calls to come. </p>
 </td></tr>
 <tr><td class="fieldname"><a class="anchor" id="af939aa6abb28e19cace161a1398e4995abb10ead7bd9915d55e762f15e721f60d"></a>ABORTED&#160;</td><td class="fielddoc">
 <p>The event vanished and requires no more processing (in a <em>PROCESS_EVENT</em> state) </p>
 </td></tr>
 <tr><td class="fieldname"><a class="anchor" id="af939aa6abb28e19cace161a1398e4995ae21a162a40bf1dc8d1218d3b69c16e51"></a>NEW_EVENT&#160;</td><td class="fielddoc">
-<p>A new event occured (in a <em>WAIT_FOR_EVENT</em> state) </p>
+<p>A new event occurred (in a <em>WAIT_FOR_EVENT</em> state) </p>
 </td></tr>
 </table>
 
@@ -366,7 +366,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>maison_callback</b> (
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The computed CRC-32 cheksum. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The computed CRC-32 checksum. </dd></dl>
 
 </div>
 </div>
@@ -487,7 +487,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>maison_callback</b> (
 </table>
 </div><div class="memdoc">
 <p>Check if a reset is due to something else than Deep Sleep return.</p>
-<dl class="section return"><dt>Returns</dt><dd>True if a reset occured that is not coming from a Deep Sleep return. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>True if a reset occurred that is not coming from a Deep Sleep return. </dd></dl>
 
 </div>
 </div>
@@ -507,7 +507,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>maison_callback</b> (
 <p>Function to be called by the application in the main loop to insure proper actions by the framework.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">_process</td><td>The application processing function. This function will be called every time the <a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">Maison::loop</a> function will be processing the finite state machine (once every time the loop function is called). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">_process</td><td>The application processing function. This function will be called by the framework every time the <a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">Maison::loop()</a> is called, just before processing the finite state machine. </td></tr>
   </table>
   </dd>
 </dl>
@@ -553,7 +553,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>maison_callback</b> (
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>pointer to the beginning of the buffer </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>pointer to the beginning of the buffer. </dd></dl>
 
 </div>
 </div>
@@ -613,7 +613,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>maison_callback</b> (
 <tr>
 <td align="center">6 </td><td>Hardware Reset </td></tr>
 </table>
-<dl class="section return"><dt>Returns</dt><dd>The raison of the reset as a number. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The reason of the reset as a number. </dd></dl>
 
 </div>
 </div>
@@ -719,12 +719,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>maison_callback</b> (
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Set the MQTT msg callback for the user application.</p>
+<p>Set the MQTT message callback for the user application.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">_cb</td><td>The Callback function address </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">_topic</td><td>The topic to subscribe to </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">_qos</td><td>The QOS for the subscription </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">_cb</td><td>The Callback function address. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">_topic</td><td>The topic to subscribe to. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">_qos</td><td>The QOS for the subscription. </td></tr>
   </table>
   </dd>
 </dl>

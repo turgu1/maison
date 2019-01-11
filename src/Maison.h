@@ -94,10 +94,10 @@
   #define SHOW_RESULT(f)
 #endif
 
-// Syntaxic sugar
+// Syntactic sugar
 
 #define DO        bool result = false; while (true)    ///< Beginning of a DO loop
-#define OK_DO     { result = true; break; }            ///< Successfull exit of a DO loop
+#define OK_DO     { result = true; break; }            ///< Successful exit of a DO loop
 #define ERROR(m)  { DEBUGLN(F(" ERROR: " m)); break; } ///< Exit the loop with an ERROR message
 
 // To get WATCHDOG Time faster during tests
@@ -147,14 +147,14 @@ class Maison
     ///
     enum UserResult : uint8_t { 
       COMPLETED = 1, ///< The processing for the current state is considered completed
-      NOT_COMPLETED, ///< The current state still requier some processing in calls to come
+      NOT_COMPLETED, ///< The current state still require some processing in calls to come
       ABORTED,       ///< The event vanished and requires no more processing (in a *PROCESS_EVENT* state)
-      NEW_EVENT      ///< A new event occured (in a *WAIT_FOR_EVENT* state)
+      NEW_EVENT      ///< A new event occurred (in a *WAIT_FOR_EVENT* state)
     };
 
     /// Application defined process function. To be supplied as a parameter 
     /// to the Maison::loop() function.
-    /// @param[in] _state The current state of the Finate State Machine.
+    /// @param[in] _state The current state of the Finite State Machine.
     /// @return The status of the user process execution.
     typedef UserResult Process(State _state);
 
@@ -196,7 +196,7 @@ class Maison
     ///     5  | Deep Sleep Reset
     ///     6  | Hardware Reset
     ///
-    /// @return The raison of the reset as a number.
+    /// @return The reason of the reset as a number.
     int  reset_reason();
 
     /// Will restart the ESP8266
@@ -232,7 +232,7 @@ class Maison
     
     /// Check if a reset is due to something else than Deep Sleep return.
     ///
-    /// @return True if a reset occured that is not coming from a Deep Sleep return.
+    /// @return True if a reset occurred that is not coming from a Deep Sleep return.
     inline bool is_hard_reset() { 
       return reset_reason() != REASON_DEEP_SLEEP_AWAKE; 
     }
@@ -263,37 +263,37 @@ class Maison
     ///   maison/device_name/hello
     ///   ```
     ///
-    /// @param[in] _topic_suffix The topic suffix portion to build the complete topic from.
+    /// @param[in]  _topic_suffix The topic suffix portion to build the complete topic from.
     /// @param[out] _buffer Where the topic name will be built.
-    /// @param[in] _length The size of the buffer.
-    /// @return pointer to the beginning of the buffer
+    /// @param[in]  _length The size of the buffer.
+    /// @return pointer to the beginning of the buffer.
     char * my_topic(const char * _topic_suffix, char * _buffer, uint16_t _length);
 
     /// Compute a CRC-32 checksum
     ///
     /// @param[in] _data The data vector to compute the checksum on.
     /// @param[in] _length The size of the data vector.
-    /// @return The computed CRC-32 cheksum.
+    /// @return The computed CRC-32 checksum.
     uint32_t CRC32(const uint8_t * _data, size_t _length);
 
-    /// Set the MQTT msg callback for the user application.
+    /// Set the MQTT message callback for the user application.
     ///
-    /// @param[in] _cb The Callback function address
-    /// @param[in] _topic The topic to subscribe to
-    /// @param[in] _qos The QOS for the subscription
+    /// @param[in] _cb The Callback function address.
+    /// @param[in] _topic The topic to subscribe to.
+    /// @param[in] _qos The QOS for the subscription.
     void set_msg_callback(Callback * _cb, const char * _topic, uint8_t _qos = 0);
 
     /// Function to be called by the application in the main loop to insure 
     /// proper actions by the framework.
     ///
     /// @param[in] _process The application processing function. This function will be 
-    ///                    called every time the Maison::loop function will be processing
-    ///                    the finite state machine (once every time the loop function is called).
+    ///                    called by the framework every time the Maison::loop() is called, 
+    ///                    just before processing the finite state machine.
     void loop(Process * _process = NULL);
 
   private:
     // The configuration is read at setup time from file "/config.json" in the SPIFFS flash
-    // memory space. It is updated by the home management tool through mqtt topic 
+    // memory space. It is updated by the home management tool through MQTT topic 
     // named "maison/" + device_name + "_ctrl"
 
     struct Config {
@@ -313,7 +313,7 @@ class Maison
       State    state;
       State    sub_state;
       uint16_t hours_24_count;      // Up to 24 hours
-      uint16_t lost_count;          // How many mqtt lost connections since reset
+      uint16_t lost_count;          // How many MQTT lost connections since reset
       uint32_t one_hour_step_count; // Up to 3600 seconds in milliseconds
       uint32_t magic;
     } mem;
