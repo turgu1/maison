@@ -202,7 +202,7 @@ class Maison
     /// Will restart the ESP8266
     void restart();
 
-    /// Initiates a ESP.deep_sleep() call. This function never suppose to return...
+    /// Initiates an `ESP.deep_sleep()` call. This function never suppose to return...
     ///
     /// @param[in] _back_with_wifi True if WiFi networking enabled on restart
     /// @param[in] _sleep_time_in_sec The number of second to wait before restart
