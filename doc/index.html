@@ -135,7 +135,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td align="center">MAISON_CTRL_TOPIC </td><td align="center">maison/ctrl </td><td>Topic where the framework event controls are sent </td></tr>
 <tr>
-<td align="center">CTRL_SUFFIX_TOPIC </td><td align="center">/ctrl </td><td>This is the topic suffix used to identify device-related control topic </td></tr>
+<td align="center">CTRL_SUFFIX_TOPIC </td><td align="center">ctrl </td><td>This is the topic suffix used to identify device-related control topic </td></tr>
 <tr>
 <td align="center">DEFAULT_SHORT_REBOOT_TIME </td><td align="center">5 </td><td>This is the default reboot time in seconds when deep sleep is enable. This is used at the end of the following states: <em>PROCESS_EVENT</em>, <em>WAIT_END_EVENT</em>, <em>END_EVENT</em>. For the other states, the wait time is 60 minutes (3600 seconds). </td></tr>
 </table>
@@ -251,7 +251,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td align="center">6 </td><td>Hardware Reset </td></tr>
 </table>
-<h3>The Status message</h3>
+<p>Example:</p>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;{&quot;device&quot;:&quot;WATER_SPILL&quot;,&quot;msg_type&quot;:&quot;STARTUP&quot;,&quot;reason&quot;:6,&quot;VBAT&quot;:3.0}</div></div><!-- fragment --><h3>The Status message</h3>
 <p>This message is sent to the MQTT topic <b>maison/status</b> when a message sent to the device control topic (e.g. <b>maison/device_name/ctrl</b>) containing the string "STATE?" is received.</p>
 <table class="doxtable">
 <tr>
@@ -275,7 +276,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td align="center">VBAT </td><td>This is the Battery voltage. This parameter is optional. Its presence depends on the <em>VOLTAGE_CHECK</em> feature. See the description of the <a href="#feature-mask">Feature Mask</a>. </td></tr>
 </table>
-<h3>The Watchdog Message</h3>
+<p>Example:</p>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;{&quot;device&quot;:&quot;WATER_SPILL&quot;,&quot;msg_type&quot;:&quot;STATE&quot;,&quot;state&quot;:2,&quot;hours&quot;:7,&quot;millis&quot;:8001,&quot;lost&quot;:0,&quot;rssi&quot;:-63,&quot;heap&quot;:16704,&quot;VBAT&quot;:3.0}</div></div><!-- fragment --><h3>The Watchdog Message</h3>
 <p>This message is sent to the MQTT topic <b>maison/status</b> every 24 hours. Its transmission is enabled through the <em>WATCHDOG_24H</em> feature. See the description of the <a href="#feature-mask">Feature Mask</a>.</p>
 <table class="doxtable">
 <tr>
@@ -287,8 +289,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td align="center">VBAT </td><td>This is the Battery voltage. This parameter is optional. Its presence depend on the <em>VOLTAGE_CHECK</em> feature. See the description of the <a href="#feature-mask">Feature Mask</a>. </td></tr>
 </table>
-<h3>The Config message</h3>
-<p>This message is sent to the MQTT topic <b>maison/status</b> when a message sent to the device ctrl topic (e.g. <b>maison/device_name/ctrl</b>) containing the string "CONFIG?" is received.</p>
+<p>Example:</p>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;{&quot;device&quot;:&quot;WATER_SPILL&quot;,&quot;msg_type&quot;:&quot;WATCHDOG&quot;,&quot;VBAT&quot;:3.0}</div></div><!-- fragment --><h3>The Config message</h3>
+<p>This message is sent to the MQTT topic <b>maison/status</b> when a message sent to the device control topic (e.g. <b>maison/device_name/ctrl</b>) containing the string "CONFIG?" is received.</p>
 <table class="doxtable">
 <tr>
 <th align="center">Parameter </th><th>Description  </th></tr>
@@ -299,7 +302,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td align="center">content </td><td>This is the configuration of the device in a JSON format. See the <a href="#configuration-parameters">Configuration Parameters</a> section for the format details. </td></tr>
 </table>
-<h2>The Finite State Machine</h2>
+<p>Example:</p>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;{&quot;device&quot;:&quot;WATER_SPILL&quot;,&quot;msg_type&quot;:&quot;CONFIG&quot;,&quot;content&quot;:{</div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;  &quot;version&quot;          : 1,</div><div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;  &quot;device_name&quot;      : &quot;TEST_DEV&quot;,</div><div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;  &quot;ssid&quot;             : &quot;the_ssid&quot;,</div><div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;  &quot;wifi_password&quot;    : &quot;the_password&quot;,</div><div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;  &quot;mqtt_server_name&quot; : &quot;the_server_sqdn&quot;,</div><div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;  &quot;mqtt_user_name&quot;   : &quot;the_mqtt_user_name&quot;,</div><div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;  &quot;mqtt_password&quot;    : &quot;the_mqtt_password&quot;,</div><div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;  &quot;mqtt_port&quot;        : 8883,</div><div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;  &quot;mqtt_fingerprint&quot; : [13,217,75,226,184,245,80,117,113,43,18,251,39,75,237,77,35,65,10,19]</div><div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;}}</div></div><!-- fragment --><h2>The Finite State Machine</h2>
 <p>The finite state machine is processed inside the <code><a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">Maison::loop()</a></code> function.</p>
 <p>When using the <em>DEEP_SLEEP</em> <a href="#feature-mask">feature</a>, networking is disabled for some of the states to minimize battery usage. If the <em>DEEP_SLEEP</em> feature is not used, networking is available all the time. The <code><a class="el" href="classMaison.html#a737fc95f3204808f969b025eb3a76d5c">Maison::network_is_available()</a></code> function can be used to check network availability.</p>
 <table class="doxtable">
@@ -316,7 +320,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td align="center">END_EVENT </td><td align="center">16 </td><td align="center">YES </td><td>The end of an event has been detected. It's time to do an event rundown. This will usually send a message to the MQTT broker. </td></tr>
 <tr>
-<td align="center">HOURS_24 </td><td align="center">32 </td><td align="center">YES </td><td>This event occurs every 24 hours. It permits the transmission of a Watchdog message if enabled with the <em>WATCHDOG_24H</em> feature. The state is required to have at least one state per day for which the network interface is energized to allow for the reception of config/control messages. </td></tr>
+<td align="center">HOURS_24 </td><td align="center">32 </td><td align="center">YES </td><td>This event occurs every 24 hours. It permits the transmission of a Watchdog message if enabled with the <em>WATCHDOG_24H</em> feature. The state is required to have at least one state per day for which the network interface is energized to allow for the reception of configuration and control messages. </td></tr>
 </table>
 <h2>Usage on battery power</h2>
 <p>The <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> framework can be tailored to use Deep Sleep when on battery power, through the <em>DEEP_SLEEP</em> <a href="#feature-mask">feature</a>.</p>

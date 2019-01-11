@@ -74,7 +74,7 @@ QUICK_TURN          |    0      | If = 1, WATCHDOG messages are sent every 2 min
 MAISON_PREFIX_TOPIC | maison/   | All topics used by the framework are prefixed with this text   
 MAISON_STATUS_TOPIC | maison/status | Topic where the framework status are sent
 MAISON_CTRL_TOPIC   | maison/ctrl   | Topic where the framework event controls are sent
-CTRL_SUFFIX_TOPIC   | /ctrl         | This is the topic suffix used to identify device-related control topic
+CTRL_SUFFIX_TOPIC   | ctrl          | This is the topic suffix used to identify device-related control topic
 DEFAULT_SHORT_REBOOT_TIME |  5  | This is the default reboot time in seconds when deep sleep is enable. This is used at the end of the following states: *PROCESS_EVENT*, *WAIT_END_EVENT*, *END_EVENT*. For the other states, the wait time is 60 minutes (3600 seconds).
 
 Note that for *MAISON_STATUS_TOPIC* and *MAISON_CTRL_TOPIC*, they will be modified automatically if *MAISON_PREFIX_TOPIC* is changed. For example, if you change *MAISON_PREFIX_TOPIC* to be `home/`, *MAISON_STATUS_TOPIC* will become `home/status` and *MAISON_CTRL_TOPIC* will become `maison/ctrl`.
@@ -263,6 +263,12 @@ value | description
    5  | Deep Sleep Reset
    6  | Hardware Reset
 
+Example:
+
+```
+{"device":"WATER_SPILL","msg_type":"STARTUP","reason":6,"VBAT":3.0}
+```
+
 ### The Status message
 
 This message is sent to the MQTT topic **maison/status** when a message sent to the device control topic (e.g. **maison/device_name/ctrl**) containing the string "STATE?" is received.
@@ -279,6 +285,12 @@ rssi      | The WiFi signal strength of the connection to the router, in dBm.
 heap      | The current value of the free heap space available on the device
 VBAT      | This is the Battery voltage. This parameter is optional. Its presence depends on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
 
+Example:
+
+```
+{"device":"WATER_SPILL","msg_type":"STATE","state":2,"hours":7,"millis":8001,"lost":0,"rssi":-63,"heap":16704,"VBAT":3.0}
+```
+
 ### The Watchdog Message
 
 This message is sent to the MQTT topic **maison/status** every 24 hours. Its transmission is enabled through the *WATCHDOG_24H* feature. See the description of the [Feature Mask](#feature-mask).
@@ -289,15 +301,37 @@ device    | The device name as stated in the configuration parameters. If the co
 msg_type  | This content the string "WATCHDOG".
 VBAT      | This is the Battery voltage. This parameter is optional. Its presence depend on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
 
+Example:
+
+```
+{"device":"WATER_SPILL","msg_type":"WATCHDOG","VBAT":3.0}
+```
+
 ### The Config message
 
-This message is sent to the MQTT topic **maison/status** when a message sent to the device ctrl topic (e.g. **maison/device_name/ctrl**) containing the string "CONFIG?" is received.
+This message is sent to the MQTT topic **maison/status** when a message sent to the device control topic (e.g. **maison/device_name/ctrl**) containing the string "CONFIG?" is received.
 
 Parameter | Description
 :--------:|------------------
 device    | The device name as stated in the configuration parameters. If the configuration parameter is empty, the MAC address of the device WiFi interface is used.
 msg_type  | This content the string "CONFIG".
 content   | This is the configuration of the device in a JSON format. See the [Configuration Parameters](#configuration-parameters) section for the format details.
+
+Example:
+
+```
+{"device":"WATER_SPILL","msg_type":"CONFIG","content":{
+  "version"          : 1,
+  "device_name"      : "TEST_DEV",
+  "ssid"             : "the_ssid",
+  "wifi_password"    : "the_password",
+  "mqtt_server_name" : "the_server_sqdn",
+  "mqtt_user_name"   : "the_mqtt_user_name",
+  "mqtt_password"    : "the_mqtt_password",
+  "mqtt_port"        : 8883,
+  "mqtt_fingerprint" : [13,217,75,226,184,245,80,117,113,43,18,251,39,75,237,77,35,65,10,19]
+}}
+```
 
 ## The Finite State Machine
 
@@ -312,7 +346,7 @@ WAIT_FOR_EVENT |   2   |   NO    | This is the state waiting for an event to occ
 PROCESS_EVENT  |   4   |   YES   | An event is being processed by the application. This will usually send a message to the MQTT broker.
 WAIT_END_EVENT |   8   |   NO    | The device is waiting for the end of the event to occur.
 END_EVENT      |  16   |   YES   | The end of an event has been detected. It's time to do an event rundown. This will usually send a message to the MQTT broker.
-HOURS_24       |  32   |   YES   | This event occurs every 24 hours. It permits the transmission of a Watchdog message if enabled with the  *WATCHDOG_24H* feature. The state is required to have at least one state per day for which the network interface is energized to allow for the reception of config/control messages.
+HOURS_24       |  32   |   YES   | This event occurs every 24 hours. It permits the transmission of a Watchdog message if enabled with the  *WATCHDOG_24H* feature. The state is required to have at least one state per day for which the network interface is energized to allow for the reception of configuration and control messages.
 
 ## Usage on battery power
 
