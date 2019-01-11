@@ -92,6 +92,28 @@ void maison_callback(const char * _topic, byte * _payload, unsigned int _length)
   DEBUGLN(F(" End of maison_callback()"));
 }
 
+void Maison::send_config_msg()
+{
+  File file = SPIFFS.open("/config.json", "r");
+  if (!file) {
+    DEBUGLN(" ERROR: Unable to open current config file");
+  }
+  else {
+    mqtt_client.beginPublish(MAISON_STATUS_TOPIC, 
+                             file.size() + strlen(config.device_name) + 44, 
+                             false);
+    mqtt_client.write((uint8_t *) "{\"device\":\"", 11);
+    mqtt_client.write((uint8_t *) config.device_name, strlen(config.device_name));
+    mqtt_client.write((uint8_t *) "\",\"msg_type\":\"CONFIG\",\"content\":", 32);
+    file.read((uint8_t *) buffer, file.size());
+    mqtt_client.write((uint8_t *) buffer, file.size());
+    mqtt_client.write((uint8_t *) "}", 1);
+    mqtt_client.endPublish();
+
+    file.close();
+  }
+}
+
 void Maison::process_callback(const char * _topic, byte * _payload, unsigned int _length)
 {
   SHOW("process_callback()");
@@ -108,24 +130,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
     if (strncmp(buffer, "CONFIG?", 7) == 0) {
       DEBUGLN(F(" Config content requested by Maison"));
 
-      File file = SPIFFS.open("/config.json", "r");
-      if (!file) {
-        DEBUGLN(" ERROR: Unable to open current config file");
-      }
-      else {
-        mqtt_client.beginPublish(MAISON_STATUS_TOPIC, 
-                                 file.size() + strlen(config.device_name) + 44, 
-                                 false);
-        mqtt_client.write((uint8_t *) "{\"device\":\"", 11);
-        mqtt_client.write((uint8_t *) config.device_name, strlen(config.device_name));
-        mqtt_client.write((uint8_t *) "\",\"msg_type\":\"CONFIG\",\"content\":", 32);
-        file.read((uint8_t *) buffer, file.size());
-        mqtt_client.write((uint8_t *) buffer, file.size());
-        mqtt_client.write((uint8_t *) "}", 1);
-        mqtt_client.endPublish();
-
-        file.close();
-      }
+      send_config_msg();
     }
     else if (strncmp(buffer, "CONFIG:", 7) == 0) {
       DEBUGLN(F(" New config received"));
@@ -153,6 +158,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
           else {
             DEBUGLN(F(" ERROR: New config with a wrong version number. Not saved."));
           }
+          send_config_msg();
         }
       }
     }

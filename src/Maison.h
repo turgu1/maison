@@ -154,6 +154,43 @@ class Maison
     /// END_EVENT --> WAIT_FOR_EVENT : COMPLETED
     /// END_EVENT --> END_EVENT : NOT_COMPLETED
     /// @enduml
+    ///
+    /// @startuml{sequence_uml.png} "Maison Sequence Diagram" width=8cm
+    /// 
+    /// actor Device
+    /// actor device_ctrl as "maison/WATER_SPILL/ctrl"
+    /// actor server_status as "maison/status"
+    /// 
+    /// group Device actions
+    ///   group Reset
+    ///     Device --> server_status : "{Startup}"
+    ///   end
+    ///   loop Every 24 hours
+    ///     Device --> server_status : "{Watchdog}"
+    ///   end
+    /// end
+    /// 
+    /// group Server Requests
+    ///   group Device State
+    ///     device_ctrl --> Device : "STATE?"
+    ///     Device --> server_status : "{State}"
+    ///   end
+    /// 
+    ///   group Current Config
+    ///     device_ctrl --> Device : "CONFIG?"
+    ///     Device --> server_status : "{config}"
+    ///   end
+    /// 
+    ///   group Set Config
+    ///     device_ctrl --> Device : "CONFIG: {config}"
+    ///     Device --> server_status : "{config}"
+    ///   end
+    /// 
+    ///   group Reset device
+    ///     device_ctrl --> Device : "RESTART!"
+    ///   end
+    /// end
+    /// @enduml
 
     enum State : uint8_t {
       STARTUP        =  1, ///< The device has just been reset
@@ -363,6 +400,8 @@ class Maison
 
     friend void maison_callback(const char * _topic, byte * _payload, unsigned int _length);
     void process_callback(const char * _topic, byte * _payload, unsigned int _length);
+
+    void send_config_msg();
 
     inline bool   wifi_connected() { return WiFi.status() == WL_CONNECTED;             }
     inline bool   mqtt_connected() { return mqtt_client.connected();                   }

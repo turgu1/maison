@@ -38,7 +38,11 @@ The sections below describe the specific of these requirements.
 
 The Maison library supplies the usual algorithms required for an IOT device to interact within an event management architecture based on the use of a MQTT broker for message exchanges. It helps the programmer in the management of the various aspects of integrating the code responsible of the functionality of the IOT device with the intricacies of managing the lifespan inside the architecture.
 
-...
+(To be completed)
+
+The following sequence diagram shows the automated interaction between the device and the MQTT broker. 
+
+![](doc/sequence_uml.png)
 
 ## Building an Application
 
@@ -213,7 +217,7 @@ The Maison framework is automating access to the MQTT message broker through the
   "mqtt_user_name" : "the user name",
   "mqtt_password" : "password",
   "mqtt_port" : 8883,
-  "mqtt_fingerprint" : [12,24,126,43,13,42,125,75,76,34,21,53,66,152,173,23,63,47,221,23]
+  "mqtt_fingerprint" : [13,217,75,226,184,245,80,117,113,43,18,251,39,75,237,77,35,65,10,19]
 }
 ```
 
