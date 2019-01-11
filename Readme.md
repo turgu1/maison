@@ -281,7 +281,7 @@ VBAT      | This is the Battery voltage. This parameter is optional. Its presenc
 
 ### The Watchdog Message
 
-This message is sent to the MQTT topic **maison/status** every 24 hours. Its transmission depends on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
+This message is sent to the MQTT topic **maison/status** every 24 hours. Its transmission is enabled through the *WATCHDOG_24H* feature. See the description of the [Feature Mask](#feature-mask).
 
 Parameter | Description
 :--------:|------------------
