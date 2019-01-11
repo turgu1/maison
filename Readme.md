@@ -275,6 +275,7 @@ state     | The current state of the finite state machine, as a number. Look int
 hours     | Hours counter. Used to compute the next 24 hours period.
 millis    | Milliseconds in the last hour.
 lost      | Counter of the number of time the connection to the MQTT broker has been lost.
+rssi      | The WiFi signal strength of the connection to the router, in dBm.
 heap      | The current value of the free heap space available on the device
 VBAT      | This is the Battery voltage. This parameter is optional. Its presence depends on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
 

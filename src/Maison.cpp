@@ -174,6 +174,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         "\"hours\":%u,"
         "\"millis\":%u,"
         "\"lost\":%u,"
+        "\"rssi\":%ld,"
         "\"heap\":%u"
         "%s"
         "}",
@@ -182,6 +183,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         mem.hours_24_count,
         mem.one_hour_step_count,
         mem.lost_count,
+        wifi_connected() ? WiFi.RSSI() : 0,
         ESP.getFreeHeap(),
         vbat);
     }
