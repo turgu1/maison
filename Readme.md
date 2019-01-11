@@ -1,22 +1,22 @@
 # Maison - Minimally Secure ESP8266 IOT MQTT based Framework
 
-Note: This is still work in progress. This code is working on an ESP8266. The documentation is also a work in progress. The code is working and must be considered of a Beta level.
+Note: This is still work in progress. The documentation is also a work in progress. The code is working and must be considered of a Beta level.
 
-This library implements a small, minimally secure, IOT Framework for embedded ESP8266 devices to serve into a Home IOT environment. It diminishes the amount of code to be put in the targeted app source code. The app interacts with the framework through a Finite State Machine algorithm allowing for specific usage at every stage.
+This library implements a small, minimally secure, IOT Framework for embedded ESP8266 devices to serve into a Home IOT environment. It diminishes the amount of code to be put in the targeted application source code. The application interacts with the framework through a Finite State Machine algorithm allowing for specific usage at every stage.
 
 Here are the main characteristics:
 
 * Framework configuration saved in file through SPIFFS.
 * WiFi MQTT based communications. Nothing else.
 * TLS encryption: All MQTT communication with encryption.
-* Server authentification through fingerprinting.
+* Server authentication through fingerprinting.
 * User/Password identification.
 * JSON based data transmission with server.
 * Configuration updates through MQTT.
 * Option: Automated Watchdog transmission every 24 hours.
 * Option: Battery voltage transmission.
 * Option: DeepSleep or continuous power.
-* Option: Application specific mqtt topic subscription.
+* Option: Application specific MQTT topic subscription.
 * Option: Application specific automatic state saving in RTC memory.
 * Option: Verbose/Silent debugging output through compilation.
 
@@ -24,7 +24,7 @@ The MQTT based transmission architecture is specific to this implementation and 
 
 The framework is to be used with the [PlarformIO](https://platformio.org/) ecosystem. Some (soon to be supplied) examples are to be compiled through PlatformIO.
 
-Note that the library maybe useable through the Arduino IDE, but this is not supported. It is known to be a challenge to set compiling options and access Maison defined types from .ino source code.
+Note that the library maybe usable through the Arduino IDE, but this is not supported. It is known to be a challenge to set compiling options and access Maison defined types from .ino source code.
 
 The Maison framework, to be functional, requires the following:
 
@@ -77,9 +77,9 @@ MAISON_CTRL_TOPIC   | maison/ctrl   | Topic where the framework event controls a
 CTRL_SUFFIX_TOPIC   | /ctrl         | This is the topic suffix used to identify device-related control topic
 DEFAULT_SHORT_REBOOT_TIME |  5  | This is the default reboot time in seconds when deep sleep is enable. This is used at the end of the following states: *PROCESS_EVENT*, *WAIT_END_EVENT*, *END_EVENT*. For the other states, the wait time is 60 minutes (3600 seconds).
 
-Note that for *MAISON_STATUS_TOPIC* and *MAISON_CTRL_TOPIC*, they will be modifified automatically if *MAISON_PREFIX_TOPIC* is changed. For example, if you change *MAISON_PREFIX_TOPIC* to be `home/`, *MAISON_STATUS_TOPIC* will become `home/status` and *MAISON_CTRL_TOPIC* will become `maison/ctrl`.
+Note that for *MAISON_STATUS_TOPIC* and *MAISON_CTRL_TOPIC*, they will be modified automatically if *MAISON_PREFIX_TOPIC* is changed. For example, if you change *MAISON_PREFIX_TOPIC* to be `home/`, *MAISON_STATUS_TOPIC* will become `home/status` and *MAISON_CTRL_TOPIC* will become `maison/ctrl`.
 
-The framework will subscribe to MQTT messages coming from the server on a topic built using *MAISON_PREFIX_TOPIC*, the device name and *CTRL_SUFFIX_TOPIC*. For example, if the device name is "WATER_SPILL", the subsribed topic would be `maison/WATER_SPILL/ctrl`.
+The framework will subscribe to MQTT messages coming from the server on a topic built using *MAISON_PREFIX_TOPIC*, the device name and *CTRL_SUFFIX_TOPIC*. For example, if the device name is "WATER_SPILL", the subscribed topic would be `maison/WATER_SPILL/ctrl`.
 
 ## Code Usage
 
@@ -101,7 +101,7 @@ void loop()
 }
 ```
 
-This piece of code won't do much at the user application level, but it will set the scene to the automation of exchanges with a MQTT message broker, sending startup/watchdog messages, answering information requests, changes of configuration, completly automated through Maison framework.
+This piece of code won't do much at the user application level, but it will set the scene to the automation of exchanges with a MQTT message broker, sending startup/watchdog messages, answering information requests, changes of configuration, completely automated through Maison framework.
 
 Here is a more complete example of code to be used to initialize the framework with optional features and integrate it in the loop() function. It shows both option parameters, calls to the framework with message callback and finite state machine functions:
 
@@ -154,7 +154,7 @@ In the following sections, we describe the specific aspects of this code example
 
 ### Include File
 
-The `#include <Maison.h>` integrates the Maison header into the user application. This will import the Maison class declaration and a bunch of definitions that are documentated below. All required libraries needed by the framework are also included by this call.
+The `#include <Maison.h>` integrates the Maison header into the user application. This will import the Maison class declaration and a bunch of definitions that are documented below. All required libraries needed by the framework are also included by this call.
 
 ### Maison Declaration
 
@@ -221,7 +221,7 @@ All parameters must be present in the file to be considered valid by the framewo
 
 Parameter | Description
 :--------:|------------------------------
-version | This is the sequential version number. This is the property of the Server responsible of transmitting new configuration files to the device. It must be incremented every time a new config file is sent to the device. The device will not update its configuration if the version number is not greather than the current one. 
+version | This is the sequential version number. This is the property of the Server responsible of transmitting new configuration files to the device. It must be incremented every time a new configuration file is sent to the device. The device will not update its configuration if the version number is not greater than the current one. 
 device_name | A unique identifier for the device. This identifier is used inside messages sent through MQTT. It is also used to generate the topics related to the device. It can be an empty string: the MAC address of the device WiFi interface will then be used as the identifier. Use letters, underscore, numbers to compose the identifier (no space or other special characters).
 ssid / wifi_password | The WiFi SSID and password. Required to reach the network.
 mqtt_server_name | This is the MQTT server name (SQDN) or IP address.
@@ -251,7 +251,7 @@ msg_type  | This content the string "STARTUP".
 reason    | The reason for startup (hardware reset type).
 VBAT      | This is the Battery voltage. This parameter is optional. Its presence depend on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
 
-The harware reset reason come from the ESP8266 reset information:
+The hardware reset reason come from the ESP8266 reset information:
 
 value | description
 :----:|------------
@@ -265,7 +265,7 @@ value | description
 
 ### The Status message
 
-This message is sent to the MQTT topic **maison/status** when a message sent to the device ctrl topic (e.g. **maison/device_name/ctrl**) containing the string "STATE?" is received.
+This message is sent to the MQTT topic **maison/status** when a message sent to the device control topic (e.g. **maison/device_name/ctrl**) containing the string "STATE?" is received.
 
 Parameter | Description
 :--------:|------------------
@@ -315,13 +315,13 @@ HOURS_24       |  32   |   YES   | This event occurs every 24 hours. It permits 
 
 ## Usage on battery power
 
-The Maison framework can be tailored to use Deep Sleep when on battery power, throught the *DEEP_SLEEP* [feature](#feature-mask). 
+The Maison framework can be tailored to use Deep Sleep when on battery power, through the *DEEP_SLEEP* [feature](#feature-mask). 
 
 In this context, the finite state machine will cause a call to the `ESP.deep_sleep()` function at the end of each of its processing cycle (function `Maison::loop()`) to put the processor in a dormant state. The deep sleep duration, by default, is set to 5 seconds before entry to the states *PROCESS_EVENT*, *WAIT_END_EVENT*, *END_EVENT* and *HOURS_24*; it is 3600 seconds for *WAIT_FOR_EVENT*.
 
 If the deep sleep feature is enabled, the call to `Maison::loop()` never return to the caller as the processor will reset after the deep sleep period.
 
-It is expected that a hardware interrupt will wake up the device to signifiate the arrival of a new event. If it's not the case, it will be then be required to modulate the amount of time to wait for the next *WAIT_FOR_EVENT* state to occurs. This must be used with caution as it will have an impact on the battery capacity.
+It is expected that a hardware interrupt will wake up the device to indicate the arrival of a new event. If it's not the case, it will be then be required to modulate the amount of time to wait for the next *WAIT_FOR_EVENT* state to occurs. This must be used with caution as it will have an impact on the battery capacity.
 
 The application process can change the amount of seconds for the next deep sleep period using the `Maison::set_deep_sleep_wait_time()` function. This can be called inside the application `process_state()` function before returning control to the framework. 
 
