@@ -348,6 +348,10 @@ WAIT_END_EVENT |   8   |   NO    | The device is waiting for the end of the even
 END_EVENT      |  16   |   YES   | The end of an event has been detected. It's time to do an event rundown. This will usually send a message to the MQTT broker.
 HOURS_24       |  32   |   YES   | This event occurs every 24 hours. It permits the transmission of a Watchdog message if enabled with the  *WATCHDOG_24H* feature. The state is required to have at least one state per day for which the network interface is energized to allow for the reception of configuration and control messages.
 
+Here is a state diagram showing the inter-relationship between each state and the corresponding application process return values for witch state changes will be fired:
+
+![](doc/state_uml.png)
+
 ## Usage on battery power
 
 The Maison framework can be tailored to use Deep Sleep when on battery power, through the *DEEP_SLEEP* [feature](#feature-mask). 
