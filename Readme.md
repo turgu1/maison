@@ -34,6 +34,12 @@ The Maison framework, to be functional, requires the following:
 
 The sections below describe the specific of these requirements.
 
+## Overview
+
+The Maison library supplies the usual algorithms required for an IOT device to interact within an event management architecture based on the use of a MQTT broker for message exchanges. It helps the programmer in the management of the various aspects of integrating the code responsible of the functionality of the IOT device with the intricacies of managing the lifespan inside the architecture.
+
+...
+
 ## Building an Application
 
 The Maison framework is using the following libraries and, through its library configuration, automate their retrieval through the PlatformIO ecosystem:
@@ -300,7 +306,7 @@ When using the *DEEP_SLEEP* [feature](#feature-mask), networking is disabled for
 
 State          | Value | Network | Description
 :-------------:|:-----:|:-------:|-------------
-STARTUP        |   1   |   YES   | The device has just been reset
+STARTUP        |   1   |   YES   | The device has just been reset.
 WAIT_FOR_EVENT |   2   |   NO    | This is the state waiting for an event to occur. The event is application specific.
 PROCESS_EVENT  |   4   |   YES   | An event is being processed by the application. This will usually send a message to the MQTT broker.
 WAIT_END_EVENT |   8   |   NO    | The device is waiting for the end of the event to occur.
