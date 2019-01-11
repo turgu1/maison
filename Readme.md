@@ -74,7 +74,7 @@ The Maison framework allow for some defined options to be modified through -D co
 Option              | Default   | Description
 :------------------:|:---------:|------------------------------------------------------------------------
 MAISON_TESTING      |    0      | If = 1, enable debuging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any Maison function.
-QUICK_TURN          |    0      | If = 1, WATCHDOG messages are sent every 2 minutes instead of 24 hours. This is automatically the case when *MAISON_TESTING* is set to 1.
+QUICK_TURN          |    0      | If = 1, HOURS_24 state is fired every 2 minutes instead of 24 hours. This is automatically the case when *MAISON_TESTING* is set to 1, unless QUICK_TURN is also defined in build_flags.
 MAISON_PREFIX_TOPIC | maison/   | All topics used by the framework are prefixed with this text   
 MAISON_STATUS_TOPIC | maison/status | Topic where the framework status are sent
 MAISON_CTRL_TOPIC   | maison/ctrl   | Topic where the framework event controls are sent

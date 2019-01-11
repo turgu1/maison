@@ -108,7 +108,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <p>The sections below describe the specific of these requirements.</p>
 <h2>Overview</h2>
 <p>The <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> library supplies the usual algorithms required for an IOT device to interact within an event management architecture based on the use of a MQTT broker for message exchanges. It helps the programmer in the management of the various aspects of integrating the code responsible of the functionality of the IOT device with the intricacies of managing the lifespan inside the architecture.</p>
-<p>...</p>
+<p>(To be completed)</p>
+<p>The following sequence diagram shows the automated interaction between the device and the MQTT broker.</p>
+<div class="image">
+<img src="doc/sequence_uml.png" />
+</div>
 <h2>Building an Application</h2>
 <p>The <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> framework is using the following libraries and, through its library configuration, automate their retrieval through the PlatformIO ecosystem:</p>
 <ul>
@@ -127,7 +131,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td align="center">MAISON_TESTING </td><td align="center">0 </td><td>If = 1, enable debuging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> function. </td></tr>
 <tr>
-<td align="center">QUICK_TURN </td><td align="center">0 </td><td>If = 1, WATCHDOG messages are sent every 2 minutes instead of 24 hours. This is automatically the case when <em>MAISON_TESTING</em> is set to 1. </td></tr>
+<td align="center">QUICK_TURN </td><td align="center">0 </td><td>If = 1, HOURS_24 state is fired every 2 minutes instead of 24 hours. This is automatically the case when <em>MAISON_TESTING</em> is set to 1, unless QUICK_TURN is also defined in build_flags. </td></tr>
 <tr>
 <td align="center">MAISON_PREFIX_TOPIC </td><td align="center">maison/ </td><td>All topics used by the framework are prefixed with this text </td></tr>
 <tr>
