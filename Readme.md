@@ -233,6 +233,22 @@ mqtt_user_name / mqtt_password | These are the credentials to connect to the MQT
 mqtt_port | The TLS/SSL port number of the MQTT server.
 mqtt_fingerprint | This is the fingerprint associated with the MQTT service certificate. It must be a vector of 20 decimal values. Each value correspond to a byte part of the fingerprint. This is used to validate the MQTT server by the BearSSL library.
 
+### PlatformIO configuration
+
+A SPIFFS flash file system must be put in place on the targeted device. This can be accomplished through the following process, as described in the [platformio documentation](https://docs.platformio.org/en/latest/platforms/espressif8266.html#uploading-files-to-file-system-spiffs):
+
+1. Put the **config.json** in a folder named `data` located at the same level as for the application `src` folder.
+
+2. Add the following compilation options to the `build_flags` element of the **platformio.ini** file:
+
+```
+-Wl,-Teagle.flash.4m1m.ld
+```
+3. Connect the device to the computer
+
+4. Initiate the flash memory preparation of the SPIFFS file system using the following PlatformIO "Upload File System image" task from the IDE.
+
+
 ## Messages sent by the framework
 
 The Maison framework automate some messages that are sent to the **maison/status** topic. All messages are sent using a JSON formatted string. 

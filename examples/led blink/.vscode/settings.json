@@ -1,0 +1,6 @@
+{
+  "terminal.integrated.env.linux": {
+    "PATH": "/home/turgu1/.platformio/penv/bin:/home/turgu1/.platformio/penv:/home/turgu1/.asdf/shims:/home/turgu1/.asdf/bin:/usr/local/blender:/home/turgu1/bin:/home/turgu1/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games",
+    "PLATFORMIO_CALLER": "vscode"
+  }
+}

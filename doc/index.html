@@ -213,6 +213,16 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td align="center">mqtt_fingerprint </td><td>This is the fingerprint associated with the MQTT service certificate. It must be a vector of 20 decimal values. Each value correspond to a byte part of the fingerprint. This is used to validate the MQTT server by the BearSSL library. </td></tr>
 </table>
+<h3>PlatformIO configuration</h3>
+<p>A SPIFFS flash file system must be put in place on the targeted device. This can be accomplished through the following process, as described in the <a href="https://docs.platformio.org/en/latest/platforms/espressif8266.html#uploading-files-to-file-system-spiffs">platformio documentation</a>:</p>
+<ol type="1">
+<li>Put the <b>config.json</b> in a folder named <code>data</code> located at the same level as for the application <code>src</code> folder.</li>
+<li>Add the following compilation options to the <code>build_flags</code> element of the <b>platformio.ini</b> file:</li>
+</ol>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;-Wl,-Teagle.flash.4m1m.ld</div></div><!-- fragment --><ol type="1">
+<li>Connect the device to the computer</li>
+<li>Initiate the flash memory preparation of the SPIFFS file system using the following PlatformIO "Upload File System image" task from the IDE.</li>
+</ol>
 <h2>Messages sent by the framework</h2>
 <p>The <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> framework automate some messages that are sent to the <b>maison/status</b> topic. All messages are sent using a JSON formatted string.</p>
 <p>Here is a description of each message sent, namely:</p>
