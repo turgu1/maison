@@ -258,7 +258,9 @@ A SPIFFS flash file system must be put in place on the targeted device. This can
 ```
 3. Connect the device to the computer
 
-4. Initiate the flash memory preparation of the SPIFFS file system using the PlatformIO "Upload File System image" task from the IDE.
+4. Kill the PlatformIO Serial Monitor. The next step won't work if the Serial Monitor is working.
+
+5. Initiate the flash memory preparation of the SPIFFS file system using the PlatformIO "Upload File System image" task from the IDE.
 
 ## 6. MQTT Broker
 

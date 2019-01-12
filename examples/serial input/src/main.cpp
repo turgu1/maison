@@ -7,10 +7,11 @@
 // The framework requires the presence of a file named "/config.json" 
 // located in the device SPIFFS flash file system. To do so, please 
 //
-// 1. update the supplied data/config.json.sample file to your
+// 1. Update the supplied data/config.json.sample file to your
 //    network configuration parameters
-// 2. rename it to data/config.json
-// 3. launch the "Upload File System Image" task of the PlatformIO IDE.
+// 2. Rename it to data/config.json
+// 3. Kill the PlatformIO Serial Monitor
+// 4. Launch the "Upload File System Image" task of the PlatformIO IDE.
 //
 // Guy Turcotte
 // 2019/01/11
@@ -24,8 +25,9 @@ SoftwareSerial my_serial(13, 15, false, 256);
 
 Maison maison(Maison::WATCHDOG_24H);
 
-#define CR 13
-#define LF 10
+#define CR  ((char) 13)
+#define LF  ((char) 10)
+#define TAB ((char)  9)
 
 char buffer[256];
 int idx;
@@ -43,22 +45,30 @@ Maison::UserResult process(Maison::State state)
             return Maison::NEW_EVENT;
           }
         }
-        else if (idx < 255) {
-          buffer[idx++] = ch;
+        else if ((ch == '"') || (ch == TAB) || (ch == '\\')) {
+          if (idx < 254) {
+            buffer[idx++] = '\\';
+            buffer[idx++] = (ch == TAB) ? 't' : ch;
+          }
+        }
+        else if ((ch >= ' ') && (ch < 127)) {
+          if (idx < 255) {
+            buffer[idx++] = ch;
+          }
         }
       }
       break;
 
     case Maison::PROCESS_EVENT:
-      Serial.print("Received: ");
-      Serial.println(buffer);
+      //Serial.print("Received: ");
+      //Serial.println(buffer);
       maison.send_msg(
         MAISON_CTRL_TOPIC, 
-        "{\"device\":%s,"
+        "{\"device\":\"%s\","
         "\"msg_type\":\"EVENT_DATA\","
         "\"content\":\"%s\"}",
         maison.get_device_name(),
-        buffer)
+        buffer);
       break;
 
     case Maison::END_EVENT:
@@ -76,18 +86,19 @@ Maison::UserResult process(Maison::State state)
 void setup() 
 {
   delay(100);
-  Serial.begin(74880);
+  //Serial.begin(74880);
   my_serial.begin(2400);
   
   maison.setup();
 
   idx = 0;
 
-  IPAddress ip = WiFi.localIP();
-  Serial.print("IP Address:");
-  Serial.println(ip);
+  //IPAddress ip = WiFi.localIP();
+  //Serial.print("IP Address:");
+  //Serial.println(ip);
 }
 
-void loop() {
+void loop() 
+{
   maison.loop(process);
 }
