@@ -315,7 +315,7 @@ class Maison
     /// Get elapsed time since the last call to user process in the preceding loop call.
     /// @return Elapsed time in microseconds.
     inline long last_loop_duration() { 
-      return mem.elapse_time(); 
+      return mem.elapse_time; 
     }
 
     /// Returns a complete device related topic name, built using the default prefix and
