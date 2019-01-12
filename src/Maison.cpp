@@ -334,7 +334,7 @@ void Maison::loop(Process * _process)
 
     case WAIT_END_EVENT:
       if (res != NOT_COMPLETED) {
-        new_state = new_sub_state = WAIT_FOR_EVENT;
+        new_state = new_sub_state = END_EVENT;
       }
       else {
         new_sub_state = WAIT_END_EVENT;
