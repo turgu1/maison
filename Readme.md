@@ -34,7 +34,7 @@ The Maison framework, to be functional, requires the following:
 
 The sections below describe the specific of these requirements.
 
-## Overview
+## 1. Overview
 
 The Maison library supplies the usual algorithms required for an IOT device to interact within an event management architecture based on the use of a MQTT broker for message exchanges. It helps the programmer in the management of the various aspects of integrating the code responsible of the functionality of the IOT device with the intricacies of managing the lifespan inside the architecture.
 
@@ -44,7 +44,7 @@ The following sequence diagram shows the automated interaction between the devic
 
 ![](doc/sequence_uml.png)
 
-## Building an Application
+## 2. Building an Application
 
 The Maison framework is using the following libraries and, through its library configuration, automate their retrieval through the PlatformIO ecosystem:
 
@@ -67,7 +67,7 @@ The following options in `platformio.ini` **shall** also be used:
 framework = arduino
 platform = espressif8266
 ```
-### Compilation Options
+### 2.1 Compilation Options
 
 The Maison framework allow for some defined options to be modified through -D compilation parameters (PlatformIO: build_flags). The following are the compilation options available to change some library behavior:
 
@@ -85,7 +85,17 @@ Note that for *MAISON_STATUS_TOPIC* and *MAISON_CTRL_TOPIC*, they will be modifi
 
 The framework will subscribe to MQTT messages coming from the server on a topic built using *MAISON_PREFIX_TOPIC*, the device name and *CTRL_SUFFIX_TOPIC*. For example, if the device name is "WATER_SPILL", the subscribed topic would be `maison/WATER_SPILL/ctrl`.
 
-## Code Usage
+## 3. Usage
+
+The Maison framework is expecting the following aspects to be properly in place for its usage on a device:
+
+1. [Application Source Code](#application-source-code) with the Maison framework integration.
+2. A [Configuration Parameters](#configuration-parameters) file.
+3. A [MQTT broker](#mqtt-broker) on a networked server.
+
+The following sections explain each of this elements. 
+
+## 4. Application Source Code
 
 Here is a minimal piece of code to initialize and start the framework:
 
@@ -156,18 +166,18 @@ The use of `process_state` and `set_msg_callback` is optional.
 
 In the following sections, we describe the specific aspects of this code example.
 
-### Include File
+### 4.1 Include File
 
 The `#include <Maison.h>` integrates the Maison header into the user application. This will import the Maison class declaration and a bunch of definitions that are documented below. All required libraries needed by the framework are also included by this call.
 
-### Maison Declaration
+### 4.2 Maison Declaration
 
 The `Maison maison(...)` declaration create an instance of the framework. This declaration accepts the following parameters:
 
 * An optional [feature mask](#feature-mask), to enable some aspects of the framework (see table below).
-* An optional [user application memory structure](#user-application-memory-structure) (here named `my_state`) and it's size to be automatically saved in non-volatile memory when DeepSleep is enabled.
+* An optional [user application state structure](#user-application-state-structure) (here named `my_state`) and it's size to be automatically saved in non-volatile memory when DeepSleep is enabled.
 
-#### Feature Mask
+#### 4.2.1 Feature Mask
 
 The following table show the current features supported through the feature mask (They are part of the Maison::Feature enum definition):
 
@@ -186,13 +196,15 @@ Note: if the *VOLTAGE_CHECK* feature is selected, the following line is required
 ADC_MODE(ADC_VCC);
 ```
 
-#### User Application Memory Structure
+#### 4.2.2 User Application State Structure
 
-The user application memory structure **shall** have a `uint32_t` item as the first element in the structure. This is used by the framework to verify that the content saved in non-volatile memory is valid using a CRC-32 checksum. The whole content will be initialized (zeroed) if the checksum is bad. The checksum is computed by the framework, the user application just need to supplied the space in the structure.
+The user application state structure (here named `user_data`) **shall** have a `uint32_t` item as the first element in the structure. This is used by the framework to verify that the content saved in non-volatile memory is valid using a CRC-32 checksum. The whole content will be initialized (zeroed) if the checksum is bad. The checksum is computed by the framework, the user application just need to supplied the space in the structure.
 
-#### maison.loop
+This structure is optional and could be required by the application when the *DEEP_SLEEP* feature is selected. It will allow for the saving and retrieval of the current application state as the Deep Sleep feature induce processor resets that invalidate the memory content.
 
-The Maison::loop function must be called regularly in your main loop function to permit the execution of the finite state machine and receiving new MQTT messages. As a parameter the Maison::loop function accepts a processing function that will be called by Maison inside the finite state machine. The function will receive the current state value as a parameter. It must return a status value from the following list:
+### 4.3 maison.loop()
+
+The Maison::loop() function must be called regularly in the user application main loop function to permit the execution of the finite state machine and the receiving of new MQTT messages. As a parameter, the Maison::loop() function accepts a processing function that will be called by Maison inside the finite state machine. The function will receive the current state value as a parameter. It must return a status value from the following list:
 
 Value         | Description
 :------------:|----------------
@@ -201,9 +213,9 @@ NOT_COMPLETED | The reverse of *COMPLETED*. Mainly used with *PROCESS_EVENT* in 
 ABORTED       | Return in the case of *PROCESS_EVENT* when the event vanished before processing, such that the finite state machine return to the *WAIT_FOR_EVENT* state instead of going to the *WAIT_END_EVENT* state.
 NEW_EVENT     | Returned when processing a *WAIT_FOR_EVENT* state to indicate that an event must be processed.
 
-Note: if the *DEEP_SLEEP* feature was enabled, the loop will almost never return as the processor will wait for further processing through a call to ESP.deep_sleep function. The processor, after the wait time, will restart the code from the beginning. 
+Note: if the *DEEP_SLEEP* feature was enabled, the loop will almost never return as the processor will wait for further processing through a call to ESP.deep_sleep function. The processor, after the wait time, will restart the code execution from the beginning. 
 
-## Configuration Parameters
+## 5. Configuration Parameters
 
 The Maison framework is automating access to the MQTT message broker through the WiFi connection. As such, parameters are required to link the device to the WiFi network and the MQTT broker server. A file named "/config.json" must be created on a SPIFFS file system in flash memory. This is a JSON structured file. Here is an example of such a file:
 
@@ -233,7 +245,7 @@ mqtt_user_name / mqtt_password | These are the credentials to connect to the MQT
 mqtt_port | The TLS/SSL port number of the MQTT server.
 mqtt_fingerprint | This is the fingerprint associated with the MQTT service certificate. It must be a vector of 20 decimal values. Each value correspond to a byte part of the fingerprint. This is used to validate the MQTT server by the BearSSL library.
 
-### PlatformIO configuration
+### 5.1 PlatformIO configuration
 
 A SPIFFS flash file system must be put in place on the targeted device. This can be accomplished through the following process, as described in the [platformio documentation](https://docs.platformio.org/en/latest/platforms/espressif8266.html#uploading-files-to-file-system-spiffs):
 
@@ -246,10 +258,13 @@ A SPIFFS flash file system must be put in place on the targeted device. This can
 ```
 3. Connect the device to the computer
 
-4. Initiate the flash memory preparation of the SPIFFS file system using the following PlatformIO "Upload File System image" task from the IDE.
+4. Initiate the flash memory preparation of the SPIFFS file system using the PlatformIO "Upload File System image" task from the IDE.
 
+## 6. MQTT Broker
 
-## Messages sent by the framework
+(To be completed)
+
+## 7. Messages sent by the framework
 
 The Maison framework automate some messages that are sent to the **maison/status** topic. All messages are sent using a JSON formatted string. 
 
@@ -260,7 +275,7 @@ Here is a description of each message sent, namely:
 * The Watchdog message
 * The Config message
 
-### The Startup message
+### 7.1 The Startup message
 
 This message is sent to the MQTT topic **maison/status** when the device is reset (Usually because of a Power-On action or a reset button being pressed). It is not sent when a DeepSleep wake-up action is taken by the device.
 
@@ -289,7 +304,7 @@ Example:
 {"device":"WATER_SPILL","msg_type":"STARTUP","reason":6,"VBAT":3.0}
 ```
 
-### The Status message
+### 7.2 The Status message
 
 This message is sent to the MQTT topic **maison/status** when a message sent to the device control topic (e.g. **maison/device_name/ctrl**) containing the string "STATE?" is received.
 
@@ -311,7 +326,7 @@ Example:
 {"device":"WATER_SPILL","msg_type":"STATE","state":2,"hours":7,"millis":8001,"lost":0,"rssi":-63,"heap":16704,"VBAT":3.0}
 ```
 
-### The Watchdog Message
+### 7.3 The Watchdog Message
 
 This message is sent to the MQTT topic **maison/status** every 24 hours. Its transmission is enabled through the *WATCHDOG_24H* feature. See the description of the [Feature Mask](#feature-mask).
 
@@ -327,7 +342,7 @@ Example:
 {"device":"WATER_SPILL","msg_type":"WATCHDOG","VBAT":3.0}
 ```
 
-### The Config message
+### 7.4 The Config message
 
 This message is sent to the MQTT topic **maison/status** when a message sent to the device control topic (e.g. **maison/device_name/ctrl**) containing the string "CONFIG?" is received.
 
@@ -353,7 +368,7 @@ Example:
 }}
 ```
 
-## The Finite State Machine
+## 8. The Finite State Machine
 
 The finite state machine is processed inside the `Maison::loop()` function.
 
@@ -372,7 +387,7 @@ Here is a state diagram showing the inter-relationship between each state and th
 
 ![](doc/state_uml.png)
 
-## Usage on battery power
+## 9. Usage on battery power
 
 The Maison framework can be tailored to use Deep Sleep when on battery power, through the *DEEP_SLEEP* [feature](#feature-mask). 
 

@@ -106,14 +106,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>Configuration parameters located in SPIFFS (file <code>/config.json</code>). Look at the <a href="#configuration-parameters">Configuration Parameters</a> section.</li>
 </ul>
 <p>The sections below describe the specific of these requirements.</p>
-<h2>Overview</h2>
+<h2>1. Overview</h2>
 <p>The <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> library supplies the usual algorithms required for an IOT device to interact within an event management architecture based on the use of a MQTT broker for message exchanges. It helps the programmer in the management of the various aspects of integrating the code responsible of the functionality of the IOT device with the intricacies of managing the lifespan inside the architecture.</p>
 <p>(To be completed)</p>
 <p>The following sequence diagram shows the automated interaction between the device and the MQTT broker.</p>
 <div class="image">
 <img src="doc/sequence_uml.png" />
 </div>
-<h2>Building an Application</h2>
+<h2>2. Building an Application</h2>
 <p>The <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> framework is using the following libraries and, through its library configuration, automate their retrieval through the PlatformIO ecosystem:</p>
 <ul>
 <li>PubSubClient</li>
@@ -123,7 +123,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <p>The following options <b>shall</b> be added to the <code>plarformio.ini</code> file of your application to integrate the framework:</p>
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;lib_deps = https://github.com/turgu1/maison.git</div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;build_flags = -D MQTT_MAX_PACKET_SIZE=512</div></div><!-- fragment --><p>Note that <em>MQTT_MAX_PACKET_SIZE</em> can be larger depending of the application requirements.</p>
 <p>The following options in <code>platformio.ini</code> <b>shall</b> also be used:</p>
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;framework = arduino</div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;platform = espressif8266</div></div><!-- fragment --> <h3>Compilation Options</h3>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;framework = arduino</div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;platform = espressif8266</div></div><!-- fragment --> <h3>2.1 Compilation Options</h3>
 <p>The <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> framework allow for some defined options to be modified through -D compilation parameters (PlatformIO: build_flags). The following are the compilation options available to change some library behavior:</p>
 <table class="doxtable">
 <tr>
@@ -145,21 +145,29 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </table>
 <p>Note that for <em>MAISON_STATUS_TOPIC</em> and <em>MAISON_CTRL_TOPIC</em>, they will be modified automatically if <em>MAISON_PREFIX_TOPIC</em> is changed. For example, if you change <em>MAISON_PREFIX_TOPIC</em> to be <code>home/</code>, <em>MAISON_STATUS_TOPIC</em> will become <code>home/status</code> and <em>MAISON_CTRL_TOPIC</em> will become <code>maison/ctrl</code>.</p>
 <p>The framework will subscribe to MQTT messages coming from the server on a topic built using <em>MAISON_PREFIX_TOPIC</em>, the device name and <em>CTRL_SUFFIX_TOPIC</em>. For example, if the device name is "WATER_SPILL", the subscribed topic would be <code>maison/WATER_SPILL/ctrl</code>.</p>
-<h2>Code Usage</h2>
+<h2>3. Usage</h2>
+<p>The <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> framework is expecting the following aspects to be properly in place for its usage on a device:</p>
+<ol type="1">
+<li><a href="#application-source-code">Application Source Code</a> with the <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> framework integration.</li>
+<li>A <a href="#configuration-parameters">Configuration Parameters</a> file.</li>
+<li>A <a href="#mqtt-broker">MQTT broker</a> on a networked server.</li>
+</ol>
+<p>The following sections explain each of this elements.</p>
+<h2>4. Application Source Code</h2>
 <p>Here is a minimal piece of code to initialize and start the framework:</p>
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;{C++}</div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;#include &lt;Maison.h&gt;</div><div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;</div><div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;Maison maison();</div><div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;</div><div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;void setup()</div><div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;{</div><div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;  maison.setup();</div><div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;}</div><div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;</div><div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;void loop()</div><div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;{</div><div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;  maison.loop();</div><div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;}</div></div><!-- fragment --><p>This piece of code won't do much at the user application level, but it will set the scene to the automation of exchanges with a MQTT message broker, sending startup/watchdog messages, answering information requests, changes of configuration, completely automated through <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> framework.</p>
 <p>Here is a more complete example of code to be used to initialize the framework with optional features and integrate it in the loop() function. It shows both option parameters, calls to the framework with message callback and finite state machine functions:</p>
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;{C++}</div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;ADC_MODE(ADC_VCC);</div><div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;</div><div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;#include &lt;Maison.h&gt;</div><div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;</div><div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;struct user_data {</div><div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;  uint32_t crc;</div><div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;  int my_data;</div><div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;  ...</div><div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;} my_state;</div><div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;</div><div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;Maison maison(Maison::Feature::WATCHDOG_24H|</div><div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;              Maison::Feature::VOLTAGE_CHECK,</div><div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;              &amp;my_state, sizeof(my_state));</div><div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;</div><div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;void msg_callback(const char  * topic,</div><div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;                  byte        * payload,</div><div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;                  unsigned int  length)</div><div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;{</div><div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;</div><div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;}</div><div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;</div><div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;Maison::UserResult process_state(Maison::State state)</div><div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;{</div><div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;  switch (state) {</div><div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    case ...</div><div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;  }</div><div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div><div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;  return Maison::UserResult::COMPLETED;</div><div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;}</div><div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;</div><div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;void setup()</div><div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;{</div><div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  maison.setup();</div><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;  maison.set_msg_callback(&quot;my_topic&quot;, msg_callback, 0);</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;}</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;void loop()</div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;{</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  maison.loop(process_state);</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;}</div></div><!-- fragment --><p>The use of <code>process_state</code> and <code>set_msg_callback</code> is optional.</p>
 <p>In the following sections, we describe the specific aspects of this code example.</p>
-<h3>Include File</h3>
+<h3>4.1 Include File</h3>
 <p>The <code>#include &lt;<a class="el" href="Maison_8h_source.html">Maison.h</a>&gt;</code> integrates the <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> header into the user application. This will import the <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> class declaration and a bunch of definitions that are documented below. All required libraries needed by the framework are also included by this call.</p>
-<h3><a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> Declaration</h3>
+<h3>4.2 <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> Declaration</h3>
 <p>The <code><a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> maison(...)</code> declaration create an instance of the framework. This declaration accepts the following parameters:</p>
 <ul>
 <li>An optional <a href="#feature-mask">feature mask</a>, to enable some aspects of the framework (see table below).</li>
-<li>An optional <a href="#user-application-memory-structure">user application memory structure</a> (here named <code>my_state</code>) and it's size to be automatically saved in non-volatile memory when DeepSleep is enabled.</li>
+<li>An optional <a href="#user-application-state-structure">user application state structure</a> (here named <code>my_state</code>) and it's size to be automatically saved in non-volatile memory when DeepSleep is enabled.</li>
 </ul>
-<h4>Feature Mask</h4>
+<h4>4.2.1 Feature Mask</h4>
 <p>The following table show the current features supported through the feature mask (They are part of the <a class="el" href="classMaison.html#a78d9ef41e0b19f1018697766cf7d47d7">Maison::Feature</a> enum definition):</p>
 <table class="doxtable">
 <tr>
@@ -175,10 +183,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </table>
 <p>To use them, you have to prefix them with <code><a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a>::</code> or <code><a class="el" href="classMaison.html#a78d9ef41e0b19f1018697766cf7d47d7">Maison::Feature</a>::</code> as shown in the code example.</p>
 <p>Note: if the <em>VOLTAGE_CHECK</em> feature is selected, the following line is required to be put at the beginning of the main application sketch:</p>
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;{C++}</div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;ADC_MODE(ADC_VCC);</div></div><!-- fragment --><h4>User Application Memory Structure</h4>
-<p>The user application memory structure <b>shall</b> have a <code>uint32_t</code> item as the first element in the structure. This is used by the framework to verify that the content saved in non-volatile memory is valid using a CRC-32 checksum. The whole content will be initialized (zeroed) if the checksum is bad. The checksum is computed by the framework, the user application just need to supplied the space in the structure.</p>
-<h4>maison.loop</h4>
-<p>The <a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">Maison::loop</a> function must be called regularly in your main loop function to permit the execution of the finite state machine and receiving new MQTT messages. As a parameter the <a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">Maison::loop</a> function accepts a processing function that will be called by <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> inside the finite state machine. The function will receive the current state value as a parameter. It must return a status value from the following list:</p>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;{C++}</div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;ADC_MODE(ADC_VCC);</div></div><!-- fragment --><h4>4.2.2 User Application State Structure</h4>
+<p>The user application state structure (here named <code>user_data</code>) <b>shall</b> have a <code>uint32_t</code> item as the first element in the structure. This is used by the framework to verify that the content saved in non-volatile memory is valid using a CRC-32 checksum. The whole content will be initialized (zeroed) if the checksum is bad. The checksum is computed by the framework, the user application just need to supplied the space in the structure.</p>
+<p>This structure is optional and could be required by the application when the <em>DEEP_SLEEP</em> feature is selected. It will allow for the saving and retrieval of the current application state as the Deep Sleep feature induce processor resets that invalidate the memory content.</p>
+<h3>4.3 maison.loop()</h3>
+<p>The <a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">Maison::loop()</a> function must be called regularly in the user application main loop function to permit the execution of the finite state machine and the receiving of new MQTT messages. As a parameter, the <a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">Maison::loop()</a> function accepts a processing function that will be called by <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> inside the finite state machine. The function will receive the current state value as a parameter. It must return a status value from the following list:</p>
 <table class="doxtable">
 <tr>
 <th align="center">Value </th><th>Description  </th></tr>
@@ -191,8 +200,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td align="center">NEW_EVENT </td><td>Returned when processing a <em>WAIT_FOR_EVENT</em> state to indicate that an event must be processed. </td></tr>
 </table>
-<p>Note: if the <em>DEEP_SLEEP</em> feature was enabled, the loop will almost never return as the processor will wait for further processing through a call to ESP.deep_sleep function. The processor, after the wait time, will restart the code from the beginning.</p>
-<h2>Configuration Parameters</h2>
+<p>Note: if the <em>DEEP_SLEEP</em> feature was enabled, the loop will almost never return as the processor will wait for further processing through a call to ESP.deep_sleep function. The processor, after the wait time, will restart the code execution from the beginning.</p>
+<h2>5. Configuration Parameters</h2>
 <p>The <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> framework is automating access to the MQTT message broker through the WiFi connection. As such, parameters are required to link the device to the WiFi network and the MQTT broker server. A file named "/config.json" must be created on a SPIFFS file system in flash memory. This is a JSON structured file. Here is an example of such a file:</p>
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;{</div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;  &quot;version&quot; : 1,</div><div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;  &quot;device_name&quot; : &quot;WATER_SPILL&quot;,</div><div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;  &quot;ssid&quot; : &quot;the wifi ssid&quot;,</div><div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;  &quot;wifi_password&quot; : &quot;the wifi password&quot;,</div><div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;  &quot;mqtt_server_name&quot; : &quot;the server name or IP address&quot;,</div><div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;  &quot;mqtt_user_name&quot; : &quot;the user name&quot;,</div><div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;  &quot;mqtt_password&quot; : &quot;password&quot;,</div><div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;  &quot;mqtt_port&quot; : 8883,</div><div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;  &quot;mqtt_fingerprint&quot; : [13,217,75,226,184,245,80,117,113,43,18,251,39,75,237,77,35,65,10,19]</div><div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;}</div></div><!-- fragment --><p>All parameters must be present in the file to be considered valid by the framework. Here is a description of each parameter:</p>
 <table class="doxtable">
@@ -213,7 +222,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td align="center">mqtt_fingerprint </td><td>This is the fingerprint associated with the MQTT service certificate. It must be a vector of 20 decimal values. Each value correspond to a byte part of the fingerprint. This is used to validate the MQTT server by the BearSSL library. </td></tr>
 </table>
-<h3>PlatformIO configuration</h3>
+<h3>5.1 PlatformIO configuration</h3>
 <p>A SPIFFS flash file system must be put in place on the targeted device. This can be accomplished through the following process, as described in the <a href="https://docs.platformio.org/en/latest/platforms/espressif8266.html#uploading-files-to-file-system-spiffs">platformio documentation</a>:</p>
 <ol type="1">
 <li>Put the <b>config.json</b> in a folder named <code>data</code> located at the same level as for the application <code>src</code> folder.</li>
@@ -221,9 +230,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </ol>
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;-Wl,-Teagle.flash.4m1m.ld</div></div><!-- fragment --><ol type="1">
 <li>Connect the device to the computer</li>
-<li>Initiate the flash memory preparation of the SPIFFS file system using the following PlatformIO "Upload File System image" task from the IDE.</li>
+<li>Initiate the flash memory preparation of the SPIFFS file system using the PlatformIO "Upload File System image" task from the IDE.</li>
 </ol>
-<h2>Messages sent by the framework</h2>
+<h2>6. MQTT Broker</h2>
+<p>(To be completed)</p>
+<h2>7. Messages sent by the framework</h2>
 <p>The <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> framework automate some messages that are sent to the <b>maison/status</b> topic. All messages are sent using a JSON formatted string.</p>
 <p>Here is a description of each message sent, namely:</p>
 <ul>
@@ -232,7 +243,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>The Watchdog message</li>
 <li>The Config message</li>
 </ul>
-<h3>The Startup message</h3>
+<h3>7.1 The Startup message</h3>
 <p>This message is sent to the MQTT topic <b>maison/status</b> when the device is reset (Usually because of a Power-On action or a reset button being pressed). It is not sent when a DeepSleep wake-up action is taken by the device.</p>
 <table class="doxtable">
 <tr>
@@ -266,7 +277,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <td align="center">6 </td><td>Hardware Reset </td></tr>
 </table>
 <p>Example:</p>
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;{&quot;device&quot;:&quot;WATER_SPILL&quot;,&quot;msg_type&quot;:&quot;STARTUP&quot;,&quot;reason&quot;:6,&quot;VBAT&quot;:3.0}</div></div><!-- fragment --><h3>The Status message</h3>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;{&quot;device&quot;:&quot;WATER_SPILL&quot;,&quot;msg_type&quot;:&quot;STARTUP&quot;,&quot;reason&quot;:6,&quot;VBAT&quot;:3.0}</div></div><!-- fragment --><h3>7.2 The Status message</h3>
 <p>This message is sent to the MQTT topic <b>maison/status</b> when a message sent to the device control topic (e.g. <b>maison/device_name/ctrl</b>) containing the string "STATE?" is received.</p>
 <table class="doxtable">
 <tr>
@@ -291,7 +302,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <td align="center">VBAT </td><td>This is the Battery voltage. This parameter is optional. Its presence depends on the <em>VOLTAGE_CHECK</em> feature. See the description of the <a href="#feature-mask">Feature Mask</a>. </td></tr>
 </table>
 <p>Example:</p>
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;{&quot;device&quot;:&quot;WATER_SPILL&quot;,&quot;msg_type&quot;:&quot;STATE&quot;,&quot;state&quot;:2,&quot;hours&quot;:7,&quot;millis&quot;:8001,&quot;lost&quot;:0,&quot;rssi&quot;:-63,&quot;heap&quot;:16704,&quot;VBAT&quot;:3.0}</div></div><!-- fragment --><h3>The Watchdog Message</h3>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;{&quot;device&quot;:&quot;WATER_SPILL&quot;,&quot;msg_type&quot;:&quot;STATE&quot;,&quot;state&quot;:2,&quot;hours&quot;:7,&quot;millis&quot;:8001,&quot;lost&quot;:0,&quot;rssi&quot;:-63,&quot;heap&quot;:16704,&quot;VBAT&quot;:3.0}</div></div><!-- fragment --><h3>7.3 The Watchdog Message</h3>
 <p>This message is sent to the MQTT topic <b>maison/status</b> every 24 hours. Its transmission is enabled through the <em>WATCHDOG_24H</em> feature. See the description of the <a href="#feature-mask">Feature Mask</a>.</p>
 <table class="doxtable">
 <tr>
@@ -304,7 +315,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <td align="center">VBAT </td><td>This is the Battery voltage. This parameter is optional. Its presence depend on the <em>VOLTAGE_CHECK</em> feature. See the description of the <a href="#feature-mask">Feature Mask</a>. </td></tr>
 </table>
 <p>Example:</p>
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;{&quot;device&quot;:&quot;WATER_SPILL&quot;,&quot;msg_type&quot;:&quot;WATCHDOG&quot;,&quot;VBAT&quot;:3.0}</div></div><!-- fragment --><h3>The Config message</h3>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;{&quot;device&quot;:&quot;WATER_SPILL&quot;,&quot;msg_type&quot;:&quot;WATCHDOG&quot;,&quot;VBAT&quot;:3.0}</div></div><!-- fragment --><h3>7.4 The Config message</h3>
 <p>This message is sent to the MQTT topic <b>maison/status</b> when a message sent to the device control topic (e.g. <b>maison/device_name/ctrl</b>) containing the string "CONFIG?" is received.</p>
 <table class="doxtable">
 <tr>
@@ -317,7 +328,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <td align="center">content </td><td>This is the configuration of the device in a JSON format. See the <a href="#configuration-parameters">Configuration Parameters</a> section for the format details. </td></tr>
 </table>
 <p>Example:</p>
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;{&quot;device&quot;:&quot;WATER_SPILL&quot;,&quot;msg_type&quot;:&quot;CONFIG&quot;,&quot;content&quot;:{</div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;  &quot;version&quot;          : 1,</div><div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;  &quot;device_name&quot;      : &quot;TEST_DEV&quot;,</div><div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;  &quot;ssid&quot;             : &quot;the_ssid&quot;,</div><div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;  &quot;wifi_password&quot;    : &quot;the_password&quot;,</div><div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;  &quot;mqtt_server_name&quot; : &quot;the_server_sqdn&quot;,</div><div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;  &quot;mqtt_user_name&quot;   : &quot;the_mqtt_user_name&quot;,</div><div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;  &quot;mqtt_password&quot;    : &quot;the_mqtt_password&quot;,</div><div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;  &quot;mqtt_port&quot;        : 8883,</div><div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;  &quot;mqtt_fingerprint&quot; : [13,217,75,226,184,245,80,117,113,43,18,251,39,75,237,77,35,65,10,19]</div><div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;}}</div></div><!-- fragment --><h2>The Finite State Machine</h2>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;{&quot;device&quot;:&quot;WATER_SPILL&quot;,&quot;msg_type&quot;:&quot;CONFIG&quot;,&quot;content&quot;:{</div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;  &quot;version&quot;          : 1,</div><div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;  &quot;device_name&quot;      : &quot;TEST_DEV&quot;,</div><div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;  &quot;ssid&quot;             : &quot;the_ssid&quot;,</div><div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;  &quot;wifi_password&quot;    : &quot;the_password&quot;,</div><div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;  &quot;mqtt_server_name&quot; : &quot;the_server_sqdn&quot;,</div><div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;  &quot;mqtt_user_name&quot;   : &quot;the_mqtt_user_name&quot;,</div><div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;  &quot;mqtt_password&quot;    : &quot;the_mqtt_password&quot;,</div><div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;  &quot;mqtt_port&quot;        : 8883,</div><div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;  &quot;mqtt_fingerprint&quot; : [13,217,75,226,184,245,80,117,113,43,18,251,39,75,237,77,35,65,10,19]</div><div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;}}</div></div><!-- fragment --><h2>8. The Finite State Machine</h2>
 <p>The finite state machine is processed inside the <code><a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">Maison::loop()</a></code> function.</p>
 <p>When using the <em>DEEP_SLEEP</em> <a href="#feature-mask">feature</a>, networking is disabled for some of the states to minimize battery usage. If the <em>DEEP_SLEEP</em> feature is not used, networking is available all the time. The <code><a class="el" href="classMaison.html#a737fc95f3204808f969b025eb3a76d5c">Maison::network_is_available()</a></code> function can be used to check network availability.</p>
 <table class="doxtable">
@@ -340,7 +351,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="image">
 <img src="doc/state_uml.png" />
 </div>
-<h2>Usage on battery power</h2>
+<h2>9. Usage on battery power</h2>
 <p>The <a class="el" href="classMaison.html" title="Maison Framework Class. ">Maison</a> framework can be tailored to use Deep Sleep when on battery power, through the <em>DEEP_SLEEP</em> <a href="#feature-mask">feature</a>.</p>
 <p>In this context, the finite state machine will cause a call to the <code>ESP.deep_sleep()</code> function at the end of each of its processing cycle (function <code><a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">Maison::loop()</a></code>) to put the processor in a dormant state. The deep sleep duration, by default, is set to 5 seconds before entry to the states <em>PROCESS_EVENT</em>, <em>WAIT_END_EVENT</em>, <em>END_EVENT</em> and <em>HOURS_24</em>; it is 3600 seconds for <em>WAIT_FOR_EVENT</em>.</p>
 <p>If the deep sleep feature is enabled, the call to <code><a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">Maison::loop()</a></code> never return to the caller as the processor will reset after the deep sleep period.</p>
