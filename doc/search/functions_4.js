@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['is_5fhard_5freset',['is_hard_reset',['../classMaison.html#a23c10f853d29ee5a72ad282f7c40fda3',1,'Maison']]]
+  ['get_5fdevice_5fname',['get_device_name',['../classMaison.html#af45162b75d6bc2c083780ff46922b800',1,'Maison']]]
 ];

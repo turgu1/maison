@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['hours_5f24',['HOURS_24',['../classMaison.html#a36a00785b7fadfcb17bfd25641cbfb45a330daefb3541940eafcdad9a55d9576c',1,'Maison']]]
+  ['get_5fdevice_5fname',['get_device_name',['../classMaison.html#af45162b75d6bc2c083780ff46922b800',1,'Maison']]]
 ];

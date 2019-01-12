@@ -348,6 +348,12 @@ class Maison
     /// @param[in] _qos The QOS for the subscription.
     void set_msg_callback(Callback * _cb, const char * _topic, uint8_t _qos = 0);
 
+    /// Get device name. The device name is retrieve from the configuration and
+    /// sent back to the user as a constant string.
+    ///
+    /// @return The device name as a constant string
+    const char * get_device_name() { return config.device_name; }
+
     /// Function to be called by the application in the main loop to insure 
     /// proper actions by the framework.
     ///

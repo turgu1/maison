@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['process',['Process',['../classMaison.html#af2bd1f83b2706b8a2672d315634c0154',1,'Maison']]],
-  ['process_5fevent',['PROCESS_EVENT',['../classMaison.html#a36a00785b7fadfcb17bfd25641cbfb45a7144793f7780da320ef7516d60e186f9',1,'Maison']]]
+  ['network_5fis_5favailable',['network_is_available',['../classMaison.html#a737fc95f3204808f969b025eb3a76d5c',1,'Maison']]],
+  ['new_5fevent',['NEW_EVENT',['../classMaison.html#af939aa6abb28e19cace161a1398e4995ae21a162a40bf1dc8d1218d3b69c16e51',1,'Maison']]],
+  ['none',['NONE',['../classMaison.html#a78d9ef41e0b19f1018697766cf7d47d7a823a680e4b6a8861d19a9ecdbc325eff',1,'Maison']]],
+  ['not_5fcompleted',['NOT_COMPLETED',['../classMaison.html#af939aa6abb28e19cace161a1398e4995a96193193c07a8af6d352fe7917e005e3',1,'Maison']]]
 ];

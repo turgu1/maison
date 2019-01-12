@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['reset_5freason',['reset_reason',['../classMaison.html#acda2e5b68e5cce2e8705d005f087ead7',1,'Maison']]],
-  ['restart',['restart',['../classMaison.html#acf2f1aa6722ace5dd1d9d7b7092e7859',1,'Maison']]]
+  ['network_5fis_5favailable',['network_is_available',['../classMaison.html#a737fc95f3204808f969b025eb3a76d5c',1,'Maison']]]
 ];
