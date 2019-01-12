@@ -28,7 +28,7 @@ Note that the library maybe usable through the Arduino IDE, but this is not supp
 
 The Maison framework, to be functional, requires the following:
 
-* Proper application setup parameters in file `platformio.ini`. Look at the [Building an Application](#building-an-application) section;
+* Proper application setup parameters in file `platformio.ini`. Look at the [Building an Application](#2-building-an-application) section;
 * Code in the user application to setup and use the framework. Look at the [Code Usage](#code-usage) section;
 * Configuration parameters located in SPIFFS (file `/config.json`). Look at the [Configuration Parameters](#configuration-parameters) section.
 
