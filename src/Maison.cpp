@@ -267,6 +267,7 @@ void Maison::loop(Process * _process)
 
   if (use_deep_sleep()) {
     mem.elapse_time += micros();
+  }
   else {
     mem.elapse_time  = micros() - loop_time_marker;
   }
