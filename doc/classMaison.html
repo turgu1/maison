@@ -159,6 +159,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="separator:a20db75bbcbdca7c2b07316c5115db0aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a737fc95f3204808f969b025eb3a76d5c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a737fc95f3204808f969b025eb3a76d5c">network_is_available</a> ()</td></tr>
 <tr class="separator:a737fc95f3204808f969b025eb3a76d5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a707bd3cf0ee5bd3f651ebeb8651d2c4c"><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a707bd3cf0ee5bd3f651ebeb8651d2c4c">last_loop_duration</a> ()</td></tr>
+<tr class="separator:a707bd3cf0ee5bd3f651ebeb8651d2c4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a65cde93be7582956e277e8642f07eda4"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a65cde93be7582956e277e8642f07eda4">my_topic</a> (const char *_topic_suffix, char *_buffer, uint16_t _length)</td></tr>
 <tr class="separator:a65cde93be7582956e277e8642f07eda4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af413280ce9313153225211813e89db84"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#af413280ce9313153225211813e89db84">CRC32</a> (const uint8_t *_data, size_t _length)</td></tr>
@@ -498,6 +500,30 @@ Maison Sequence Diagram</div>
 </div><div class="memdoc">
 <p>Check if a reset is due to something else than Deep Sleep return.</p>
 <dl class="section return"><dt>Returns</dt><dd>True if a reset occurred that is not coming from a Deep Sleep return. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a707bd3cf0ee5bd3f651ebeb8651d2c4c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">long Maison::last_loop_duration </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get elapsed time since the last call to user process in the preceding loop call. </p><dl class="section return"><dt>Returns</dt><dd>Elapsed time in microseconds. </dd></dl>
 
 </div>
 </div>

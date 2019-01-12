@@ -312,6 +312,12 @@ class Maison
              ((mem.state & (STARTUP|PROCESS_EVENT|END_EVENT|HOURS_24)) != 0);
     }
 
+    /// Get elapsed time since the last call to user process in the preceding loop call.
+    /// @return Elapsed time in microseconds.
+    inline long last_loop_duration() { 
+      return mem.elapse_time(); 
+    }
+
     /// Returns a complete device related topic name, built using the default prefix and
     /// the device_name. The string will contain a zero byte at the end. If the buffer is too
     /// small, it will return a zero-length string.
@@ -374,6 +380,7 @@ class Maison
       uint16_t hours_24_count;      // Up to 24 hours
       uint16_t lost_count;          // How many MQTT lost connections since reset
       uint32_t one_hour_step_count; // Up to 3600 seconds in milliseconds
+      uint32_t elapse_time;
       uint32_t magic;
     } mem;
 
@@ -392,6 +399,7 @@ class Maison
     long         last_time_count;
     bool         counting_lost_connection;
     uint16_t     deep_sleep_wait_time;
+    uint32_t     loop_time_marker;
 
     char         buffer[MQTT_MAX_PACKET_SIZE];
 

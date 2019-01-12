@@ -265,6 +265,13 @@ void Maison::loop(Process * _process)
   set_deep_sleep_wait_time(
     is_short_reboot_time_needed() ? DEFAULT_SHORT_REBOOT_TIME : ONE_HOUR);
 
+  if (use_deep_sleep()) {
+    mem.elapse_time += micros();
+  else {
+    mem.elapse_time  = micros() - loop_time_marker;
+  }
+  loop_time_marker = micros();
+
   UserResult res = call_user_process(_process);
 
   DEBUG(F("User process result: ")); DEBUGLN(res);
@@ -720,12 +727,15 @@ void Maison::deep_sleep(bool _back_with_wifi, uint16_t _sleep_time_in_sec)
   
   delay(10);
   
+  uint32_t sleep_time = 1e6 * _sleep_time_in_sec;
+
   mem.one_hour_step_count += millis() + (1000u * _sleep_time_in_sec);
-    
+  mem.elapse_time = micros() - loop_time_marker + sleep_time;
+
   save_mems();
 
   ESP.deepSleep(
-    1e6 * _sleep_time_in_sec, 
+    sleep_time, 
     _back_with_wifi ? WAKE_RF_DEFAULT : WAKE_RF_DISABLED);  
 
   delay(1000);
