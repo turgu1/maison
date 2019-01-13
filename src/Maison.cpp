@@ -177,6 +177,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         "\"device\":\"%s\","
         "\"msg_type\":\"STATE\","
         "\"state\":%u,"
+        "\"sub_state\":%u,"
         "\"hours\":%u,"
         "\"millis\":%u,"
         "\"lost\":%u,"
@@ -186,6 +187,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         "}",
         config.device_name,
         mem.state,
+        mem.sub_state,
         mem.hours_24_count,
         mem.one_hour_step_count,
         mem.lost_count,
