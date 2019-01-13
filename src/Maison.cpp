@@ -57,8 +57,6 @@ bool Maison::setup()
 {
   SHOW("\nMaison::setup()\n");
 
-  DEBUG2("Setup: user mem length: "); DEBUGLN2(user_mem_length);
-  
   DO {
     if (!   load_mems()) ERROR("Unable to load states");
     if (! load_config()) ERROR("Unable to load config");
@@ -779,7 +777,7 @@ bool Maison::load_mems()
     }
 
     if (user_mem != NULL) {
-      if (!read_mem((uint32_t *) &user_mem, user_mem_length, sizeof(mem))) {
+      if (!read_mem((uint32_t *) user_mem, user_mem_length, sizeof(mem))) {
         DEBUGLN(F(" User state initialization"));
         if (!init_user_mem()) ERROR("Unable to initialize user state in rtc memory");
       }
