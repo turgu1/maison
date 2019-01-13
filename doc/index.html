@@ -199,6 +199,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <td align="center">ABORTED </td><td>Return in the case of <em>PROCESS_EVENT</em> when the event vanished before processing, such that the finite state machine return to the <em>WAIT_FOR_EVENT</em> state instead of going to the <em>WAIT_END_EVENT</em> state. </td></tr>
 <tr>
 <td align="center">NEW_EVENT </td><td>Returned when processing a <em>WAIT_FOR_EVENT</em> state to indicate that an event must be processed. </td></tr>
+<tr>
+<td align="center">RETRY </td><td>When in state <em>WAIT_END_EVENT</em>, will return back to <em>PROCESS_EVENT</em> to check again for event processing </td></tr>
 </table>
 <p>Note: if the <em>DEEP_SLEEP</em> feature was enabled, the loop will almost never return as the processor will wait for further processing through a call to ESP.deep_sleep function. The processor, after the wait time, will restart the code execution from the beginning.</p>
 <h2>5. Configuration Parameters</h2>
@@ -296,7 +298,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td align="center">lost </td><td>Counter of the number of time the connection to the MQTT broker has been lost. </td></tr>
 <tr>
-<td align="center">rssi </td><td>The WiFi signal strength of the connection to the router, in dBm. </td></tr>
+<td align="center">rssi </td><td>The WiFi signal strength of the connection to the router, a relative signal quality measurement. -50 means a pretty good signal, -75 fearly reasonnable and -100 means no signal. </td></tr>
 <tr>
 <td align="center">heap </td><td>The current value of the free heap space available on the device </td></tr>
 <tr>

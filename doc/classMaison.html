@@ -116,10 +116,14 @@ Public Types</h2></td></tr>
 <br />
  }</td></tr>
 <tr class="separator:a36a00785b7fadfcb17bfd25641cbfb45"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af939aa6abb28e19cace161a1398e4995"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#af939aa6abb28e19cace161a1398e4995">UserResult</a> : uint8_t { <a class="el" href="classMaison.html#af939aa6abb28e19cace161a1398e4995a3f282b1367f5511485585865d1adaa21">COMPLETED</a> = 1, 
+<tr class="memitem:af939aa6abb28e19cace161a1398e4995"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#af939aa6abb28e19cace161a1398e4995">UserResult</a> : uint8_t { <br />
+&#160;&#160;<a class="el" href="classMaison.html#af939aa6abb28e19cace161a1398e4995a3f282b1367f5511485585865d1adaa21">COMPLETED</a> = 1, 
 <a class="el" href="classMaison.html#af939aa6abb28e19cace161a1398e4995a96193193c07a8af6d352fe7917e005e3">NOT_COMPLETED</a>, 
 <a class="el" href="classMaison.html#af939aa6abb28e19cace161a1398e4995abb10ead7bd9915d55e762f15e721f60d">ABORTED</a>, 
-<a class="el" href="classMaison.html#af939aa6abb28e19cace161a1398e4995ae21a162a40bf1dc8d1218d3b69c16e51">NEW_EVENT</a>
+<a class="el" href="classMaison.html#af939aa6abb28e19cace161a1398e4995ae21a162a40bf1dc8d1218d3b69c16e51">NEW_EVENT</a>, 
+<br />
+&#160;&#160;<a class="el" href="classMaison.html#af939aa6abb28e19cace161a1398e4995a915cf23d5b8cd40373dd7fb8e0edf0a4">RETRY</a>
+<br />
  }</td></tr>
 <tr class="separator:af939aa6abb28e19cace161a1398e4995"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2bd1f83b2706b8a2672d315634c0154"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classMaison.html#af939aa6abb28e19cace161a1398e4995">UserResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#af2bd1f83b2706b8a2672d315634c0154">Process</a>(<a class="el" href="classMaison.html#a36a00785b7fadfcb17bfd25641cbfb45">State</a> _state)</td></tr>
@@ -132,9 +136,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a4ce060571e1080571ff01a064b84b21a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4ce060571e1080571ff01a064b84b21a"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Maison</b> (uint8_t _feature_mask)</td></tr>
 <tr class="separator:a4ce060571e1080571ff01a064b84b21a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abe2911128eba68c95a9ecf66c400cfff"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abe2911128eba68c95a9ecf66c400cfff"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Maison</b> (uint8_t _feature_mask, void *_user_mem, uint8_t _user_mem_length)</td></tr>
-<tr class="separator:abe2911128eba68c95a9ecf66c400cfff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ce7cb128c848156b1f09fc8e914028b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0ce7cb128c848156b1f09fc8e914028b"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Maison</b> (uint8_t _feature_mask, void *_user_mem, uint16_t _user_mem_length)</td></tr>
+<tr class="separator:a0ce7cb128c848156b1f09fc8e914028b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a82233f7ee65191feaecb9d2846278acc"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a82233f7ee65191feaecb9d2846278acc">setup</a> ()</td></tr>
 <tr class="separator:a82233f7ee65191feaecb9d2846278acc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a28fd8bac036c0c39ab208de51d24d36a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaison.html#a28fd8bac036c0c39ab208de51d24d36a">send_msg</a> (const char *_topic, const char *_format,...)</td></tr>
@@ -318,6 +322,9 @@ Maison Sequence Diagram</div>
 </td></tr>
 <tr><td class="fieldname"><a class="anchor" id="af939aa6abb28e19cace161a1398e4995ae21a162a40bf1dc8d1218d3b69c16e51"></a>NEW_EVENT&#160;</td><td class="fielddoc">
 <p>A new event occurred (in a <em>WAIT_FOR_EVENT</em> state) </p>
+</td></tr>
+<tr><td class="fieldname"><a class="anchor" id="af939aa6abb28e19cace161a1398e4995a915cf23d5b8cd40373dd7fb8e0edf0a4"></a>RETRY&#160;</td><td class="fielddoc">
+<p>From WAIT_END_EVENT, go back to PROCESS_EVENT. </p>
 </td></tr>
 </table>
 
