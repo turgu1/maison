@@ -840,7 +840,7 @@ bool Maison::init_user_mem()
 
   DEBUG(F("User Memory Length: "));
   DEBUGLN(user_mem_length);
-  byte *ptr = user_mem;
+  byte *ptr = (byte *) user_mem;
   // for (int i = 0; i < user_mem_length; i++) *ptr++ = 0;
   //memset(user_mem, 0, user_mem_length);
 
