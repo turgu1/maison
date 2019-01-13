@@ -36,7 +36,7 @@ Maison::Maison(uint8_t _feature_mask) :
   maison = this;
 }
 
-Maison::Maison(uint8_t _feature_mask, void * _user_mem, uint8_t _user_mem_length) :
+Maison::Maison(uint8_t _feature_mask, void * _user_mem, uint16_t _user_mem_length) :
   wifi_client(NULL),
   last_reconnect_attempt(0),
   connect_retry_count(0),

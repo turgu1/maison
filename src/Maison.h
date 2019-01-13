@@ -230,7 +230,7 @@ class Maison
 
     Maison();
     Maison(uint8_t _feature_mask);
-    Maison(uint8_t _feature_mask, void * _user_mem, uint8_t _user_mem_length);
+    Maison(uint8_t _feature_mask, void * _user_mem, uint16_t _user_mem_length);
 
     /// The Maison setup function. Normally to be called inside the application setup() 
     /// function.
@@ -404,7 +404,7 @@ class Maison
     uint8_t      user_qos;
     uint8_t      feature_mask;
     void       * user_mem;
-    uint8_t      user_mem_length;
+    uint16_t     user_mem_length;
     long         last_time_count;
     bool         counting_lost_connection;
     uint16_t     deep_sleep_wait_time;
