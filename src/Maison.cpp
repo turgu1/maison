@@ -45,18 +45,20 @@ Maison::Maison(uint8_t _feature_mask, void * _user_mem, uint16_t _user_mem_lengt
   user_topic(NULL),
   user_qos(0),
   feature_mask(_feature_mask),
+  user_mem(_user_mem),
+  user_mem_length(_user_mem_length),
   last_time_count(0),
   counting_lost_connection(true)
 {
   maison = this;
-  user_mem = _user_mem;
-  user_mem_length = _user_mem_length;
 }
 
 bool Maison::setup()
 {
   SHOW("\nMaison::setup()\n");
 
+  DEBUG2("Setup: user mem length: "); DEBUGLN2(user_mem_length);
+  
   DO {
     if (!   load_mems()) ERROR("Unable to load states");
     if (! load_config()) ERROR("Unable to load config");
