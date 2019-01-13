@@ -94,6 +94,9 @@
   #define SHOW_RESULT(f)
 #endif
 
+#define       DEBUG2(a) Serial.print(a)
+#define     DEBUGLN2(a) Serial.println(a)
+
 // Syntactic sugar
 
 #define DO        bool result = false; while (true)    ///< Beginning of a DO loop
