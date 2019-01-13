@@ -801,7 +801,7 @@ bool Maison::save_mems()
     }
 
     if (user_mem != NULL) {
-      if (!write_mem((uint32_t *) &user_mem, user_mem_length, sizeof(mem))) {
+      if (!write_mem((uint32_t *) user_mem, user_mem_length, sizeof(mem))) {
         ERROR("Unable to update user state in rtc memory");
       }
     }
