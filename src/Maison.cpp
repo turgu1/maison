@@ -838,8 +838,10 @@ bool Maison::init_user_mem()
 
   SHOW("init_user_mem()");
 
-  //byte *ptr = user_mem;
-  //for (int i = 0; i < user_mem_length; i++) *ptr++ = 0;
+  DEBUG(F("User Memory Length: "));
+  DEBUGLN(user_mem_length);
+  byte *ptr = user_mem;
+  // for (int i = 0; i < user_mem_length; i++) *ptr++ = 0;
   //memset(user_mem, 0, user_mem_length);
 
   bool result = true; //write_mem((uint32_t *) &user_mem, user_mem_length, sizeof(mem));
