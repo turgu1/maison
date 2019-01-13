@@ -333,7 +333,10 @@ void Maison::loop(Process * _process)
       break;
 
     case WAIT_END_EVENT:
-      if (res != NOT_COMPLETED) {
+      if (res == RETRY) {
+        new_state = new_sub_state = PROCESS_EVENT;        
+      }
+      else if (res != NOT_COMPLETED) {
         new_state = new_sub_state = END_EVENT;
       }
       else {

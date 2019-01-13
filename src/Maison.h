@@ -211,7 +211,8 @@ class Maison
       COMPLETED = 1, ///< The processing for the current state is considered completed
       NOT_COMPLETED, ///< The current state still require some processing in calls to come
       ABORTED,       ///< The event vanished and requires no more processing (in a *PROCESS_EVENT* state)
-      NEW_EVENT      ///< A new event occurred (in a *WAIT_FOR_EVENT* state)
+      NEW_EVENT,     ///< A new event occurred (in a *WAIT_FOR_EVENT* state)
+      RETRY          ///< From WAIT_END_EVENT, go back to PROCESS_EVENT
     };
 
     /// Application defined process function. To be supplied as a parameter 
