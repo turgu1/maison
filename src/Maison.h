@@ -111,7 +111,53 @@
   #define ONE_HOUR 3600 ///< In seconds. Normal is one hour x 24 = 24 hours.
 #endif
 
-/// Maison Framework Class
+/// Maison implements a framework that simplify the creation of IOT devices 
+/// using an ESP8266 processor. It implements a protocol of exchange of
+/// information with a MQTT broker that serves as a bridge between a device
+/// management server and a variety of embedded devices.
+///
+/// Please refer to the Main Page of information in this API documentation for
+/// a detailed description.
+///
+/// The following sequence diagram show the interaction of devices implementing
+/// the protocol and an MQTT broker:
+///
+/// @startuml{sequence_uml.png} "Maison Sequence Diagram" width=8cm
+/// 
+/// actor Device
+/// actor device_ctrl as "maison/WATER_SPILL/ctrl"
+/// actor server_status as "maison/status"
+/// 
+/// group Device actions
+///   group Reset
+///     Device --> server_status : "{Startup}"
+///   end
+///   loop Every 24 hours
+///     Device --> server_status : "{Watchdog}"
+///   end
+/// end
+/// 
+/// group Server Requests
+///   group Device State
+///     device_ctrl --> Device : "STATE?"
+///     Device --> server_status : "{State}"
+///   end
+/// 
+///   group Current Config
+///     device_ctrl --> Device : "CONFIG?"
+///     Device --> server_status : "{config}"
+///   end
+/// 
+///   group Set Config
+///     device_ctrl --> Device : "CONFIG: {config}"
+///     Device --> server_status : "{config}"
+///   end
+/// 
+///   group Reset device
+///     device_ctrl --> Device : "RESTART!"
+///   end
+/// end
+/// @enduml
 
 class Maison
 {
@@ -159,42 +205,6 @@ class Maison
     /// END_EVENT --> END_EVENT : NOT_COMPLETED
     /// @enduml
     ///
-    /// @startuml{sequence_uml.png} "Maison Sequence Diagram" width=8cm
-    /// 
-    /// actor Device
-    /// actor device_ctrl as "maison/WATER_SPILL/ctrl"
-    /// actor server_status as "maison/status"
-    /// 
-    /// group Device actions
-    ///   group Reset
-    ///     Device --> server_status : "{Startup}"
-    ///   end
-    ///   loop Every 24 hours
-    ///     Device --> server_status : "{Watchdog}"
-    ///   end
-    /// end
-    /// 
-    /// group Server Requests
-    ///   group Device State
-    ///     device_ctrl --> Device : "STATE?"
-    ///     Device --> server_status : "{State}"
-    ///   end
-    /// 
-    ///   group Current Config
-    ///     device_ctrl --> Device : "CONFIG?"
-    ///     Device --> server_status : "{config}"
-    ///   end
-    /// 
-    ///   group Set Config
-    ///     device_ctrl --> Device : "CONFIG: {config}"
-    ///     Device --> server_status : "{config}"
-    ///   end
-    /// 
-    ///   group Reset device
-    ///     device_ctrl --> Device : "RESTART!"
-    ///   end
-    /// end
-    /// @enduml
 
     enum State : uint8_t {
       STARTUP        =  1, ///< The device has just been reset
@@ -387,7 +397,7 @@ class Maison
     struct mem_struct {
       uint32_t csum;
       State    state;
-      State    sub_state;
+      State    return_state;
       uint16_t hours_24_count;      // Up to 24 hours
       uint16_t lost_count;          // How many MQTT lost connections since reset
       uint32_t one_hour_step_count; // Up to 3600 seconds in milliseconds

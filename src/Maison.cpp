@@ -177,7 +177,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         "\"device\":\"%s\","
         "\"msg_type\":\"STATE\","
         "\"state\":%u,"
-        "\"sub_state\":%u,"
+        "\"return_state\":%u,"
         "\"hours\":%u,"
         "\"millis\":%u,"
         "\"lost\":%u,"
@@ -187,7 +187,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         "}",
         config.device_name,
         mem.state,
-        mem.sub_state,
+        mem.return_state,
         mem.hours_24_count,
         mem.one_hour_step_count,
         mem.lost_count,
@@ -215,7 +215,7 @@ void Maison::set_msg_callback(Callback * _cb, const char * _topic, uint8_t _qos)
 
 void Maison::loop(Process * _process) 
 { 
-  State new_state, new_sub_state;
+  State new_state, new_return_state;
 
   DEBUG(F("Maison::loop(): Current state: "));
   DEBUGLN(mem.state);
@@ -261,8 +261,8 @@ void Maison::loop(Process * _process)
     mqtt_loop();
   }
 
-  new_state     = mem.state;
-  new_sub_state = mem.sub_state;
+  new_state        = mem.state;
+  new_return_state = mem.return_state;
 
   set_deep_sleep_wait_time(
     is_short_reboot_time_needed() ? DEFAULT_SHORT_REBOOT_TIME : ONE_HOUR);
@@ -305,51 +305,51 @@ void Maison::loop(Process * _process)
       }
 
       if (res != NOT_COMPLETED) {
-        new_state     = WAIT_FOR_EVENT;
-        new_sub_state = WAIT_FOR_EVENT;
+        new_state        = WAIT_FOR_EVENT;
+        new_return_state = WAIT_FOR_EVENT;
       }
       break;
 
     case WAIT_FOR_EVENT:
       if (res == NEW_EVENT) {
-        new_state     = PROCESS_EVENT;
-        new_sub_state = PROCESS_EVENT;
+        new_state        = PROCESS_EVENT;
+        new_return_state = PROCESS_EVENT;
       }
       else {
-        new_sub_state = WAIT_FOR_EVENT;
-        new_state = check_if_24_hours_time(WAIT_FOR_EVENT);
+        new_return_state = WAIT_FOR_EVENT;
+        new_state        = check_if_24_hours_time(WAIT_FOR_EVENT);
       }
       break;
 
     case PROCESS_EVENT:
       if (res == ABORTED) {
-        new_state = new_sub_state = WAIT_FOR_EVENT;
+        new_state = new_return_state = WAIT_FOR_EVENT;
       }
       else if (res != NOT_COMPLETED) {
-        new_state = new_sub_state = WAIT_END_EVENT;
+        new_state = new_return_state = WAIT_END_EVENT;
       }
       else {
-        new_sub_state = PROCESS_EVENT;
-        new_state = check_if_24_hours_time(PROCESS_EVENT);
+        new_return_state = PROCESS_EVENT;
+        new_state        = check_if_24_hours_time(PROCESS_EVENT);
       }
       break;
 
     case WAIT_END_EVENT:
       if (res == RETRY) {
-        new_state = new_sub_state = PROCESS_EVENT;        
+        new_state = new_return_state = PROCESS_EVENT;        
       }
       else if (res != NOT_COMPLETED) {
-        new_state = new_sub_state = END_EVENT;
+        new_state = new_return_state = END_EVENT;
       }
       else {
-        new_sub_state = WAIT_END_EVENT;
-        new_state = check_if_24_hours_time(WAIT_END_EVENT);
+        new_return_state = WAIT_END_EVENT;
+        new_state        = check_if_24_hours_time(WAIT_END_EVENT);
       }
       break;
 
     case END_EVENT:
       if (res != NOT_COMPLETED) {
-        new_state = new_sub_state = WAIT_FOR_EVENT;
+        new_state = new_return_state = WAIT_FOR_EVENT;
       }
       break;
 
@@ -373,12 +373,12 @@ void Maison::loop(Process * _process)
         }
       }
 
-      new_state = new_sub_state;
+      new_state = new_return_state;
       break;
   }
 
-  mem.state     = new_state;
-  mem.sub_state = new_sub_state;
+  mem.state        = new_state;
+  mem.return_state = new_return_state;
 
   DEBUG(" Next state: "); DEBUGLN(mem.state);
 
@@ -823,9 +823,9 @@ bool Maison::init_mem()
 {
   SHOW("init_mem()");
 
-  mem.magic     = RTC_MAGIC;
-  mem.state     = STARTUP;
-  mem.sub_state = WAIT_FOR_EVENT;
+  mem.magic        = RTC_MAGIC;
+  mem.state        = STARTUP;
+  mem.return_state = WAIT_FOR_EVENT;
 
   DEBUG("Sizeof mem_struct: ");
   DEBUGLN(sizeof(mem_struct));

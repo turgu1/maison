@@ -42,7 +42,7 @@ The Maison library supplies the usual algorithms required for an IOT device to i
 
 The following sequence diagram shows the automated interaction between the device and the MQTT broker. 
 
-![](doc/sequence_uml.png)
+![](./doc/sequence_uml.png)
 
 ## 2. Building an Application
 
@@ -238,13 +238,13 @@ All parameters must be present in the file to be considered valid by the framewo
 
 Parameter | Description
 :--------:|------------------------------
-version | This is the sequential version number. This is the property of the Server responsible of transmitting new configuration files to the device. It must be incremented every time a new configuration file is sent to the device. The device will not update its configuration if the version number is not greater than the current one. 
-device_name | A unique identifier for the device. This identifier is used inside messages sent through MQTT. It is also used to generate the topics related to the device. It can be an empty string: the MAC address of the device WiFi interface will then be used as the identifier. Use letters, underscore, numbers to compose the identifier (no space or other special characters).
-ssid / wifi_password | The WiFi SSID and password. Required to reach the network.
-mqtt_server_name | This is the MQTT server name (SQDN) or IP address.
-mqtt_user_name / mqtt_password | These are the credentials to connect to the MQTT server.
-mqtt_port | The TLS/SSL port number of the MQTT server.
-mqtt_fingerprint | This is the fingerprint associated with the MQTT service certificate. It must be a vector of 20 decimal values. Each value correspond to a byte part of the fingerprint. This is used to validate the MQTT server by the BearSSL library.
+version | This is the sequential version number. This is the property of the Server responsible of transmitting new configuration files to the device. It must be incremented every time a new configuration file is sent to the device. The device will not update its configuration if the version number is not greater than the current one. Unsigned Integer value (16 bits).
+device_name | A unique identifier for the device. This identifier is used inside messages sent through MQTT. It is also used to generate the topics related to the device. It can be an empty string: the MAC address of the device WiFi interface will then be used as the identifier. Use letters, underscore, numbers to compose the identifier (no space or other special characters). Max length: 15 ASCII characters.
+ssid / wifi_password | The WiFi SSID and password. Required to reach the network. Max length: 15 ASCII characters each.
+mqtt_server_name | This is the MQTT server name (SQDN) or IP address.  Max length: 15 ASCII characters.
+mqtt_user_name / mqtt_password | These are the credentials to connect to the MQTT server. Max length: 15 ASCII characters for user_name, 29 ASCII characters for password.
+mqtt_port | The TLS/SSL port number of the MQTT server. Unsigned Integer value (16 bits).
+mqtt_fingerprint | This is the fingerprint associated with the MQTT service certificate. It must be a vector of 20 decimal values. Each value correspond to a byte part of the fingerprint. This is used to validate the MQTT server by the BearSSL library. Length: 20 bytes.
 
 ### 5.1 PlatformIO configuration
 
@@ -316,6 +316,7 @@ Parameter | Description
 device    | The device name as stated in the configuration parameters. If the configuration parameter is empty, the MAC address of the device WiFi interface is used.
 msg_type  | This content the string "STATE".
 state     | The current state of the finite state machine, as a number. Look into the [Finite State Machine](#the-finite-state-machine) section for details.
+return_state | The state to return to after *HOURS_24* processing.
 hours     | Hours counter. Used to compute the next 24 hours period.
 millis    | Milliseconds in the last hour.
 lost      | Counter of the number of time the connection to the MQTT broker has been lost.
@@ -326,7 +327,7 @@ VBAT      | This is the Battery voltage. This parameter is optional. Its presenc
 Example:
 
 ```
-{"device":"WATER_SPILL","msg_type":"STATE","state":2,"hours":7,"millis":8001,"lost":0,"rssi":-63,"heap":16704,"VBAT":3.0}
+{"device":"WATER_SPILL","msg_type":"STATE","state":32,"return_state":2,hours":7,"millis":8001,"lost":0,"rssi":-63,"heap":16704,"VBAT":3.0}
 ```
 
 ### 7.3 The Watchdog Message
@@ -388,7 +389,7 @@ HOURS_24       |  32   |   YES   | This event occurs every 24 hours. It permits 
 
 Here is a state diagram showing the inter-relationship between each state and the corresponding application process return values for witch state changes will be fired:
 
-![](doc/state_uml.png)
+![](./doc/state_uml.png)
 
 ## 9. Usage on battery power
 
