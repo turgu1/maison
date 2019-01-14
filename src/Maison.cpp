@@ -979,7 +979,6 @@ void Maison::restart()
 
 #endif
 
-
 #if 0
 // Load Certificates
 void load_certs()
