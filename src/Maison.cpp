@@ -959,14 +959,14 @@ void Maison::restart()
   {
     DEBUGLN(F("\nConfiguration:\n-------------"));
 
-    DEBUG(F("Version          : ")); DEBUGLN(_config.version         );
-    DEBUG(F("Device Name      : ")); DEBUGLN(_config.device_name     );
-    DEBUG(F("WiFi SSID        : ")); DEBUGLN(_config.wifi_ssid       );
-    DEBUG(F("WiFi Password    : ")); DEBUGLN(F("<Hidden>")           );
-    DEBUG(F("MQTT Server      : ")); DEBUGLN(_config.mqtt_server     );
-    DEBUG(F("MQTT Username    : ")); DEBUGLN(_config.mqtt_username   );
-    DEBUG(F("MQTT Password    : ")); DEBUGLN(F("<Hidden>")           );
-    DEBUG(F("MQTT Port        : ")); DEBUGLN(_config.mqtt_port       );
+    DEBUG(F("Version       : ")); DEBUGLN(_config.version         );
+    DEBUG(F("Device Name   : ")); DEBUGLN(_config.device_name     );
+    DEBUG(F("WiFi SSID     : ")); DEBUGLN(_config.wifi_ssid       );
+    DEBUG(F("WiFi Password : ")); DEBUGLN(F("<Hidden>")           );
+    DEBUG(F("MQTT Server   : ")); DEBUGLN(_config.mqtt_server     );
+    DEBUG(F("MQTT Username : ")); DEBUGLN(_config.mqtt_username   );
+    DEBUG(F("MQTT Password : ")); DEBUGLN(F("<Hidden>")           );
+    DEBUG(F("MQTT Port     : ")); DEBUGLN(_config.mqtt_port       );
 
     DEBUG(F("MQTT Fingerprint : [")); 
     for (int i = 0; i < 20; i++) { 

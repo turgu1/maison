@@ -204,7 +204,6 @@ class Maison
     /// END_EVENT --> WAIT_FOR_EVENT : COMPLETED
     /// END_EVENT --> END_EVENT : NOT_COMPLETED
     /// @enduml
-    ///
 
     enum State : uint8_t {
       STARTUP        =  1, ///< The device has just been reset
@@ -216,8 +215,10 @@ class Maison
     };
 
     /// A UserResult is returned by the user process function to indicate
-    /// how to proceed with the finite state machine transformation.
-    ///
+    /// how to proceed with the finite state machine transformation. Please
+    /// look at the State enumeration description where a state diagram show the
+    /// relationship between states and values returned by the user process function.
+
     enum UserResult : uint8_t { 
       COMPLETED = 1, ///< The processing for the current state is considered completed
       NOT_COMPLETED, ///< The current state still require some processing in calls to come
@@ -230,6 +231,7 @@ class Maison
     /// to the Maison::loop() function.
     /// @param[in] _state The current state of the Finite State Machine.
     /// @return The status of the user process execution.
+
     typedef UserResult Process(State _state);
 
     /// Application defined MQTT message callback function. Will be called by the framework
@@ -238,6 +240,7 @@ class Maison
     /// @param[in] _topic The topic related to the received payload
     /// @param[in] _payload The message content. May not have a zero byte at the end...
     /// @param[in] _length The payload size in bytes.
+
     typedef void Callback(const char * _topic, byte * _payload, unsigned int _length);
 
     Maison();
@@ -247,6 +250,7 @@ class Maison
     /// The Maison setup function. Normally to be called inside the application setup() 
     /// function.
     /// @return True if setup completed successfully. 
+
     bool setup();
 
     /// Send a MQTT message using printf like construction syntax.
@@ -255,6 +259,7 @@ class Maison
     /// @param[in] _format The format string, as for printf
     /// @param[in] ... The arguments required by the format string
     /// @return True if the message was sent successfully
+
     bool send_msg(const char * _topic, const char * _format, ...);
 
     /// Returns the ESP8266 reason for reset. The following table lists the ESP8266
@@ -271,20 +276,24 @@ class Maison
     ///     6  | Hardware Reset
     ///
     /// @return The reason of the reset as a number.
+
     int  reset_reason();
 
     /// Will restart the ESP8266
+
     void restart();
 
     /// Initiates an `ESP.deep_sleep()` call. This function never suppose to return...
     ///
     /// @param[in] _back_with_wifi True if WiFi networking enabled on restart
     /// @param[in] _sleep_time_in_sec The number of second to wait before restart
+
     void deep_sleep(bool _back_with_wifi, uint16_t _sleep_time_in_sec);
 
     /// Enable a feature dynamically.
     ///
     /// @param[in] _feature The feature to be enabled.
+
     inline void  enable_feature(Feature _feature) { 
       feature_mask |= _feature;  
     }
@@ -292,6 +301,7 @@ class Maison
     /// Disable a feature dynamically.
     ///
     /// @param[in] _feature The feature to be disabled.
+
     inline void disable_feature(Feature _feature) { 
       feature_mask &= ~_feature; 
     }
@@ -300,6 +310,7 @@ class Maison
     /// beginning of the application sketch.
     ///
     /// @return The battery voltage as read from the ESP8266 ESP.getVcc() call
+
     inline float battery_voltage() { 
       return (ESP.getVcc() * (1.0 / 1024.0)); 
     }    
@@ -307,6 +318,7 @@ class Maison
     /// Check if a reset is due to something else than Deep Sleep return.
     ///
     /// @return True if a reset occurred that is not coming from a Deep Sleep return.
+
     inline bool is_hard_reset() { 
       return reset_reason() != REASON_DEEP_SLEEP_AWAKE; 
     }
@@ -314,6 +326,7 @@ class Maison
     /// Set the deep_sleep period inside an application process function.
     ///
     /// @param[in] _seconds The number of seconds to wait inside the next Deep Sleep call.
+
     inline void set_deep_sleep_wait_time(uint16_t _seconds) { 
       deep_sleep_wait_time = (_seconds > 4294) ? 4294 : _seconds; 
     }
@@ -322,6 +335,7 @@ class Maison
     /// is not set in the features.
     ///
     /// @return True if the network is enabled.
+
     inline bool network_is_available() { 
       return (!use_deep_sleep()) || 
              ((mem.state & (STARTUP|PROCESS_EVENT|END_EVENT|HOURS_24)) != 0);
@@ -329,6 +343,7 @@ class Maison
 
     /// Get elapsed time since the last call to user process in the preceding loop call.
     /// @return Elapsed time in microseconds.
+
     inline long last_loop_duration() { 
       return mem.elapse_time; 
     }
@@ -347,6 +362,7 @@ class Maison
     /// @param[out] _buffer Where the topic name will be built.
     /// @param[in]  _length The size of the buffer.
     /// @return pointer to the beginning of the buffer.
+
     char * my_topic(const char * _topic_suffix, char * _buffer, uint16_t _length);
 
     /// Compute a CRC-32 checksum
@@ -354,6 +370,7 @@ class Maison
     /// @param[in] _data The data vector to compute the checksum on.
     /// @param[in] _length The size of the data vector.
     /// @return The computed CRC-32 checksum.
+
     uint32_t CRC32(const uint8_t * _data, size_t _length);
 
     /// Set the MQTT message callback for the user application.
@@ -361,12 +378,14 @@ class Maison
     /// @param[in] _cb The Callback function address.
     /// @param[in] _topic The topic to subscribe to.
     /// @param[in] _qos The QOS for the subscription.
+
     void set_msg_callback(Callback * _cb, const char * _topic, uint8_t _qos = 0);
 
     /// Get device name. The device name is retrieve from the configuration and
     /// sent back to the user as a constant string.
     ///
     /// @return The device name as a constant string
+
     const char * get_device_name() { return config.device_name; }
 
     /// Function to be called by the application in the main loop to insure 
@@ -375,6 +394,7 @@ class Maison
     /// @param[in] _process The application processing function. This function will be 
     ///                    called by the framework every time the Maison::loop() is called, 
     ///                    just before processing the finite state machine.
+
     void loop(Process * _process = NULL);
 
   private:
@@ -388,9 +408,9 @@ class Maison
       char         device_name[16];
       char           wifi_ssid[16];
       char       wifi_password[16];
-      char         mqtt_server[16];
+      char         mqtt_server[32];
       char       mqtt_username[16];
-      char       mqtt_password[30];
+      char       mqtt_password[32];
       uint8_t mqtt_fingerprint[20];
     } config;
 

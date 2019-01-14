@@ -241,8 +241,8 @@ Parameter | Description
 version | This is the sequential version number. This is the property of the Server responsible of transmitting new configuration files to the device. It must be incremented every time a new configuration file is sent to the device. The device will not update its configuration if the version number is not greater than the current one. Unsigned Integer value (16 bits).
 device_name | A unique identifier for the device. This identifier is used inside messages sent through MQTT. It is also used to generate the topics related to the device. It can be an empty string: the MAC address of the device WiFi interface will then be used as the identifier. Use letters, underscore, numbers to compose the identifier (no space or other special characters). Max length: 15 ASCII characters.
 ssid / wifi_password | The WiFi SSID and password. Required to reach the network. Max length: 15 ASCII characters each.
-mqtt_server_name | This is the MQTT server name (SQDN) or IP address.  Max length: 15 ASCII characters.
-mqtt_user_name / mqtt_password | These are the credentials to connect to the MQTT server. Max length: 15 ASCII characters for user_name, 29 ASCII characters for password.
+mqtt_server_name | This is the MQTT server name (SQDN) or IP address.  Max length: 31 ASCII characters.
+mqtt_user_name / mqtt_password | These are the credentials to connect to the MQTT server. Max length: 15 ASCII characters for user_name, 31 ASCII characters for password.
 mqtt_port | The TLS/SSL port number of the MQTT server. Unsigned Integer value (16 bits).
 mqtt_fingerprint | This is the fingerprint associated with the MQTT service certificate. It must be a vector of 20 decimal values. Each value correspond to a byte part of the fingerprint. This is used to validate the MQTT server by the BearSSL library. Length: 20 bytes.
 
