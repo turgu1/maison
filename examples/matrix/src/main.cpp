@@ -22,8 +22,6 @@
 #include <LEDMatrixDriver.hpp>
 #include <string.h>
 
-#include  "local/local_params.h"
-
 // ---- Development Mode ----
 
 #define PRINTging 0
@@ -40,6 +38,8 @@
 
 #define LED    2
 #define BUZZER 5
+
+#define TOPIC "terminal"
 
 // ---- Matrix Driver Parameters ----
 
@@ -65,6 +65,13 @@ char msg[200];
 int  msg_len;
 
 bool start;
+
+// ---- Forward declarations ----
+
+void init_buzzer();
+void buzz1();
+void buzz3();
+bool displayText(char *theText, int len);
 
 // ---- Maison Framework ----
 
@@ -122,7 +129,8 @@ void setup()
   
   maison.setup();
 
-  maison.set_callback(matrix_callback);
+  char buff[60];
+  maison.set_msg_callback(maison.my_topic(TOPIC, buff, 60), matrix_callback, 0);
 
   // init display
 
@@ -308,6 +316,59 @@ int x = LEDMATRIX_WIDTH, y = 0;   // start top left
 const int ANIM_DELAY = 50;
 unsigned long myTime = millis();
 
+/**
+ * This draws a sprite to the given position using the width and height supplied (usually 8x8)
+ */
+void drawSprite(byte *sprite, int x, int y, int width, int height)
+{
+  // The mask is used to get the column bit from the sprite row
+  byte mask = B10000000;
+
+  for (int iy = 0; iy < height; iy++)
+  {
+
+    for (int ix = 0; ix < width; ix++)
+    {
+
+      //Yes my font is backwards so I swap it around.
+      //lmd.setPixel(x + (width - ix), y + iy, (bool)(sprite[iy] & mask));
+
+      lmd.setPixel(x + (width - ix), y + iy, (bool)(sprite[iy] & mask));
+
+      // Shift the mask by one pixel to the right
+      mask = mask >> 1;
+    }
+
+    // Reset column mask
+    mask = B10000000;
+  }
+}
+
+/**
+ * This function draws a string of the given length to the given position.
+ */
+void drawString(char *text, int len, int x, int y)
+{
+  for (int idx = 0; idx < len; idx++)
+  {
+    int c = text[idx] - 32;
+
+    // stop if char is outside visible area
+    if ((x + idx * 8) > LEDMATRIX_WIDTH)
+    {
+      return;
+    }
+
+    // only draw if char is visible
+    if ((8 + x + idx * 8) > 0)
+    {
+      drawSprite(font[c], x + (idx * 8), y, 8, 8);
+    }
+  }
+
+  return;
+}
+
 /* This function is called in loop but 
  *  only does stuff when animimation delay
  *  is met. 
@@ -339,53 +400,5 @@ bool displayText (char * theText, int len)
     }
   }  
   return false; // Still something to do
-}
-
-/**
- * This function draws a string of the given length to the given position.
- */
-void drawString(char * text, int len, int x, int y)
-{
-  for (int idx = 0; idx < len; idx++) {
-    int c = text[idx] - 32;
-
-    // stop if char is outside visible area
-    if ((x + idx * 8) > LEDMATRIX_WIDTH) {
-      return;
-    }
-
-    // only draw if char is visible
-    if ((8 + x + idx * 8) > 0) {
-      drawSprite(font[c], x + (idx * 8), y, 8, 8);
-    }
-  }
-
-  return;
-}
-
-/**
- * This draws a sprite to the given position using the width and height supplied (usually 8x8)
- */
-void drawSprite( byte * sprite, int x, int y, int width, int height )
-{
-  // The mask is used to get the column bit from the sprite row
-  byte mask = B10000000;
-  
-  for (int iy = 0; iy < height; iy++) {
-    
-    for (int ix = 0; ix < width; ix++) {
-      
-      //Yes my font is backwards so I swap it around.
-      //lmd.setPixel(x + (width - ix), y + iy, (bool)(sprite[iy] & mask));
-      
-      lmd.setPixel(x + (width - ix), y + iy, (bool)(sprite[iy] & mask));
-
-      // Shift the mask by one pixel to the right
-      mask = mask >> 1;
-    }
-
-    // Reset column mask
-    mask = B10000000;
-  }
 }
 

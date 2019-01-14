@@ -62,7 +62,7 @@ bool Maison::setup()
     if (! load_config()) ERROR("Unable to load config");
 
     if (is_hard_reset()) {
-      mem.state = mem.sub_state = STARTUP;
+      mem.state = mem.return_state = STARTUP;
       mem.hours_24_count      = 0;
       mem.one_hour_step_count = 0;
       mem.lost_count          = 0;
