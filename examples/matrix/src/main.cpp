@@ -41,6 +41,8 @@ void matrix_callback(const char * topic, byte * payload, unsigned int length)
   
   if (length > 200) length = 199;
 
+  // To ring the buzzer, the payload must have a CTRL_G (binary 7) as the first character
+
   i = 0;
   if (payload[0] == 7) {
     buzz3();
@@ -48,6 +50,9 @@ void matrix_callback(const char * topic, byte * payload, unsigned int length)
     length--;
   }
 
+  // The rest of the payload is put in the msg buffer.
+  // msq_len != 0 will trigger the display on the matrix cells
+  
   memcpy(msg, &payload[i], length);
   msg[length] = 0;
   msg_len = length;
@@ -66,10 +71,14 @@ void setup()
   
   maison.setup();
 
-  char buff[60];
-  maison.set_msg_callback(matrix_callback, 
-                          maison.my_topic(TERMINAL_TOPIC, buff, 60), 
-                          0);
+  static char buff[60];
+  maison.my_topic(TERMINAL_TOPIC, buff, 60);
+
+  PRINT("Topic: ");
+  PRINTLN(buff);
+
+  maison.set_msg_callback(matrix_callback, buff, 0);
+
   init_display();
  
   start = true;
