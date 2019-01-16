@@ -497,8 +497,8 @@ class Maison
     bool      read_mem(uint32_t * _data, uint16_t _length, uint16_t _addr);
     bool     write_mem(uint32_t * _data, uint16_t _length, uint16_t _addr);
 
-    char * ìp2str(byte _ip[], char *_str, int _length);
-    char * mac2str(byte _ip[], char *_str, int _length);
+    char * ip2str(byte _ip[], char *_str, int _length);
+    char * mac2str(byte _mac[], char *_str, int _length);
     bool str2ip(const char * _str, byte _ip[]);
 };
 
