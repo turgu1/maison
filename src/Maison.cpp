@@ -512,8 +512,7 @@ bool Maison::load_config(int _version)
 
 #define PUT(src, dst) dst = src
 #define PUTA(src, dst, len) dst.copyFrom(src)
-// #define PUTA(src, dst, len) for (int i = 0; i < len; i++) dst.add(src[i])
-#define PUTIP(src, dst) ip2str(src, buffer, 50); dst.copyFrom(src);
+#define PUTIP(src, dst) ip2str(src, buffer, 50); dst.copyFrom(buffer);
 
 bool Maison::save_config()
 {
