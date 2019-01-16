@@ -371,7 +371,7 @@ Example:
 ```
 {"device":"WATER_SPILL","msg_type":"CONFIG","content":{
   "version"          : 1,
-  "device_name"      : "TEST_DEV",
+  "device_name"      : "WATER_SPILL",
   "ssid"             : "the_ssid",
   "wifi_password"    : "the_password",
   "ip"               : "192.168.1.71",

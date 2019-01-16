@@ -662,7 +662,11 @@ bool Maison::mqtt_connect()
       mqtt_client.setClient(*wifi_client);    
       mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
 
+      char client_name[30];
+      strcpy(client_name, "client-");
+      strcat(client_name, config.device_name);
       if (use_deep_sleep()) {
+        DEBUGLN(F(" Connect with clean-session off."));
         mqtt_client.connect(config.device_name, 
                             config.mqtt_username, 
                             config.mqtt_password,
@@ -670,6 +674,7 @@ bool Maison::mqtt_connect()
                             false);
       }
       else {
+        DEBUGLN(F(" Connect with clean-session on."));
         mqtt_client.connect(config.device_name, 
                             config.mqtt_username, 
                             config.mqtt_password);
@@ -678,7 +683,9 @@ bool Maison::mqtt_connect()
       if (mqtt_connected()) {
 
         mqtt_client.setCallback(maison_callback);
-        if (!mqtt_client.subscribe(my_topic(CTRL_SUFFIX_TOPIC, buffer, sizeof(buffer)))) {
+        if (!mqtt_client.subscribe(
+                     my_topic(CTRL_SUFFIX_TOPIC, buffer, sizeof(buffer)), 
+                     use_deep_sleep() ? 1 : 0)) {
           DEBUG(F(" Hum... unable to subscribe to topic (State:"));
           DEBUG(mqtt_client.state());
           DEBUG(F("): "));
@@ -998,8 +1005,6 @@ void Maison::restart()
 
 char * Maison::ip2str(uint32_t _ip, char *_str, int _length)
 {
-  char * str = _str;
-
   union {
     uint32_t ip;
     byte bip[4];

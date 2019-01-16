@@ -28,7 +28,9 @@ Guy Turcotte
 
 ADC_MODE(ADC_VCC);
 
-#define DEBUGGING 0
+#ifndef DEBUGGING
+  #define DEBUGGING 0
+#endif
 
 #if DEBUGGING
   #define LONG_WAIT    10
