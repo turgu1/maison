@@ -158,11 +158,11 @@ void setup()
   maison.setup();
 
   if (maison.is_hard_reset()) {
-    PRINTLN("--- HARD RESET! ---");
+    PRINTLN(F("--- HARD RESET! ---"));
     my_mem.xmit_count = 0;
   }
   else {
-    PRINTLN("--- DEEP SLEEP WAKEUP ---");
+    PRINTLN(F("--- DEEP SLEEP WAKEUP ---"));
   }
 }
 

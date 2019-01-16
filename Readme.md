@@ -403,6 +403,8 @@ It is expected that a hardware interrupt will wake up the device to indicate the
 
 The application process can change the amount of seconds for the next deep sleep period using the `Maison::set_deep_sleep_wait_time()` function. This can be called inside the application `process_state()` function before returning control to the framework. 
 
+As the device will be in a deep sleep state almost all the time, it becomes more difficult for it to get messages from the MQTT broker. Messages to be read by the device must then be using Qos (quality of service) of 1 or 2 to have them delivered when the device will be ready to receive them (network is running and the message callback in operation). When connecting to the broker, Maison will connect with the cleanup flag to false, indicating the need to keep what is in the queue for retrieval during sleep time.
+
 The ESP8266 does not allow for a sleep period longer than 4294967295 microseconds, that corresponds to around 4294 seconds or 71 minutes.
 
 If *DEEP_SLEEP* is not used, there is no wait time other than the code processing time in the `Maison::loop()`. Internally, the framework compute the duration of execution for the next *HOURS_24* state to occur.

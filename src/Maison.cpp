@@ -630,7 +630,18 @@ bool Maison::mqtt_connect()
       mqtt_client.setClient(*wifi_client);    
       mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
 
-      mqtt_client.connect(config.device_name, config.mqtt_username, config.mqtt_password);
+      if (use_deep_sleep()) {
+        mqtt_client.connect(config.device_name, 
+                            config.mqtt_username, 
+                            config.mqtt_password,
+                            NULL, 0, 0, NULL,  // Will message not used
+                            false);
+      }
+      else {
+        mqtt_client.connect(config.device_name, 
+                            config.mqtt_username, 
+                            config.mqtt_password);
+      }
 
       if (mqtt_connected()) {
 

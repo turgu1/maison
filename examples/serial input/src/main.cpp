@@ -60,8 +60,6 @@ Maison::UserResult process(Maison::State state)
       break;
 
     case Maison::PROCESS_EVENT:
-      //Serial.print("Received: ");
-      //Serial.println(buffer);
       maison.send_msg(
         MAISON_CTRL_TOPIC, 
         "{\"device\":\"%s\","
@@ -86,16 +84,11 @@ Maison::UserResult process(Maison::State state)
 void setup() 
 {
   delay(100);
-  //Serial.begin(74880);
   my_serial.begin(2400);
   
   maison.setup();
 
   idx = 0;
-
-  //IPAddress ip = WiFi.localIP();
-  //Serial.print("IP Address:");
-  //Serial.println(ip);
 }
 
 void loop() 

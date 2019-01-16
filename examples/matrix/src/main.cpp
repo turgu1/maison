@@ -57,7 +57,7 @@ void matrix_callback(const char * topic, byte * payload, unsigned int length)
   msg[length] = 0;
   msg_len = length;
 
-  PRINT("Received the following message: ");
+  PRINT(F("Received the following message: "));
   PRINTLN(msg);
 }
 
