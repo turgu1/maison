@@ -1089,8 +1089,8 @@ bool Maison::str2ip(const char * _str, uint32_t * _ip)
     DEBUG(F("WiFi SSID     : ")); DEBUGLN(_config.wifi_ssid       );
     DEBUG(F("WiFi Password : ")); DEBUGLN(F("<Hidden>")           );
 
-    DEBUG(F("Ip            : ")); DEBUGLN(ip2str(config.ip,          buffer, 50));
-    DEBUG(F("Dns           : ")); DEBUGLN(ip2str(config.dns,         buffer, 50));
+    DEBUG(F("IP            : ")); DEBUGLN(ip2str(config.ip,          buffer, 50));
+    DEBUG(F("DNS           : ")); DEBUGLN(ip2str(config.dns,         buffer, 50));
     DEBUG(F("Gateway       : ")); DEBUGLN(ip2str(config.gateway,     buffer, 50));
     DEBUG(F("Subnet Mask   : ")); DEBUGLN(ip2str(config.subnet_mask, buffer, 50));
     

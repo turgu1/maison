@@ -24,9 +24,9 @@ The MQTT based transmission architecture is specific to this implementation and 
 
 The framework is to be used with the [PlarformIO](https://platformio.org/) ecosystem. Some examples can be found in the `examples` folder and shall be compiled through PlatformIO.
 
-Note that the library maybe usable through the Arduino IDE, but this is not supported. It is known to be a challenge to set compiling options and access Maison defined types from `.ino` source code.
+Note that the library maybe usable through the Arduino IDE, but this is not supported. It is known to be a challenge to set compiling options and access **Maison** defined types from `.ino` source code.
 
-The Maison framework, to be functional, requires the following:
+The **Maison** framework, to be functional, requires the following:
 
 * Proper application setup parameters in file `platformio.ini`. Look at the [Building an Application](#2-building-an-application) section;
 * Code in the user application to setup and use the framework. Look at the [Code Usage](#code-usage) section;
@@ -36,7 +36,7 @@ The sections below describe the specific of these requirements.
 
 ## 1. Overview
 
-The Maison library supplies the usual algorithms required for an IOT device to interact within an event management architecture based on the use of a MQTT broker for message exchanges. It helps the programmer in the management of the various aspects of integrating the code responsible of the functionality of the IOT device with the intricacies of managing the lifespan inside the architecture.
+The **Maison** library supplies the usual algorithms required for an IOT device to interact within an event management architecture based on the use of a MQTT broker for message exchanges. It helps the programmer in the management of the various aspects of integrating the code responsible of the functionality of the IOT device with the intricacies of managing the lifespan inside the architecture.
 
 (To be completed)
 
@@ -46,7 +46,7 @@ The following sequence diagram shows the automated interaction between the devic
 
 ## 2. Building an Application
 
-The Maison framework is using the following libraries and, through its library configuration, automate their retrieval through the PlatformIO ecosystem:
+The **Maison** framework is using the following libraries and, through its library configuration, automate their retrieval through the PlatformIO ecosystem:
 
 * PubSubClient
 * BearSSL
@@ -69,11 +69,11 @@ platform = espressif8266
 ```
 ### 2.1 Compilation Options
 
-The Maison framework allow for some defined options to be modified through -D compilation parameters (PlatformIO: build_flags). The following are the compilation options available to change some library behavior:
+The **Maison** framework allow for some defined options to be modified through -D compilation parameters (PlatformIO: build_flags). The following are the compilation options available to change some library behavior:
 
 Option              | Default   | Description
 :------------------:|:---------:|------------------------------------------------------------------------
-MAISON_TESTING      |    0      | If = 1, enable debuging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any Maison function.
+MAISON_TESTING      |    0      | If = 1, enable debuging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any **Maison** function.
 QUICK_TURN          |    0      | If = 1, HOURS_24 state is fired every 2 minutes instead of 24 hours. This is automatically the case when *MAISON_TESTING* is set to 1, unless QUICK_TURN is also defined in build_flags.
 MAISON_PREFIX_TOPIC | maison/   | All topics used by the framework are prefixed with this text   
 MAISON_STATUS_TOPIC | maison/status | Topic where the framework status are sent
@@ -87,9 +87,9 @@ The framework will subscribe to MQTT messages coming from the server on a topic 
 
 ## 3. Usage
 
-The Maison framework is expecting the following aspects to be properly in place for its usage on a device:
+The **Maison** framework is expecting the following aspects to be properly in place for its usage on a device:
 
-1. [Application Source Code](#application-source-code) with the Maison framework integration.
+1. [Application Source Code](#application-source-code) with the **Maison** framework integration.
 2. A [Configuration Parameters](#configuration-parameters) file.
 3. A [MQTT broker](#mqtt-broker) on a networked server.
 
@@ -115,7 +115,7 @@ void loop()
 }
 ```
 
-This piece of code won't do much at the user application level, but it will set the scene to the automation of exchanges with a MQTT message broker, sending startup/watchdog messages, answering information requests, changes of configuration, completely automated through Maison framework.
+This piece of code won't do much at the user application level, but it will set the scene to the automation of exchanges with a MQTT message broker, sending startup/watchdog messages, answering information requests, changes of configuration, completely automated through **Maison** framework.
 
 Here is a more complete example of code to be used to initialize the framework with optional features and integrate it in the loop() function. It shows both option parameters, calls to the framework with message callback and finite state machine functions:
 
@@ -168,9 +168,9 @@ In the following sections, we describe the specific aspects of this code example
 
 ### 4.1 Include File
 
-The `#include <Maison.h>` integrates the Maison header into the user application. This will import the Maison class declaration and a bunch of definitions that are documented below. All required libraries needed by the framework are also included by this call.
+The `#include <Maison.h>` integrates the **Maison** header into the user application. This will import the **Maison** class declaration and a bunch of definitions that are documented below. All required libraries needed by the framework are also included by this call.
 
-### 4.2 Maison Declaration
+### 4.2 **Maison** Declaration
 
 The `Maison maison(...)` declaration create an instance of the framework. This declaration accepts the following parameters:
 
@@ -204,7 +204,7 @@ This structure is optional and could be required by the application when the *DE
 
 ### 4.3 maison.loop()
 
-The Maison::loop() function must be called regularly in the user application main loop function to permit the execution of the finite state machine and the receiving of new MQTT messages. As a parameter, the Maison::loop() function accepts a processing function that will be called by Maison inside the finite state machine. The function will receive the current state value as a parameter. It must return a status value from the following list:
+The Maison::loop() function must be called regularly in the user application main loop function to permit the execution of the finite state machine and the receiving of new MQTT messages. As a parameter, the Maison::loop() function accepts a processing function that will be called by **Maison** inside the finite state machine. The function will receive the current state value as a parameter. It must return a status value from the following list:
 
 Value         | Description
 :------------:|----------------
@@ -218,7 +218,7 @@ Note: if the *DEEP_SLEEP* feature was enabled, the loop will almost never return
 
 ## 5. Configuration Parameters
 
-The Maison framework is automating access to the MQTT message broker through the WiFi connection. As such, parameters are required to link the device to the WiFi network and the MQTT broker server. A file named "/config.json" must be created on a SPIFFS file system in flash memory. This is a JSON structured file. Here is an example of such a file:
+The **Maison** framework is automating access to the MQTT message broker through the WiFi connection. As such, parameters are required to link the device to the WiFi network and the MQTT broker server. A file named "/config.json" must be created on a SPIFFS file system in flash memory. This is a JSON structured file. Here is an example of such a file:
 
 ```json
 {
@@ -277,7 +277,7 @@ A SPIFFS flash file system must be put in place on the targeted device. This can
 
 ## 7. Messages sent by the framework
 
-The Maison framework automate some messages that are sent to the **maison/status** topic. All messages are sent using a JSON formatted string. 
+The **Maison** framework automate some messages that are sent to the **maison/status** topic. All messages are sent using a JSON formatted string. 
 
 Here is a description of each message sent, namely:
 
@@ -407,7 +407,7 @@ Here is a state diagram showing the inter-relationship between each state and th
 
 ## 9. Usage on battery power
 
-The Maison framework can be tailored to use Deep Sleep when on battery power, through the *DEEP_SLEEP* [feature](#feature-mask). 
+The **Maison** framework can be tailored to use Deep Sleep when on battery power, through the *DEEP_SLEEP* [feature](#feature-mask). 
 
 In this context, the finite state machine will cause a call to the `ESP.deep_sleep()` function at the end of each of its processing cycle (function `Maison::loop()`) to put the processor in a dormant state. The deep sleep duration, by default, is set to 5 seconds before entry to the states *PROCESS_EVENT*, *WAIT_END_EVENT*, *END_EVENT* and *HOURS_24*; it is 3600 seconds for *WAIT_FOR_EVENT*.
 
@@ -417,7 +417,7 @@ It is expected that a hardware interrupt will wake up the device to indicate the
 
 The application process can change the amount of seconds for the next deep sleep period using the `Maison::set_deep_sleep_wait_time()` function. This can be called inside the application `process_state()` function before returning control to the framework. 
 
-As the device will be in a deep sleep state almost all the time, it becomes more difficult for it to get messages from the MQTT broker. Messages to be read by the device must then be using Qos (quality of service) of 1 or 2 to have them delivered when the device will be ready to receive them (network is running and the message callback in operation). When connecting to the broker, Maison will connect with the cleanup flag to false, indicating the need to keep what is in the queue for retrieval during sleep time.
+As the device will be in a deep sleep state almost all the time, it becomes more difficult for it to get messages from the MQTT broker. Messages to be read by the device must then be using Qos (quality of service) of 1 to have them delivered when the device will be ready to receive them (network is running and the message callback is in operation). When connecting to the broker, **Maison** will connect with the cleanup flag to false, indicating the need to keep what is in the queue for retrieval after sleep time. The MQTT broker uses the client_name as the id to manage persistency. As such, it is required to be different than any other device name. When no device name is supplied in the config file (empty string), **Maison** uses the mac address as the device name. Insure that when us set the device name, it is unique amongst your devices. **Maison** prefix it with "client-" and send it to the MQTT broker at connection time.
 
 The ESP8266 does not allow for a sleep period longer than 4294967295 microseconds, that corresponds to around 4294 seconds or 71 minutes.
 
