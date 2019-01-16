@@ -1007,24 +1007,7 @@ char * Maison::ip2str(uint32_t _ip, char *_str, int _length)
 
   ip.ip = _ip;
 
-  for (int idx = 0; idx < 4; idx++) {
-    byte v = ip.bip[idx];
-    do {
-      if (--_length < 0) {
-        *str = 0;
-        return _str;
-      }
-      *str++ = (v % 10) + '0';
-      v = v / 10;
-    } while (v != 0);
-    if (idx != 3) {
-      if (--_length < 0) {
-        *str = 0;
-        return _str;
-      }
-      *str++ = '.';
-    }
-  }
+  snprintf(_str, _length, "%d.%d.%d.%d", ip.bib[0], ip.bib[1], ip.bib[2], ip.bib[3]);
   return _str;
 }
 

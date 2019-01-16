@@ -144,6 +144,8 @@ void setup()
 
   SETUP_SERIAL;
 
+  PRINTLN(F("==> SETUP <=="));
+
   pinMode(SENSE_PIN, INPUT);
 
   turnOff(0);
@@ -155,14 +157,16 @@ void setup()
   //turnOff(14);
   turnOff(15, 0);
 
+  PRINTLN(F("  maison.setup()"));
+
   maison.setup();
 
   if (maison.is_hard_reset()) {
-    PRINTLN(F("--- HARD RESET! ---"));
+    PRINTLN(F("==> HARD RESET! <=="));
     my_mem.xmit_count = 0;
   }
   else {
-    PRINTLN(F("--- DEEP SLEEP WAKEUP ---"));
+    PRINTLN(F("==> DEEP SLEEP WAKEUP <=="));
   }
 }
 

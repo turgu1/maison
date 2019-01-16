@@ -226,9 +226,9 @@ The Maison framework is automating access to the MQTT message broker through the
   "device_name" : "WATER_SPILL",
   "ssid" : "the wifi ssid",
   "ip" : "192.168.1.71",
-  "dsn" : "192.168.1.1",
+  "dns" : "192.168.1.1",
   "gateway" : "192.168.1.1",
-  "subnet_mask" : "255.255.255.0".
+  "subnet_mask" : "255.255.255.0",
   "wifi_password" : "the wifi password",
   "mqtt_server_name" : "the server name or IP address",
   "mqtt_user_name" : "the user name",
@@ -375,9 +375,9 @@ Example:
   "ssid"             : "the_ssid",
   "wifi_password"    : "the_password",
   "ip"               : "192.168.1.71",
-  "dsn"              : "192.168.1.1",
+  "dns"              : "192.168.1.1",
   "gateway"          : "192.168.1.1",
-  "subnet_mask"      : "255.255.255.0".
+  "subnet_mask"      : "255.255.255.0",
   "mqtt_server_name" : "the_server_sqdn",
   "mqtt_user_name"   : "the_mqtt_user_name",
   "mqtt_password"    : "the_mqtt_password",
