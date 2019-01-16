@@ -431,7 +431,7 @@ void Maison::loop(Process * _process)
     ERROR(" Copy To " STRINGIZE(dst) " with inconsistent size")
 
 #define GETIP(dst, src) \
-  if (!str2ip(src, dst)) \
+  if (!str2ip(src, &dst)) \
     ERROR(" Bad IP Address or Mask format for " STRINGIZE(dst))
 
 bool Maison::retrieve_config(JsonObject & _root, Config & _config)
@@ -513,7 +513,7 @@ bool Maison::load_config(int _version)
 #define PUT(src, dst) dst = src
 #define PUTA(src, dst, len) dst.copyFrom(src)
 // #define PUTA(src, dst, len) for (int i = 0; i < len; i++) dst.add(src[i])
-#define PUTIP(srd, dst) ip2str(src, buffer, 50); dst.copyFrom(src);
+#define PUTIP(src, dst) ip2str(src, buffer, 50); dst.copyFrom(src);
 
 bool Maison::save_config()
 {
@@ -610,7 +610,7 @@ bool Maison::wifi_connect()
     if (!wifi_connected()) {
       delay(200);
       WiFi.mode(WIFI_STA);
-      if (config.ip[0] != 0) {
+      if (config.ip != 0) {
         WiFi.config(config.ip, 
                     config.dns, 
                     config.gateway, 

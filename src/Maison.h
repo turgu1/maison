@@ -499,7 +499,7 @@ class Maison
 
     char * ip2str(uint32_t, char *_str, int _length);
     char * mac2str(byte _mac[], char *_str, int _length);
-    bool str2ip(const char * _str, uint32_t _ip);
+    bool str2ip(const char * _str, uint32_t * _ip);
 };
 
 #endif
