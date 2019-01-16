@@ -991,12 +991,19 @@ void Maison::restart()
   delay(1000); 
 }
 
-char * Maison::ìp2str(byte _ip[], char *_str, int _length)
+char * Maison::ip2str(uint32_t _ip, char *_str, int _length)
 {
   char * str = _str;
 
+  union {
+    uint32_t ip;
+    byte bip[4];
+  } ip;
+
+  ip.ip = _ip;
+
   for (int idx = 0; idx < 4; idx++) {
-    byte v = _ip[idx];
+    byte v = ip.bip[idx];
     do {
       if (--_length < 0) {
         *str = 0;
@@ -1045,14 +1052,17 @@ char * Maison::mac2str(byte _mac[], char *_str, int _length)
   return _str;
 }
 
-bool Maison::str2ip(const char * _str, byte _ip[])
+bool Maison::str2ip(const char * _str, uint32_t * _ip)
 {
   int idx = 0;
 
-  _ip[0] = 0;
-  _ip[1] = 0;
-  _ip[2] = 0;
-  _ip[3] = 0;
+  union {
+    uint32_t ip;
+    byte bip[4];
+  } ip;
+
+  ip.ip = 0;
+  *_ip = 0;
 
   if (*_str ==  0 ) return true;
   if (*_str == '.') return false;
@@ -1063,13 +1073,14 @@ bool Maison::str2ip(const char * _str, byte _ip[])
       if (++  idx  > 3) return false;
     }
     else if ((*_str >= '0') && (*_str <= '9')) {
-      _ip[idx] = (_ip[idx] * 10) + (*_str++ - '0');
+      ip.bip[idx] = (ip.bip[idx] * 10) + (*_str++ - '0');
     }
     else {
       return false;
     }
   }
 
+  *_ip = ip.ip;
   return (*_str == 0) && (idx == 3);
 }
 

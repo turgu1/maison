@@ -408,10 +408,10 @@ class Maison
       char         device_name[16];
       char           wifi_ssid[16];
       char       wifi_password[16];
-      byte                   ip[4];
-      byte          subnet_mask[4];
-      byte              gateway[4];
-      byte                  dns[4];
+      uint32_t                  ip;
+      uint32_t         subnet_mask;
+      uint32_t             gateway;
+      uint32_t                 dns;
       char         mqtt_server[32];
       char       mqtt_username[16];
       char       mqtt_password[32];
@@ -497,9 +497,9 @@ class Maison
     bool      read_mem(uint32_t * _data, uint16_t _length, uint16_t _addr);
     bool     write_mem(uint32_t * _data, uint16_t _length, uint16_t _addr);
 
-    char * ip2str(byte _ip[], char *_str, int _length);
+    char * ip2str(uint32_t, char *_str, int _length);
     char * mac2str(byte _mac[], char *_str, int _length);
-    bool str2ip(const char * _str, byte _ip[]);
+    bool str2ip(const char * _str, uint32_t _ip);
 };
 
 #endif
