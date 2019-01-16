@@ -166,6 +166,12 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
       static char vbat[15];
       static char   ip[20];
       static char  mac[20];
+      byte ma[6];
+
+      ip2str(WiFi.localIP(), ip, sizeof(ip));
+      WiFi.macAddress(ma);
+      mac2str(ma, mac, sizeof(mac));
+
       if (show_voltage()) {
         snprintf(vbat, 14, ",\"VBAT\":%3.1f", battery_voltage());
       }
@@ -190,8 +196,8 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         "%s"
         "}",
         config.device_name,
-        ip2str(WiFi.localIP(), ip, sizeof(ip)),
-        mac2str(WiFi.macAddress(), mac, sizeof(mac)),
+        ip,
+        mac,
         mem.state,
         mem.return_state,
         mem.hours_24_count,
@@ -512,7 +518,7 @@ bool Maison::load_config(int _version)
 
 #define PUT(src, dst) dst = src
 #define PUTA(src, dst, len) dst.copyFrom(src)
-#define PUTIP(src, dst) ip2str(src, buffer, 50); dst.copyFrom(buffer);
+#define PUTIP(src, dst) ip2str(src, buffer, 50); dst = buffer;
 
 bool Maison::save_config()
 {
@@ -1025,7 +1031,7 @@ char * Maison::ip2str(uint32_t _ip, char *_str, int _length)
 char * Maison::mac2str(byte _mac[], char *_str, int _length)
 {
   char * str = _str;
-  static char * hex = "0123456789ABCDEF";
+  static char hex[17] = "0123456789ABCDEF";
 
   for (int idx = 0; idx < 6; idx++) {
     if (--_length < 0) {
