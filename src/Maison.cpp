@@ -665,9 +665,10 @@ bool Maison::mqtt_connect()
       char client_name[30];
       strcpy(client_name, "client-");
       strcat(client_name, config.device_name);
+
       if (use_deep_sleep()) {
         DEBUGLN(F(" Connect with clean-session off."));
-        mqtt_client.connect(config.device_name, 
+        mqtt_client.connect(client_name, 
                             config.mqtt_username, 
                             config.mqtt_password,
                             NULL, 0, 0, NULL,  // Will message not used
@@ -675,7 +676,7 @@ bool Maison::mqtt_connect()
       }
       else {
         DEBUGLN(F(" Connect with clean-session on."));
-        mqtt_client.connect(config.device_name, 
+        mqtt_client.connect(client_name, 
                             config.mqtt_username, 
                             config.mqtt_password);
       }
@@ -742,7 +743,7 @@ bool Maison::send_msg(const char * _topic, const char * _format, ...)
   va_list args;
   va_start (args, _format);
 
-  vsnprintf(buffer, 512, _format, args);
+  vsnprintf(buffer, MQTT_MAX_PACKET_SIZE, _format, args);
   
   DO {
     DEBUG(F(" Sending msg to ")); 
