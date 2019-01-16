@@ -13,8 +13,8 @@
 // Insure that MQTT Packet size is big enough for the needs of the framework
 // This is an option of the PubSubClient library that can be set through platformio.ini
 
-#if MQTT_MAX_PACKET_SIZE < 512
-  #error "MQTT_MAX_PACKET_SIZE MUST BE AT LEAST 512 IN SIZE."
+#if MQTT_MAX_PACKET_SIZE < 1024
+  #error "MQTT_MAX_PACKET_SIZE MUST BE AT LEAST 1024 IN SIZE."
 #endif
 
 // ----- OPTIONS -----
@@ -408,6 +408,10 @@ class Maison
       char         device_name[16];
       char           wifi_ssid[16];
       char       wifi_password[16];
+      byte                   ip[4];
+      byte          subnet_mask[4];
+      byte              gateway[4];
+      byte                  dns[4];
       char         mqtt_server[32];
       char       mqtt_username[16];
       char       mqtt_password[32];
@@ -492,6 +496,10 @@ class Maison
     bool init_user_mem();
     bool      read_mem(uint32_t * _data, uint16_t _length, uint16_t _addr);
     bool     write_mem(uint32_t * _data, uint16_t _length, uint16_t _addr);
+
+    char * ìp2str(byte _ip[], char *_str, int _length);
+    char * mac2str(byte _ip[], char *_str, int _length);
+    bool str2ip(const char * _str, byte _ip[]);
 };
 
 #endif

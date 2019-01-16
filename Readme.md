@@ -56,7 +56,7 @@ The following options **shall** be added to the `plarformio.ini` file of your ap
 
 ```
 lib_deps = https://github.com/turgu1/maison.git
-build_flags = -D MQTT_MAX_PACKET_SIZE=512
+build_flags = -D MQTT_MAX_PACKET_SIZE=1024
 ```
 
 Note that *MQTT_MAX_PACKET_SIZE* can be larger depending of the application requirements.
@@ -225,6 +225,10 @@ The Maison framework is automating access to the MQTT message broker through the
   "version" : 1,
   "device_name" : "WATER_SPILL",
   "ssid" : "the wifi ssid",
+  "ip" : "192.168.1.71",
+  "dsn" : "192.168.1.1",
+  "gateway" : "192.168.1.1",
+  "subnet_mask" : "255.255.255.0".
   "wifi_password" : "the wifi password",
   "mqtt_server_name" : "the server name or IP address",
   "mqtt_user_name" : "the user name",
@@ -241,6 +245,10 @@ Parameter | Description
 version | This is the sequential version number. This is the property of the Server responsible of transmitting new configuration files to the device. It must be incremented every time a new configuration file is sent to the device. The device will not update its configuration if the version number is not greater than the current one. Unsigned Integer value (16 bits).
 device_name | A unique identifier for the device. This identifier is used inside messages sent through MQTT. It is also used to generate the topics related to the device. It can be an empty string: the MAC address of the device WiFi interface will then be used as the identifier. Use letters, underscore, numbers to compose the identifier (no space or other special characters). Max length: 15 ASCII characters.
 ssid / wifi_password | The WiFi SSID and password. Required to reach the network. Max length: 15 ASCII characters each.
+ip | The ip address to set for the WiFi connection. If an empty string or equal to "0.0.0.0", the device will get its IP, dns, gateway adresses and subnet_mask from the network through DHCP.
+dns | The dns server IP address. Can be set to an empty string.
+gateway | The gateway (router) IP address. Can be set to an empty string.
+subnet_mask | The subnet mask. Can be set to an empty string.
 mqtt_server_name | This is the MQTT server name (SQDN) or IP address.  Max length: 31 ASCII characters.
 mqtt_user_name / mqtt_password | These are the credentials to connect to the MQTT server. Max length: 15 ASCII characters for user_name, 31 ASCII characters for password.
 mqtt_port | The TLS/SSL port number of the MQTT server. Unsigned Integer value (16 bits).
@@ -315,6 +323,8 @@ Parameter | Description
 :--------:|------------------
 device    | The device name as stated in the configuration parameters. If the configuration parameter is empty, the MAC address of the device WiFi interface is used.
 msg_type  | This content the string "STATE".
+ip        | The device WiFi IP adress.
+mac       | The device MAC address.
 state     | The current state of the finite state machine, as a number. Look into the [Finite State Machine](#the-finite-state-machine) section for details.
 return_state | The state to return to after *HOURS_24* processing.
 hours     | Hours counter. Used to compute the next 24 hours period.
@@ -327,7 +337,7 @@ VBAT      | This is the Battery voltage. This parameter is optional. Its presenc
 Example:
 
 ```
-{"device":"WATER_SPILL","msg_type":"STATE","state":32,"return_state":2,hours":7,"millis":8001,"lost":0,"rssi":-63,"heap":16704,"VBAT":3.0}
+{"device":"WATER_SPILL","msg_type":"STATE","ip":"192.168.1.71","mac":"2B:1D:03:31:2A:54","state":32,"return_state":2,hours":7,"millis":8001,"lost":0,"rssi":-63,"heap":16704,"VBAT":3.0}
 ```
 
 ### 7.3 The Watchdog Message
@@ -364,6 +374,10 @@ Example:
   "device_name"      : "TEST_DEV",
   "ssid"             : "the_ssid",
   "wifi_password"    : "the_password",
+  "ip"               : "192.168.1.71",
+  "dsn"              : "192.168.1.1",
+  "gateway"          : "192.168.1.1",
+  "subnet_mask"      : "255.255.255.0".
   "mqtt_server_name" : "the_server_sqdn",
   "mqtt_user_name"   : "the_mqtt_user_name",
   "mqtt_password"    : "the_mqtt_password",
