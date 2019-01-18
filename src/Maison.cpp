@@ -1,5 +1,6 @@
 #include <Maison.h>
 
+// Used by the maison_callback friend function
 static Maison * maison;
 
 Maison::Maison() :
@@ -114,6 +115,83 @@ void Maison::send_config_msg()
   }
 }
 
+void Maison::send_state_msg()
+{
+  static char vbat[15];
+  static char   ip[20];
+  static char  mac[20];
+  byte ma[6];
+
+  ip2str(WiFi.localIP(), ip, sizeof(ip));
+  WiFi.macAddress(ma);
+  mac2str(ma, mac, sizeof(mac));
+
+  if (show_voltage()) {
+    snprintf(vbat, 14, ",\"VBAT\":%3.1f", battery_voltage());
+  }
+  else {
+    vbat[0] = 0;
+  }
+
+  send_msg(
+    MAISON_STATUS_TOPIC, 
+    "{"
+    "\"device\":\"%s\","
+    "\"msg_type\":\"STATE\","
+    "\"ip\":\"%s\","
+    "\"mac\":\"%s\","
+    "\"state\":%u,"
+    "\"return_state\":%u,"
+    "\"hours\":%u,"
+    "\"millis\":%u,"
+    "\"lost\":%u,"
+    "\"rssi\":%ld,"
+    "\"heap\":%u"
+    "%s"
+    "}",
+    config.device_name,
+    ip,
+    mac,
+    mem.state,
+    mem.return_state,
+    mem.hours_24_count,
+    mem.one_hour_step_count,
+    mem.lost_count,
+    wifi_connected() ? WiFi.RSSI() : 0,
+    ESP.getFreeHeap(),
+    vbat);
+}
+
+void Maison::get_new_config()
+{
+  DynamicJsonBuffer jsonBuffer;
+  JsonObject & root = jsonBuffer.parseObject(&buffer[7]);
+
+  if (!root.success()) {
+    DEBUGLN(F(" ERROR: Unable to parse JSON content"));
+  }
+  else {
+    Config cfg;
+
+    if (!retrieve_config(root, cfg)) {
+      DEBUGLN(F(" ERROR: Unable to retrieve config from received message"));
+    }
+    else {
+      if (cfg.version > config.version) {
+        config = cfg;
+        #if MAISON_TESTING
+          show_config(config);
+        #endif
+        save_config();
+      }
+      else {
+        DEBUGLN(F(" ERROR: New config with a wrong version number. Not saved."));
+      }
+      send_config_msg();
+    }
+  }
+}
+
 void Maison::process_callback(const char * _topic, byte * _payload, unsigned int _length)
 {
   SHOW("process_callback()");
@@ -127,85 +205,20 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
     buffer[len] = 0;
     DEBUGLN(buffer);
 
-    if (strncmp(buffer, "CONFIG?", 7) == 0) {
-      DEBUGLN(F(" Config content requested by Maison"));
+    if (strncmp(buffer, "CONFIG:", 7) == 0) {
+      DEBUGLN(F(" New config received"));
+
+      get_new_config();
+    }
+    else if (strncmp(buffer, "CONFIG?", 7) == 0) {
+      DEBUGLN(F(" Config content requested"));
 
       send_config_msg();
     }
-    else if (strncmp(buffer, "CONFIG:", 7) == 0) {
-      DEBUGLN(F(" New config received"));
-
-      DynamicJsonBuffer jsonBuffer;
-      JsonObject & root = jsonBuffer.parseObject(&buffer[7]);
-
-      if (!root.success()) {
-        DEBUGLN(F(" ERROR: Unable to parse JSON content"));
-      }
-      else {
-        Config cfg;
-
-        if (!retrieve_config(root, cfg)) {
-          DEBUGLN(F(" ERROR: Unable to retrieve config from received message"));
-        }
-        else {
-          if (cfg.version > config.version) {
-            config = cfg;
-            #if MAISON_TESTING
-              show_config(config);
-            #endif
-            save_config();
-          }
-          else {
-            DEBUGLN(F(" ERROR: New config with a wrong version number. Not saved."));
-          }
-          send_config_msg();
-        }
-      }
-    }
     else if (strncmp(buffer, "STATE?", 6) == 0) {
-      static char vbat[15];
-      static char   ip[20];
-      static char  mac[20];
-      byte ma[6];
+      DEBUGLN(F(" Config content requested"));
 
-      ip2str(WiFi.localIP(), ip, sizeof(ip));
-      WiFi.macAddress(ma);
-      mac2str(ma, mac, sizeof(mac));
-
-      if (show_voltage()) {
-        snprintf(vbat, 14, ",\"VBAT\":%3.1f", battery_voltage());
-      }
-      else {
-        vbat[0] = 0;
-      }
-
-      send_msg(
-        MAISON_STATUS_TOPIC, 
-        "{"
-        "\"device\":\"%s\","
-        "\"msg_type\":\"STATE\","
-        "\"ip\":\"%s\","
-        "\"mac\":\"%s\","
-        "\"state\":%u,"
-        "\"return_state\":%u,"
-        "\"hours\":%u,"
-        "\"millis\":%u,"
-        "\"lost\":%u,"
-        "\"rssi\":%ld,"
-        "\"heap\":%u"
-        "%s"
-        "}",
-        config.device_name,
-        ip,
-        mac,
-        mem.state,
-        mem.return_state,
-        mem.hours_24_count,
-        mem.one_hour_step_count,
-        mem.lost_count,
-        wifi_connected() ? WiFi.RSSI() : 0,
-        ESP.getFreeHeap(),
-        vbat);
+      send_state_msg();
     }
     else if (strncmp(buffer, "RESTART!", 8) == 0) {
       DEBUGLN("Device is restarting");

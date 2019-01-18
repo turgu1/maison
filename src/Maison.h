@@ -454,8 +454,6 @@ class Maison
     friend void maison_callback(const char * _topic, byte * _payload, unsigned int _length);
     void process_callback(const char * _topic, byte * _payload, unsigned int _length);
 
-    void send_config_msg();
-
     inline bool   wifi_connected() { return WiFi.status() == WL_CONNECTED;             }
     inline bool   mqtt_connected() { return mqtt_client.connected();                   }
 
@@ -482,7 +480,12 @@ class Maison
     State check_if_24_hours_time(State _default_state);
     bool retrieve_config(JsonObject & _root, Config & _config);
     bool load_config(int _version = 0);
-    bool save_config();
+    
+    bool     save_config();
+    void send_config_msg();
+    void  send_state_msg();
+    void  get_new_config();
+
     #if MAISON_TESTING
       void show_config(Config & _config);
     #endif
