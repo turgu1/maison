@@ -1,5 +1,6 @@
 #include <Maison.h>
 
+// Used by the maison_callback friend function
 static Maison * maison;
 
 Maison::Maison() :
@@ -114,6 +115,83 @@ void Maison::send_config_msg()
   }
 }
 
+void Maison::send_state_msg()
+{
+  static char vbat[15];
+  static char   ip[20];
+  static char  mac[20];
+  byte ma[6];
+
+  ip2str(WiFi.localIP(), ip, sizeof(ip));
+  WiFi.macAddress(ma);
+  mac2str(ma, mac, sizeof(mac));
+
+  if (show_voltage()) {
+    snprintf(vbat, 14, ",\"VBAT\":%3.1f", battery_voltage());
+  }
+  else {
+    vbat[0] = 0;
+  }
+
+  send_msg(
+    MAISON_STATUS_TOPIC, 
+    "{"
+    "\"device\":\"%s\","
+    "\"msg_type\":\"STATE\","
+    "\"ip\":\"%s\","
+    "\"mac\":\"%s\","
+    "\"state\":%u,"
+    "\"return_state\":%u,"
+    "\"hours\":%u,"
+    "\"millis\":%u,"
+    "\"lost\":%u,"
+    "\"rssi\":%ld,"
+    "\"heap\":%u"
+    "%s"
+    "}",
+    config.device_name,
+    ip,
+    mac,
+    mem.state,
+    mem.return_state,
+    mem.hours_24_count,
+    mem.one_hour_step_count,
+    mem.lost_count,
+    wifi_connected() ? WiFi.RSSI() : 0,
+    ESP.getFreeHeap(),
+    vbat);
+}
+
+void Maison::get_new_config()
+{
+  DynamicJsonBuffer jsonBuffer;
+  JsonObject & root = jsonBuffer.parseObject(&buffer[7]);
+
+  if (!root.success()) {
+    DEBUGLN(F(" ERROR: Unable to parse JSON content"));
+  }
+  else {
+    Config cfg;
+
+    if (!retrieve_config(root, cfg)) {
+      DEBUGLN(F(" ERROR: Unable to retrieve config from received message"));
+    }
+    else {
+      if (cfg.version > config.version) {
+        config = cfg;
+        #if MAISON_TESTING
+          show_config(config);
+        #endif
+        save_config();
+      }
+      else {
+        DEBUGLN(F(" ERROR: New config with a wrong version number. Not saved."));
+      }
+      send_config_msg();
+    }
+  }
+}
+
 void Maison::process_callback(const char * _topic, byte * _payload, unsigned int _length)
 {
   SHOW("process_callback()");
@@ -127,73 +205,20 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
     buffer[len] = 0;
     DEBUGLN(buffer);
 
-    if (strncmp(buffer, "CONFIG?", 7) == 0) {
-      DEBUGLN(F(" Config content requested by Maison"));
+    if (strncmp(buffer, "CONFIG:", 7) == 0) {
+      DEBUGLN(F(" New config received"));
+
+      get_new_config();
+    }
+    else if (strncmp(buffer, "CONFIG?", 7) == 0) {
+      DEBUGLN(F(" Config content requested"));
 
       send_config_msg();
     }
-    else if (strncmp(buffer, "CONFIG:", 7) == 0) {
-      DEBUGLN(F(" New config received"));
-
-      DynamicJsonBuffer jsonBuffer;
-      JsonObject & root = jsonBuffer.parseObject(&buffer[7]);
-
-      if (!root.success()) {
-        DEBUGLN(F(" ERROR: Unable to parse JSON content"));
-      }
-      else {
-        Config cfg;
-
-        if (!retrieve_config(root, cfg)) {
-          DEBUGLN(F(" ERROR: Unable to retrieve config from received message"));
-        }
-        else {
-          if (cfg.version > config.version) {
-            config = cfg;
-            #if MAISON_TESTING
-              show_config(config);
-            #endif
-            save_config();
-          }
-          else {
-            DEBUGLN(F(" ERROR: New config with a wrong version number. Not saved."));
-          }
-          send_config_msg();
-        }
-      }
-    }
     else if (strncmp(buffer, "STATE?", 6) == 0) {
-      char vbat[15];
-      if (show_voltage()) {
-        snprintf(vbat, 14, ",\"VBAT\":%3.1f", battery_voltage());
-      }
-      else {
-        vbat[0] = 0;
-      }
+      DEBUGLN(F(" Config content requested"));
 
-      send_msg(
-        MAISON_STATUS_TOPIC, 
-        "{"
-        "\"device\":\"%s\","
-        "\"msg_type\":\"STATE\","
-        "\"state\":%u,"
-        "\"return_state\":%u,"
-        "\"hours\":%u,"
-        "\"millis\":%u,"
-        "\"lost\":%u,"
-        "\"rssi\":%ld,"
-        "\"heap\":%u"
-        "%s"
-        "}",
-        config.device_name,
-        mem.state,
-        mem.return_state,
-        mem.hours_24_count,
-        mem.one_hour_step_count,
-        mem.lost_count,
-        wifi_connected() ? WiFi.RSSI() : 0,
-        ESP.getFreeHeap(),
-        vbat);
+      send_state_msg();
     }
     else if (strncmp(buffer, "RESTART!", 8) == 0) {
       DEBUGLN("Device is restarting");
@@ -219,6 +244,8 @@ void Maison::loop(Process * _process)
 
   DEBUG(F("Maison::loop(): Current state: "));
   DEBUGLN(mem.state);
+
+  yield();
 
   if (network_is_available()) {
 
@@ -422,6 +449,10 @@ void Maison::loop(Process * _process)
   if (src.as<JsonArray>().copyTo(dst) != size) \
     ERROR(" Copy To " STRINGIZE(dst) " with inconsistent size")
 
+#define GETIP(dst, src) \
+  if (!str2ip(src, &dst)) \
+    ERROR(" Bad IP Address or Mask format for " STRINGIZE(dst))
+
 bool Maison::retrieve_config(JsonObject & _root, Config & _config)
 {
   SHOW("retrieve_config()");
@@ -429,15 +460,19 @@ bool Maison::retrieve_config(JsonObject & _root, Config & _config)
   DO {
     const char * tmp;
 
-    GETI(_config.version,          _root["version"         ]);
-    GETS(_config.device_name,      _root["device_name"     ], sizeof(_config.device_name     ));
-    GETS(_config.wifi_ssid,        _root["ssid"            ], sizeof(_config.wifi_ssid       ));
-    GETS(_config.wifi_password,    _root["wifi_password"   ], sizeof(_config.wifi_password   ));
-    GETS(_config.mqtt_server,      _root["mqtt_server_name"], sizeof(_config.mqtt_server     ));
-    GETS(_config.mqtt_username,    _root["mqtt_user_name"  ], sizeof(_config.mqtt_username   ));
-    GETS(_config.mqtt_password,    _root["mqtt_password"   ], sizeof(_config.mqtt_password   ));
-    GETI(_config.mqtt_port,        _root["mqtt_port"       ]);
-    GETA(_config.mqtt_fingerprint, _root["mqtt_fingerprint"], 20);
+    GETI (_config.version,          _root["version"         ]);
+    GETS (_config.device_name,      _root["device_name"     ], sizeof(_config.device_name     ));
+    GETS (_config.wifi_ssid,        _root["ssid"            ], sizeof(_config.wifi_ssid       ));
+    GETS (_config.wifi_password,    _root["wifi_password"   ], sizeof(_config.wifi_password   ));
+    GETS (_config.mqtt_server,      _root["mqtt_server_name"], sizeof(_config.mqtt_server     ));
+    GETS (_config.mqtt_username,    _root["mqtt_user_name"  ], sizeof(_config.mqtt_username   ));
+    GETS (_config.mqtt_password,    _root["mqtt_password"   ], sizeof(_config.mqtt_password   ));
+    GETI (_config.mqtt_port,        _root["mqtt_port"       ]);
+    GETA (_config.mqtt_fingerprint, _root["mqtt_fingerprint"], 20);
+    GETIP(_config.ip,               _root["ip"              ]);
+    GETIP(_config.subnet_mask,      _root["subnet_mask"     ]);
+    GETIP(_config.gateway,          _root["gateway"         ]);
+    GETIP(_config.dns,              _root["dns"             ]);
 
     OK_DO;
   }
@@ -496,7 +531,7 @@ bool Maison::load_config(int _version)
 
 #define PUT(src, dst) dst = src
 #define PUTA(src, dst, len) dst.copyFrom(src)
-// #define PUTA(src, dst, len) for (int i = 0; i < len; i++) dst.add(src[i])
+#define PUTIP(src, dst) ip2str(src, buffer, 50); dst = buffer;
 
 bool Maison::save_config()
 {
@@ -525,15 +560,19 @@ bool Maison::save_config()
     JsonArray & arr = root.createNestedArray("mqtt_fingerprint");
     if (!arr.success()) ERROR("Unable to create JSON array object");
 
-    PUT (config.version,          root["version"         ]);
-    PUT (config.device_name,      root["device_name"     ]);
-    PUT (config.wifi_ssid,        root["ssid"            ]);
-    PUT (config.wifi_password,    root["wifi_password"   ]);
-    PUT (config.mqtt_server,      root["mqtt_server_name"]);
-    PUT (config.mqtt_username,    root["mqtt_user_name"  ]);
-    PUT (config.mqtt_password,    root["mqtt_password"   ]);
-    PUT (config.mqtt_port,        root["mqtt_port"       ]);
-    PUTA(config.mqtt_fingerprint, arr, 20);
+    PUT  (config.version,          root["version"         ]);
+    PUT  (config.device_name,      root["device_name"     ]);
+    PUT  (config.wifi_ssid,        root["ssid"            ]);
+    PUT  (config.wifi_password,    root["wifi_password"   ]);
+    PUTIP(config.ip,               root["ip"              ]);
+    PUTIP(config.subnet_mask,      root["subnet_mask"     ]);
+    PUTIP(config.gateway,          root["gateway"         ]);
+    PUTIP(config.dns,              root["dns"             ]);
+    PUT  (config.mqtt_server,      root["mqtt_server_name"]);
+    PUT  (config.mqtt_username,    root["mqtt_user_name"  ]);
+    PUT  (config.mqtt_password,    root["mqtt_password"   ]);
+    PUT  (config.mqtt_port,        root["mqtt_port"       ]);
+    PUTA (config.mqtt_fingerprint, arr, 20);
 
     if (!root.printTo(file)) ERROR("Unable to send JSON content to file /config.json");
 
@@ -589,6 +628,12 @@ bool Maison::wifi_connect()
     if (!wifi_connected()) {
       delay(200);
       WiFi.mode(WIFI_STA);
+      if (config.ip != 0) {
+        WiFi.config(config.ip, 
+                    config.dns, 
+                    config.gateway, 
+                    config.subnet_mask);
+      }
       WiFi.begin(config.wifi_ssid, config.wifi_password);
       delay(100);
 
@@ -630,15 +675,21 @@ bool Maison::mqtt_connect()
       mqtt_client.setClient(*wifi_client);    
       mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
 
+      char client_name[30];
+      strcpy(client_name, "client-");
+      strcat(client_name, config.device_name);
+
       if (use_deep_sleep()) {
-        mqtt_client.connect(config.device_name, 
+        DEBUGLN(F(" Connect with clean-session off."));
+        mqtt_client.connect(client_name, 
                             config.mqtt_username, 
                             config.mqtt_password,
                             NULL, 0, 0, NULL,  // Will message not used
                             false);
       }
       else {
-        mqtt_client.connect(config.device_name, 
+        DEBUGLN(F(" Connect with clean-session on."));
+        mqtt_client.connect(client_name, 
                             config.mqtt_username, 
                             config.mqtt_password);
       }
@@ -646,7 +697,9 @@ bool Maison::mqtt_connect()
       if (mqtt_connected()) {
 
         mqtt_client.setCallback(maison_callback);
-        if (!mqtt_client.subscribe(my_topic(CTRL_SUFFIX_TOPIC, buffer, sizeof(buffer)))) {
+        if (!mqtt_client.subscribe(
+                     my_topic(CTRL_SUFFIX_TOPIC, buffer, sizeof(buffer)), 
+                     use_deep_sleep() ? 1 : 0)) {
           DEBUG(F(" Hum... unable to subscribe to topic (State:"));
           DEBUG(mqtt_client.state());
           DEBUG(F("): "));
@@ -703,7 +756,7 @@ bool Maison::send_msg(const char * _topic, const char * _format, ...)
   va_list args;
   va_start (args, _format);
 
-  vsnprintf(buffer, 512, _format, args);
+  vsnprintf(buffer, MQTT_MAX_PACKET_SIZE, _format, args);
   
   DO {
     DEBUG(F(" Sending msg to ")); 
@@ -964,6 +1017,80 @@ void Maison::restart()
   delay(1000); 
 }
 
+char * Maison::ip2str(uint32_t _ip, char *_str, int _length)
+{
+  union {
+    uint32_t ip;
+    byte bip[4];
+  } ip;
+
+  ip.ip = _ip;
+
+  snprintf(_str, _length, "%d.%d.%d.%d", ip.bip[0], ip.bip[1], ip.bip[2], ip.bip[3]);
+  return _str;
+}
+
+char * Maison::mac2str(byte _mac[], char *_str, int _length)
+{
+  char * str = _str;
+  static char hex[17] = "0123456789ABCDEF";
+
+  for (int idx = 0; idx < 6; idx++) {
+    if (--_length < 0) {
+      *str = 0;
+      return _str;
+    }
+    *str++ = hex[(_mac[idx] >> 4) & 0x0F];
+
+    if (--_length < 0) {
+      *str = 0;
+      return _str;
+    }
+    *str++ = hex[_mac[idx] & 0x0F];
+
+    if (idx != 5) {
+      if (--_length < 0) {
+        *str = 0;
+        return _str;
+      }
+      *str++ = ':';
+    }
+  }
+  return _str;
+}
+
+bool Maison::str2ip(const char * _str, uint32_t * _ip)
+{
+  int idx = 0;
+
+  union {
+    uint32_t ip;
+    byte bip[4];
+  } ip;
+
+  ip.ip = 0;
+  *_ip = 0;
+
+  if (*_str ==  0 ) return true;
+  if (*_str == '.') return false;
+
+  while (*_str) {
+    if (*_str == '.') {
+      if (*++_str == 0) return false;
+      if (++  idx  > 3) return false;
+    }
+    else if ((*_str >= '0') && (*_str <= '9')) {
+      ip.bip[idx] = (ip.bip[idx] * 10) + (*_str++ - '0');
+    }
+    else {
+      return false;
+    }
+  }
+
+  *_ip = ip.ip;
+  return (*_str == 0) && (idx == 3);
+}
+
 #if MAISON_TESTING
 
   void Maison::show_config(Config & _config)
@@ -974,6 +1101,12 @@ void Maison::restart()
     DEBUG(F("Device Name   : ")); DEBUGLN(_config.device_name     );
     DEBUG(F("WiFi SSID     : ")); DEBUGLN(_config.wifi_ssid       );
     DEBUG(F("WiFi Password : ")); DEBUGLN(F("<Hidden>")           );
+
+    DEBUG(F("IP            : ")); DEBUGLN(ip2str(config.ip,          buffer, 50));
+    DEBUG(F("DNS           : ")); DEBUGLN(ip2str(config.dns,         buffer, 50));
+    DEBUG(F("Gateway       : ")); DEBUGLN(ip2str(config.gateway,     buffer, 50));
+    DEBUG(F("Subnet Mask   : ")); DEBUGLN(ip2str(config.subnet_mask, buffer, 50));
+    
     DEBUG(F("MQTT Server   : ")); DEBUGLN(_config.mqtt_server     );
     DEBUG(F("MQTT Username : ")); DEBUGLN(_config.mqtt_username   );
     DEBUG(F("MQTT Password : ")); DEBUGLN(F("<Hidden>")           );

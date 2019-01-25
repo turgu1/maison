@@ -13,8 +13,8 @@
 // Insure that MQTT Packet size is big enough for the needs of the framework
 // This is an option of the PubSubClient library that can be set through platformio.ini
 
-#if MQTT_MAX_PACKET_SIZE < 512
-  #error "MQTT_MAX_PACKET_SIZE MUST BE AT LEAST 512 IN SIZE."
+#if MQTT_MAX_PACKET_SIZE < 1024
+  #error "MQTT_MAX_PACKET_SIZE MUST BE AT LEAST 1024 IN SIZE."
 #endif
 
 // ----- OPTIONS -----
@@ -408,6 +408,10 @@ class Maison
       char         device_name[16];
       char           wifi_ssid[16];
       char       wifi_password[16];
+      uint32_t                  ip;
+      uint32_t         subnet_mask;
+      uint32_t             gateway;
+      uint32_t                 dns;
       char         mqtt_server[32];
       char       mqtt_username[16];
       char       mqtt_password[32];
@@ -450,8 +454,6 @@ class Maison
     friend void maison_callback(const char * _topic, byte * _payload, unsigned int _length);
     void process_callback(const char * _topic, byte * _payload, unsigned int _length);
 
-    void send_config_msg();
-
     inline bool   wifi_connected() { return WiFi.status() == WL_CONNECTED;             }
     inline bool   mqtt_connected() { return mqtt_client.connected();                   }
 
@@ -478,7 +480,12 @@ class Maison
     State check_if_24_hours_time(State _default_state);
     bool retrieve_config(JsonObject & _root, Config & _config);
     bool load_config(int _version = 0);
-    bool save_config();
+    
+    bool     save_config();
+    void send_config_msg();
+    void  send_state_msg();
+    void  get_new_config();
+
     #if MAISON_TESTING
       void show_config(Config & _config);
     #endif
@@ -492,6 +499,10 @@ class Maison
     bool init_user_mem();
     bool      read_mem(uint32_t * _data, uint16_t _length, uint16_t _addr);
     bool     write_mem(uint32_t * _data, uint16_t _length, uint16_t _addr);
+
+    char * ip2str(uint32_t, char *_str, int _length);
+    char * mac2str(byte _mac[], char *_str, int _length);
+    bool str2ip(const char * _str, uint32_t * _ip);
 };
 
 #endif
