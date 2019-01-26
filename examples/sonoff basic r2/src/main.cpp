@@ -46,13 +46,11 @@
 #define LED   13
 
 #if DEBUGGING
-  #define SWITCH 0
-  #define STEADY 0
-  #define WAIT_TIME (30 * 1000)
+  #define SWITCH 0       // Uses device button for debugging (IO0)
+  #define WALL_SWITCH 0  // Push button
 #else
-  #define SWITCH 3
-  #define STEADY 1
-  #define WAIT_TIME (300 * 1000)
+  #define SWITCH 3       // Use RXD as switch entry (IO3)
+  #define WALL_SWITCH 1  // Normal wall switch
 #endif
 
 #define MAX_DEBOUNCE_COUNT 3
@@ -60,11 +58,13 @@
 #define LED_ON  digitalWrite(LED, LOW )
 #define LED_OFF digitalWrite(LED, HIGH)
 
-#define RELAY_ON     { digitalWrite(RELAY, LOW ); relay_is_on = false; LED_ON; }
-#define RELAY_OFF    { digitalWrite(RELAY, HIGH); relay_is_on = true; LED_OFF; }
-#define RELAY_TOGGLE { if (relay_is_on) RELAY_OFF else RELAY_ON        }
+#define RELAY_ON     { digitalWrite(RELAY, HIGH); relay_is_on = true;  LED_ON;  }
+#define RELAY_OFF    { digitalWrite(RELAY, LOW ); relay_is_on = false; LED_OFF; }
+#define RELAY_TOGGLE { if (relay_is_on) RELAY_OFF else RELAY_ON                 }
 
 #define RELAY_TOPIC "relay"
+
+#define ON_AT_STARTUP 0
 
 Maison maison(Maison::WATCHDOG_24H);
 
@@ -73,26 +73,34 @@ bool switch_state;
 bool switch_new_state;
 byte switch_new_state_count;
 
+void send_relay_state()
+{
+  maison.send_msg(MAISON_STATUS_TOPIC,
+                  "{"
+                  "\"device\":\"%s\","
+                  "\"msg_type\":\"RELAY_STATE\","
+                  "\"content\":\"%s\""
+                  "}",
+                  maison.get_device_name(),
+                  relay_is_on ? "ON" : "OFF");
+}
+
 void sonoff_callback(const char * topic, byte * payload, unsigned int length)
 {
   if (memcmp(payload, "TOGGLE!", 7) == 0) {
     RELAY_TOGGLE;
+    send_relay_state();
   }
   else if (memcmp(payload, "ON!", 3) == 0) {
     RELAY_ON;
+    send_relay_state();
   }
   else if (memcmp(payload, "OFF!", 4) == 0) {
     RELAY_OFF;
+    send_relay_state();
   }
   else if (memcmp(payload, "STATE?", 6) == 0) {
-    maison.send_msg(MAISON_STATUS_TOPIC,
-                    "{"
-                    "\"device\":\"%s\","
-                    "\"msg_type\":\"RELAY_STATE\","
-                    "\"content\":\"%s\""
-                    "}",
-                    maison.get_device_name(),
-                    relay_is_on ? "ON" : "OFF");
+    send_relay_state();
   }
   SHOW_RELAY;
 }
@@ -107,14 +115,18 @@ void setup()
   pinMode(RELAY,  OUTPUT);
   pinMode(SWITCH, INPUT_PULLUP);
 
-  RELAY_OFF;
+  #if ON_AT_STARTUP
+    RELAY_ON;
+  #else
+    RELAY_OFF;
+  #endif
 
   delay(100);
 
+  maison.setup();
+
   switch_state = digitalRead(SWITCH) == LOW;
   switch_new_state_count = 0;
-
-  maison.setup();
 
   static char buff[60];
   maison.my_topic(RELAY_TOPIC, buff, 60);
@@ -136,14 +148,17 @@ void loop()
     if (++switch_new_state_count > MAX_DEBOUNCE_COUNT) {
       // We have a new switch state. Toggle the relay...
       switch_state = switch_new_state;
-      #if STEADY
+      #if WALL_SWITCH
         RELAY_TOGGLE;
+        send_relay_state();
+        SHOW_RELAY;
       #else
         if (switch_state) {
           RELAY_TOGGLE;
+          send_relay_state();
+          SHOW_RELAY;
         }
       #endif
-      SHOW_RELAY;
     }
   }
   else {
