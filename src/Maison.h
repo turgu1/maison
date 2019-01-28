@@ -10,6 +10,18 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#ifndef CODE_NAME
+  #define CODE_NAME "UNKNOWN"
+#endif
+
+#ifndef CODE_VERSION
+  #define CODE_VERSION "1.0.0"
+#endif
+
+#ifndef MQTT_OTA
+  #define MQTT_OTA 0
+#endif
+
 // Insure that MQTT Packet size is big enough for the needs of the framework
 // This is an option of the PubSubClient library that can be set through platformio.ini
 
@@ -21,7 +33,7 @@
 //
 // To be set in the platformio.ini file
 
-// If MAISON_TESTING is != 0, the Serial port must be properly initialized by 
+// If MAISON_TESTING is != 0, the Serial port must be properly initialized by
 // the user sketch before calling Maison::setup(). For example:
 //
 // Serial.begin(9600)
@@ -111,7 +123,7 @@
   #define ONE_HOUR 3600 ///< In seconds. Normal is one hour x 24 = 24 hours.
 #endif
 
-/// Maison implements a framework that simplify the creation of IOT devices 
+/// Maison implements a framework that simplify the creation of IOT devices
 /// using an ESP8266 processor. It implements a protocol of exchange of
 /// information with a MQTT broker that serves as a bridge between a device
 /// management server and a variety of embedded devices.
@@ -123,11 +135,11 @@
 /// the protocol and an MQTT broker:
 ///
 /// @startuml{sequence_uml.png} "Maison Sequence Diagram" width=8cm
-/// 
+///
 /// actor Device
 /// actor device_ctrl as "maison/WATER_SPILL/ctrl"
 /// actor server_status as "maison/status"
-/// 
+///
 /// group Device actions
 ///   group Reset
 ///     Device --> server_status : "{Startup}"
@@ -136,23 +148,23 @@
 ///     Device --> server_status : "{Watchdog}"
 ///   end
 /// end
-/// 
+///
 /// group Server Requests
 ///   group Device State
 ///     device_ctrl --> Device : "STATE?"
 ///     Device --> server_status : "{State}"
 ///   end
-/// 
+///
 ///   group Current Config
 ///     device_ctrl --> Device : "CONFIG?"
 ///     Device --> server_status : "{config}"
 ///   end
-/// 
+///
 ///   group Set Config
 ///     device_ctrl --> Device : "CONFIG: {config}"
 ///     Device --> server_status : "{config}"
 ///   end
-/// 
+///
 ///   group Reset device
 ///     device_ctrl --> Device : "RESTART!"
 ///   end
@@ -178,7 +190,7 @@ class Maison
 
     /// States of the finite state machine
     ///
-    /// On battery power (*DEEP_SLEEP* feature is set), only the following 
+    /// On battery power (*DEEP_SLEEP* feature is set), only the following
     /// states will have networking capability:
     ///
     ///    *STARTUP*, *PROCESS_EVENT*, *END_EVENT*, *HOURS_24*
@@ -219,7 +231,7 @@ class Maison
     /// look at the State enumeration description where a state diagram show the
     /// relationship between states and values returned by the user process function.
 
-    enum UserResult : uint8_t { 
+    enum UserResult : uint8_t {
       COMPLETED = 1, ///< The processing for the current state is considered completed
       NOT_COMPLETED, ///< The current state still require some processing in calls to come
       ABORTED,       ///< The event vanished and requires no more processing (in a *PROCESS_EVENT* state)
@@ -227,7 +239,7 @@ class Maison
       RETRY          ///< From WAIT_END_EVENT, go back to PROCESS_EVENT
     };
 
-    /// Application defined process function. To be supplied as a parameter 
+    /// Application defined process function. To be supplied as a parameter
     /// to the Maison::loop() function.
     /// @param[in] _state The current state of the Finite State Machine.
     /// @return The status of the user process execution.
@@ -247,9 +259,9 @@ class Maison
     Maison(uint8_t _feature_mask);
     Maison(uint8_t _feature_mask, void * _user_mem, uint16_t _user_mem_length);
 
-    /// The Maison setup function. Normally to be called inside the application setup() 
+    /// The Maison setup function. Normally to be called inside the application setup()
     /// function.
-    /// @return True if setup completed successfully. 
+    /// @return True if setup completed successfully.
 
     bool setup();
 
@@ -294,16 +306,16 @@ class Maison
     ///
     /// @param[in] _feature The feature to be enabled.
 
-    inline void  enable_feature(Feature _feature) { 
-      feature_mask |= _feature;  
+    inline void  enable_feature(Feature _feature) {
+      feature_mask |= _feature;
     }
-    
+
     /// Disable a feature dynamically.
     ///
     /// @param[in] _feature The feature to be disabled.
 
-    inline void disable_feature(Feature _feature) { 
-      feature_mask &= ~_feature; 
+    inline void disable_feature(Feature _feature) {
+      feature_mask &= ~_feature;
     }
 
     /// Returns the battery voltage. Requires ADC_MODE(ADC_VCC); at the
@@ -311,41 +323,41 @@ class Maison
     ///
     /// @return The battery voltage as read from the ESP8266 ESP.getVcc() call
 
-    inline float battery_voltage() { 
-      return (ESP.getVcc() * (1.0 / 1024.0)); 
-    }    
-    
+    inline float battery_voltage() {
+      return (ESP.getVcc() * (1.0 / 1024.0));
+    }
+
     /// Check if a reset is due to something else than Deep Sleep return.
     ///
     /// @return True if a reset occurred that is not coming from a Deep Sleep return.
 
-    inline bool is_hard_reset() { 
-      return reset_reason() != REASON_DEEP_SLEEP_AWAKE; 
+    inline bool is_hard_reset() {
+      return reset_reason() != REASON_DEEP_SLEEP_AWAKE;
     }
 
     /// Set the deep_sleep period inside an application process function.
     ///
     /// @param[in] _seconds The number of seconds to wait inside the next Deep Sleep call.
 
-    inline void set_deep_sleep_wait_time(uint16_t _seconds) { 
-      deep_sleep_wait_time = (_seconds > 4294) ? 4294 : _seconds; 
+    inline void set_deep_sleep_wait_time(uint16_t _seconds) {
+      deep_sleep_wait_time = (_seconds > 4294) ? 4294 : _seconds;
     }
 
-    /// Checks if networking is currently available. Always true if *DEEP_SLEEP* 
+    /// Checks if networking is currently available. Always true if *DEEP_SLEEP*
     /// is not set in the features.
     ///
     /// @return True if the network is enabled.
 
-    inline bool network_is_available() { 
-      return (!use_deep_sleep()) || 
+    inline bool network_is_available() {
+      return (!use_deep_sleep()) ||
              ((mem.state & (STARTUP|PROCESS_EVENT|END_EVENT|HOURS_24)) != 0);
     }
 
     /// Get elapsed time since the last call to user process in the preceding loop call.
     /// @return Elapsed time in microseconds.
 
-    inline long last_loop_duration() { 
-      return mem.elapse_time; 
+    inline long last_loop_duration() {
+      return mem.elapse_time;
     }
 
     /// Returns a complete device related topic name, built using the default prefix and
@@ -388,18 +400,18 @@ class Maison
 
     const char * get_device_name() { return config.device_name; }
 
-    /// Function to be called by the application in the main loop to insure 
+    /// Function to be called by the application in the main loop to insure
     /// proper actions by the framework.
     ///
-    /// @param[in] _process The application processing function. This function will be 
-    ///                    called by the framework every time the Maison::loop() is called, 
+    /// @param[in] _process The application processing function. This function will be
+    ///                    called by the framework every time the Maison::loop() is called,
     ///                    just before processing the finite state machine.
 
     void loop(Process * _process = NULL);
 
   private:
     // The configuration is read at setup time from file "/config.json" in the SPIFFS flash
-    // memory space. It is updated by the home management tool through MQTT topic 
+    // memory space. It is updated by the home management tool through MQTT topic
     // named "maison/" + device_name + "_ctrl"
 
     struct Config {
@@ -431,7 +443,7 @@ class Maison
 
     PubSubClient                mqtt_client;
     BearSSL::WiFiClientSecure * wifi_client;
-    
+
     long         last_reconnect_attempt;
     int          connect_retry_count;
     bool         first_connect_trial;
@@ -463,7 +475,7 @@ class Maison
     inline bool   use_deep_sleep() { return (feature_mask & DEEP_SLEEP)    != 0;       }
     inline bool watchdog_enabled() { return (feature_mask & WATCHDOG_24H ) != 0;       }
 
-    inline bool is_short_reboot_time_needed() { 
+    inline bool is_short_reboot_time_needed() {
       return (mem.state & (PROCESS_EVENT|WAIT_END_EVENT|END_EVENT|HOURS_24)) != 0;
     }
 
@@ -480,7 +492,7 @@ class Maison
     State check_if_24_hours_time(State _default_state);
     bool retrieve_config(JsonObject & _root, Config & _config);
     bool load_config(int _version = 0);
-    
+
     bool     save_config();
     void send_config_msg();
     void  send_state_msg();
