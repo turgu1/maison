@@ -46,10 +46,10 @@
 #define LED   13
 
 #if DEBUGGING
-  #define SWITCH 0       // Uses device button for debugging (IO0)
+  #define SWITCH      0  // Uses device button for debugging (IO0)
   #define WALL_SWITCH 0  // Push button
 #else
-  #define SWITCH 3       // Use RXD as switch entry (IO3)
+  #define SWITCH      3  // Use RXD as switch entry (IO3)
   #define WALL_SWITCH 1  // Normal wall switch
 #endif
 
