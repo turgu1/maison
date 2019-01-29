@@ -163,8 +163,8 @@ void Maison::send_state_msg()
     mem.lost_count,
     wifi_connected() ? WiFi.RSSI() : 0,
     ESP.getFreeHeap(),
-    CODE_NAME,
-    CODE_VERSION,
+    STRINGIZE(CODE_NAME),
+    STRINGIZE(CODE_VERSION),
     vbat);
 }
 
@@ -295,10 +295,12 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         if (root["SIZE"]) {
           long size = root["SIZE"];
           DEBUG(F(" Receive size: ")); DEBUGLN(size);
-
-          if (cons.begin(size, root["MD5"])) {
+          
+          static char md5[33];
+          strncpy(md5, root["MD5"], 32);
+          if (cons.begin(size, md5)) {
             mqtt_client.setStream(cons);
-            log("Code update started %d %s.", size, root["MD5"]);
+            log("Code update started %d %s.", size, md5);
           }
           else {
             log("Error: Code upload not started: %s", 
