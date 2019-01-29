@@ -297,13 +297,15 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         if (size && name && md5) {
           DEBUG(F(" Receive size: ")); DEBUGLN(size);
           
-          static char _md5[33];
-          strncpy(_md5, md5, 32);
+          char tmp[33];
 
           if (strcmp(APP_NAME, name) == 0) {
-            if (cons.begin(size, _md5)) {
+            if (cons.begin(size, md5)) {
               mqtt_client.setStream(cons);
-              log("Code update started with size %d and md5: %s.", size, _md5);
+              // log uses buffer too...
+              strncpy(tmp, md5, 32);
+              log("Code update started with size %d and md5: %s.", 
+                  size, tmp);
             }
             else {
               log("Error: Code upload not started: %s", 
@@ -311,9 +313,11 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
             }
           }
           else {
+            // log uses buffer too...
+            strcpy(tmp, name, 32);
             log("Error: Code upload aborted. App name differ (%s vs %s)", 
                 APP_NAME, 
-                name);
+                tmp);
           }
         }
         else {
