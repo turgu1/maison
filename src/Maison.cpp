@@ -310,7 +310,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
           else {
             log("Error: Code upload aborted. App name differ (%s vs %s)", 
                 APP_NAME, 
-                root["APP_NAME"].as<const char *>())
+                root["APP_NAME"].as<const char *>());
           }
         }
         else {
