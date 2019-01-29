@@ -290,9 +290,9 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         DynamicJsonBuffer jsonBuffer;
         JsonObject & root = jsonBuffer.parseObject(&buffer[9]);
 
-        long size = root["SIZE"];
-        const char * name = root["APP_NAME"];
-        const char * md5  = root["MD5"];
+        long size = root["SIZE"].as<long>();
+        const char * name = root["APP_NAME"].as<const char *>();
+        const char * md5  = root["MD5"].as<const char *>();
 
         if (size && name && md5) {
           DEBUG(F(" Receive size: ")); DEBUGLN(size);
