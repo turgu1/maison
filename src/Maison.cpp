@@ -207,6 +207,7 @@ void Maison::get_new_config()
     size_t length;
     bool running;
     bool completed;
+    StreamString error; 
 
   public:
     bool begin(size_t _size, const char * _md5 = NULL) {
@@ -247,9 +248,13 @@ void Maison::get_new_config()
     bool isCompleted() { return completed;         }
     bool   isRunning() { return running;           }
     int     getError() { return Update.getError(); }
+    
+    StreamString & getErrorStr() { 
+      Update.printError(error); 
+      return error; 
+    }
 
     void   showError() { 
-      StreamString error; 
       Update.printError(error); 
       DEBUG(error); 
     }
@@ -272,19 +277,15 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
 
     #if MQTT_OTA
       if (cons.isRunning()) {
-        if (cons.end()) {
-          if (cons.isCompleted()) {
-            DEBUGLN(F(" Upload Completed. Rebooting...."));
-            ESP.restart();
-            delay(10000);
-          }
-          else {
-            DEBUGLN(F(" ERROR: Upload not completed!"));
-          }
+        if (cons.end() && cons.isCompleted()) {
+          DEBUGLN(F(" Upload Completed. Rebooting..."));
+          log("Code upload completed. Rebooting");
+          ESP.restart();
+          delay(10000);
         }
-        else {
-          DEBUGLN(F(" ERROR: Upload not complete!"));
-        }
+        DEBUGLN(F(" ERROR: Upload not complete!"));
+        log("Error: Code upload not completed: %s", 
+            cons.getErrorStr().trim().c_str());
       }
       else if (strncmp(buffer, "NEW_CODE:{", 10) == 0) {
         DynamicJsonBuffer jsonBuffer;
@@ -296,6 +297,10 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
 
           if (cons.begin(size, root["MD5"])) {
             mqtt_client.setStream(cons);
+          }
+          else {
+            log("Error: Code upload not started: %s", 
+                cons.getErrorStr().trim().c_str());            
           }
         }
         else {
@@ -876,6 +881,39 @@ bool Maison::send_msg(const char * _topic, const char * _format, ...)
   }
 
   SHOW_RESULT("send_msg()");
+
+  return result;
+}
+
+bool Maison::log(const char * _format, ...)
+{
+  SHOW("log()");
+
+  va_list args;
+  va_start (args, _format);
+
+  strcpy(buffer, get_device_name());
+  strcat(buffer, ": ");
+  int len = strlen(buffer);
+
+  vsnprintf(&buffer[len], MQTT_MAX_PACKET_SIZE-len, _format, args);
+
+  DO {
+    DEBUG(F(" Log msg : "));
+    DEBUGLN(buffer);
+
+    if (!mqtt_connected()) {
+      ERROR("Unable to connect to mqtt server");
+    }
+
+    if (!mqtt_client.publish(MAISON_LOG_TOPIC, buffer)) {
+      ERROR("Unable to log message");
+    }
+
+    OK_DO;
+  }
+
+  SHOW_RESULT("log()");
 
   return result;
 }

@@ -74,6 +74,14 @@
   #define MAISON_CTRL_TOPIC   MAISON_PREFIX_TOPIC "ctrl" ///< maison server control MQTT topic
 #endif
 
+// This is the topic name to send log (free text) information to
+//
+// For example: maison/log
+
+#ifndef MAISON_LOG_TOPIC
+  #define MAISON_LOG_TOPIC   MAISON_PREFIX_TOPIC "log" ///< maison server log MQTT topic
+#endif
+
 // This is the topic name suffix where the device wait for control commands from site
 // The completed topic is build using:
 //
@@ -274,6 +282,14 @@ class Maison
 
     bool send_msg(const char * _topic, const char * _format, ...);
 
+    /// Send a MQTT log msg using printf like construction syntax.
+    ///
+    /// @param[in] _topic The message topic
+    /// @param[in] _format The format string, as for printf
+    /// @param[in] ... The arguments required by the format string
+    /// @return True if the message was sent successfully
+
+    bool log(const char * _format, ...);
     /// Returns the ESP8266 reason for reset. The following table lists the ESP8266
     /// potential reasons for reset:
     ///
@@ -289,7 +305,7 @@ class Maison
     ///
     /// @return The reason of the reset as a number.
 
-    int  reset_reason();
+    int reset_reason();
 
     /// Will restart the ESP8266
 
