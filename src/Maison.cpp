@@ -296,13 +296,21 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
           
           static char md5[33];
           strncpy(md5, root["MD5"], 32);
-          if (cons.begin(size, md5)) {
-            mqtt_client.setStream(cons);
-            log("Code update started %d %s.", size, md5);
+
+          if (strcmp(APP_NAME, root["APP_NAME"]) == 0) {
+            if (cons.begin(size, md5)) {
+              mqtt_client.setStream(cons);
+              log("Code update started with size %d and md5: %s.", size, md5);
+            }
+            else {
+              log("Error: Code upload not started: %s", 
+                  cons.getErrorStr().c_str());            
+            }
           }
           else {
-            log("Error: Code upload not started: %s", 
-                cons.getErrorStr().c_str());            
+            log("Error: Code upload aborted. App name differ (%s vs %s)", 
+                APP_NAME, 
+                root["APP_NAME"].as<const char *>())
           }
         }
         else {
