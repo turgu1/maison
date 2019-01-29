@@ -249,7 +249,6 @@ void Maison::get_new_config()
     
     StreamString & getErrorStr() { 
       Update.printError(error);
-      error.trim(); 
       return error; 
     }
 
