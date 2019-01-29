@@ -298,6 +298,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
 
           if (cons.begin(size, root["MD5"])) {
             mqtt_client.setStream(cons);
+            log("Code update started %d %s.", size, root["MD5"]);
           }
           else {
             log("Error: Code upload not started: %s", 
