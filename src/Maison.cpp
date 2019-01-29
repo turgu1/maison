@@ -149,7 +149,7 @@ void Maison::send_state_msg()
     "\"heap\":%u,"
     #if MQTT_OTA
       "\"code_name\":\"%s\","
-      "\"code_version\":\"%s\","
+      "\"code_version\":\"%s\""
     #endif
     "%s"
     "}",
