@@ -197,30 +197,57 @@ void Maison::get_new_config()
 }
 
 #if MQTT_OTA
-  void Maison::receive_ota(const MQTT::Publish& pub)
+
+  #include <StreamString.h>
+  class OTAConsumer : public Stream
   {
-    uint32_t size = pub.payload_len();
+  private:
+    size_t length;
+    bool running;
+    bool completed;
 
-    if (size == 0) return;
-
-    DEBUG(F("Receiving OTA of "));
-    DEBUG(size);
-    DEBUGLN(F(" bytes..."));
-
-    if (ESP.updateSketch(*pub.payload_stream(), size, true, false)) {
-      DEBUGLN(F("Clearing retained message."));
-      client.publish(MQTT::Publish(pub.topic(), "")
-                     .set_retain());
-      client.disconnect();
-
-      DEBUGLN(F("Update Success: Rebooting..."));
-      ESP.restart();
-      delay(10000);
+  public:
+    bool begin(size_t _size, const char * _md5 = NULL) {
+      length    = _size;
+      completed = false;
+      running   = Update.begin(_size);
+      if (!running) showError();
+      else if (_md5) Update.setMD5(_md5);
+      return running;
     }
 
-    Update.printError(Serial);
-    Serial.setDebugOutput(false);
-  }
+    size_t write(uint8_t b) {
+      if (running) {
+        if (--length < 0) running = false;
+        else {
+          Update.write(&b, 1);
+          return 1;
+        }
+      }
+      return 0;
+    }
+
+    bool end() {
+      running = false;
+      if (Update.end()) {
+        completed = Update.isFinished();
+        if (!completed) showError();
+      } else showError();
+      return completed;
+    }
+
+    OTAConsumer()   { running = false; }
+
+    int available() { return 0; } // not used
+    int      read() { return 0; } // not used
+    int      peek() { return 0; } // not used
+
+    bool isCompleted() { return completed;         }
+    bool   isRunning() { return running;           }
+    int     getError() { return Update.getError(); }
+    void   showError() { StreamString error; Update.printError(error); DEBUG(error); }
+  } cons;
+
 #endif
 
 void Maison::process_callback(const char * _topic, byte * _payload, unsigned int _length)
@@ -230,11 +257,46 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
   if (strcmp(_topic, my_topic(CTRL_SUFFIX_TOPIC, buffer, sizeof(buffer))) == 0) {
     int len;
 
-    DEBUG(" Received MQTT Message: ");
+    DEBUG(F(" Received MQTT Message: "));
 
     memcpy(buffer, _payload, len = (_length >= sizeof(buffer)) ? (sizeof(buffer) - 1) : _length);
     buffer[len] = 0;
     DEBUGLN(buffer);
+
+    #if MQTT_OTA
+      if (cons.isRunning()) {
+        if (cons.end()) {
+          if (cons.isCompleted()) {
+            DEBUGLN(F(" Upload Completed. Rebooting...."));
+            ESP.restart();
+            delay(10000);
+          }
+          else {
+            DEBUGLN(F(" ERROR: Upload not completed!"));
+          }
+        }
+        else {
+          DEBUGLN(F(" ERROR: Upload not complete!"));
+        }
+      }
+      else if (strncmp(buffer, "NEW_CODE:{", 10) == 0) {
+        DynamicJsonBuffer jsonBuffer;
+        JsonObject & root = jsonBuffer.parseObject(&buffer[9]);
+
+        if (root["size"]) {
+          long size = root["SIZE"];
+          DEBUG(F(" Receive size: ")); DEBUGLN(size);
+
+          if (cons.begin(size, root["MD5"])) {
+            mqtt_client.setStream(cons);
+          }
+        }
+        else {
+          DEBUGLN(F(" Size not present"));
+        }
+      }
+      else 
+    #endif
 
     if (strncmp(buffer, "CONFIG:", 7) == 0) {
       DEBUGLN(F(" New config received"));
