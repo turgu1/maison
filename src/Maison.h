@@ -10,12 +10,12 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#ifndef CODE_NAME
-  #define CODE_NAME "UNKNOWN"
+#ifndef APP_NAME
+  #define APP_NAME "UNKNOWN"
 #endif
 
-#ifndef CODE_VERSION
-  #define CODE_VERSION "1.0.0"
+#ifndef APP_VERSION
+  #define APP_VERSION "1.0.0"
 #endif
 
 #ifndef MQTT_OTA
@@ -106,7 +106,6 @@
   #define     DEBUGLN(a) Serial.println(a)
   #define        SHOW(f) DEBUGLN(F(f));
   #define SHOW_RESULT(f) DEBUG(F(" Result " f ": ")); DEBUGLN(result ? F("success") : F("FAILURE"))
-  #define   STRINGIZE(a) #a
 #else
   #define       DEBUG(a)
   #define     DEBUGLN(a)
@@ -114,6 +113,7 @@
   #define SHOW_RESULT(f)
 #endif
 
+#define    STRINGIZE(a) #a
 #define       DEBUG2(a) Serial.print(a)
 #define     DEBUGLN2(a) Serial.println(a)
 

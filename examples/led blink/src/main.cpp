@@ -17,9 +17,6 @@
 
 #include <Arduino.h>
 
-#define CODE_NAME    "BLINKY"
-#define CODE_VERSION "1.0.1"
-
 #include <Maison.h>
 
 #define LED 2

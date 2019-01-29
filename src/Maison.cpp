@@ -148,8 +148,8 @@ void Maison::send_state_msg()
     "\"rssi\":%ld,"
     "\"heap\":%u,"
     #if MQTT_OTA
-      "\"code_name\":\"%s\","
-      "\"code_version\":\"%s\""
+      "\"app_name\":\"%s\","
+      "\"app_version\":\"%s\""
     #endif
     "%s"
     "}",
@@ -163,8 +163,8 @@ void Maison::send_state_msg()
     mem.lost_count,
     wifi_connected() ? WiFi.RSSI() : 0,
     ESP.getFreeHeap(),
-    STRINGIZE(CODE_NAME),
-    STRINGIZE(CODE_VERSION),
+    APP_NAME,
+    APP_VERSION,
     vbat);
 }
 
