@@ -1168,6 +1168,8 @@ char * Maison::my_topic(const char * _topic_suffix, char * _buffer, uint16_t _le
 void Maison::restart()
 {
   save_mems();
+  log("Restart requested.");
+  delay(5000);
   ESP.restart();
   delay(1000);
 }
