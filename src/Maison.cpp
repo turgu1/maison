@@ -148,8 +148,8 @@ void Maison::send_state_msg()
     "\"rssi\":%ld,"
     "\"heap\":%u,"
     #if MQTT_OTA
-      "\"app_name\":\"%s\","
-      "\"app_version\":\"%s\""
+      "\"app_name\":\"" APP_NAME "\","
+      "\"app_version\":\"" APP_VERSION "\""
     #endif
     "%s"
     "}",
@@ -163,8 +163,6 @@ void Maison::send_state_msg()
     mem.lost_count,
     wifi_connected() ? WiFi.RSSI() : 0,
     ESP.getFreeHeap(),
-    APP_NAME,
-    APP_VERSION,
     vbat);
 }
 
@@ -281,6 +279,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         if (cons.end() && cons.isCompleted()) {
           DEBUGLN(F(" Upload Completed. Rebooting..."));
           log("Code upload completed. Rebooting");
+          delay(5000);
           ESP.restart();
           delay(10000);
         }
