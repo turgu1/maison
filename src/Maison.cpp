@@ -290,17 +290,20 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         DynamicJsonBuffer jsonBuffer;
         JsonObject & root = jsonBuffer.parseObject(&buffer[9]);
 
-        if (root["SIZE"] && root["MD5"] && root["APP_NAME"]) {
-          long size = root["SIZE"];
+        long size = root["SIZE"];
+        const char * name = root["APP_NAME"];
+        const char * md5  = root["MD5"];
+
+        if (size && name && md5) {
           DEBUG(F(" Receive size: ")); DEBUGLN(size);
           
-          static char md5[33];
-          strncpy(md5, root["MD5"], 32);
+          static char _md5[33];
+          strncpy(_md5, md5, 32);
 
-          if (strcmp(APP_NAME, root["APP_NAME"]) == 0) {
-            if (cons.begin(size, md5)) {
+          if (strcmp(APP_NAME, name) == 0) {
+            if (cons.begin(size, _md5)) {
               mqtt_client.setStream(cons);
-              log("Code update started with size %d and md5: %s.", size, md5);
+              log("Code update started with size %d and md5: %s.", size, _md5);
             }
             else {
               log("Error: Code upload not started: %s", 
@@ -310,7 +313,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
           else {
             log("Error: Code upload aborted. App name differ (%s vs %s)", 
                 APP_NAME, 
-                root["APP_NAME"].as<const char *>());
+                name);
           }
         }
         else {
