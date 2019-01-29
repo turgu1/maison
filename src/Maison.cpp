@@ -292,7 +292,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         DynamicJsonBuffer jsonBuffer;
         JsonObject & root = jsonBuffer.parseObject(&buffer[9]);
 
-        if (root["size"]) {
+        if (root["SIZE"]) {
           long size = root["SIZE"];
           DEBUG(F(" Receive size: ")); DEBUGLN(size);
 
