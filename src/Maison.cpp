@@ -250,7 +250,8 @@ void Maison::get_new_config()
     int     getError() { return Update.getError(); }
     
     StreamString & getErrorStr() { 
-      Update.printError(error); 
+      Update.printError(error);
+      error.trim(); 
       return error; 
     }
 
@@ -285,7 +286,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         }
         DEBUGLN(F(" ERROR: Upload not complete!"));
         log("Error: Code upload not completed: %s", 
-            cons.getErrorStr().trim().c_str());
+            cons.getErrorStr().c_str());
       }
       else if (strncmp(buffer, "NEW_CODE:{", 10) == 0) {
         DynamicJsonBuffer jsonBuffer;
@@ -300,7 +301,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
           }
           else {
             log("Error: Code upload not started: %s", 
-                cons.getErrorStr().trim().c_str());            
+                cons.getErrorStr().c_str());            
           }
         }
         else {
