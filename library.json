@@ -22,7 +22,7 @@
     "dependencies": [
         {
             "name": "PubSubClient",
-            "version": "~2.7"
+            "version": "https://github.com/turgu1/pubsubclient.git#patch-1"
         },
         {
             "name": "ArduinoJson",
