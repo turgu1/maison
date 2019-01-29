@@ -290,7 +290,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         DynamicJsonBuffer jsonBuffer;
         JsonObject & root = jsonBuffer.parseObject(&buffer[9]);
 
-        if (root["SIZE"]) {
+        if (root["SIZE"] && root["MD5"] && root["APP_NAME"]) {
           long size = root["SIZE"];
           DEBUG(F(" Receive size: ")); DEBUGLN(size);
           
@@ -314,7 +314,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
           }
         }
         else {
-          DEBUGLN(F(" Size not present"));
+          log("Error: SIZE, MD5 or APP_NAME not present");
         }
       }
       else 
