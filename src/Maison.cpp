@@ -314,7 +314,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
           }
           else {
             // log uses buffer too...
-            strcpy(tmp, name, 32);
+            strncpy(tmp, name, 32);
             log("Error: Code upload aborted. App name differ (%s vs %s)", 
                 APP_NAME, 
                 tmp);
