@@ -148,8 +148,8 @@ void Maison::send_state_msg()
     "\"rssi\":%ld,"
     "\"heap\":%u,"
     #if MQTT_OTA
-      "\"code_name\":\"" CODE_NAME "\","
-      "\"code_version\":\"" CODE_VERSION "\","
+      "\"code_name\":\"%s\","
+      "\"code_version\":\"%s\","
     #endif
     "%s"
     "}",
@@ -163,6 +163,8 @@ void Maison::send_state_msg()
     mem.lost_count,
     wifi_connected() ? WiFi.RSSI() : 0,
     ESP.getFreeHeap(),
+    CODE_NAME,
+    CODE_VERSION,
     vbat);
 }
 
@@ -245,7 +247,12 @@ void Maison::get_new_config()
     bool isCompleted() { return completed;         }
     bool   isRunning() { return running;           }
     int     getError() { return Update.getError(); }
-    void   showError() { StreamString error; Update.printError(error); DEBUG(error); }
+
+    void   showError() { 
+      StreamString error; 
+      Update.printError(error); 
+      DEBUG(error); 
+    }
   } cons;
 
 #endif
