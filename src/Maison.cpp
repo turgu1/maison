@@ -136,20 +136,20 @@ void Maison::send_state_msg()
   send_msg(
     MAISON_STATUS_TOPIC,
     "{"
-    "\"device\":\"%s\","
-    "\"msg_type\":\"STATE\","
-    "\"ip\":\"%s\","
-    "\"mac\":\"%s\","
-    "\"state\":%u,"
-    "\"return_state\":%u,"
-    "\"hours\":%u,"
-    "\"millis\":%u,"
-    "\"lost\":%u,"
-    "\"rssi\":%ld,"
-    "\"heap\":%u,"
+     "\"device\":\"%s\""
+    ",\"msg_type\":\"STATE\""
+    ",\"ip\":\"%s\""
+    ",\"mac\":\"%s\""
+    ",\"state\":%u"
+    ",\"return_state\":%u"
+    ",\"hours\":%u"
+    ",\"millis\":%u"
+    ",\"lost\":%u"
+    ",\"rssi\":%ld"
+    ",\"heap\":%u"
     #if MQTT_OTA
-      "\"app_name\":\"" APP_NAME "\","
-      "\"app_version\":\"" APP_VERSION "\""
+      ",\"app_name\":\"" APP_NAME "\""
+      ",\"app_version\":\"" APP_VERSION "\""
     #endif
     "%s"
     "}",

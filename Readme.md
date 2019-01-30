@@ -13,6 +13,7 @@ Here are the main characteristics:
 * User/Password identification.
 * JSON based data transmission with server.
 * Configuration updates through MQTT.
+* Option: OTA over MQTT.
 * Option: Automated Watchdog transmission every 24 hours.
 * Option: Battery voltage transmission.
 * Option: DeepSleep or continuous power.
@@ -337,8 +338,8 @@ lost      | Counter of the number of time the connection to the MQTT broker has 
 rssi      | The WiFi signal strength of the connection to the router, a relative signal quality measurement. -50 means a pretty good signal, -75 fearly reasonnable and -100 means no signal.
 heap      | The current value of the free heap space available on the device
 VBAT      | This is the Battery voltage. This parameter is optional. Its presence depends on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
-app_name | The name of the application. This is the functional name of the application, used for MQTT OTA updates.
-app_version | The code version number.
+app_name | The name of the application. This is the functional name of the application, used for MQTT OTA updates. Will be showned only when MQTT_OTA is enabled.
+app_version | The code version number. Will be showned only when MQTT_OTA is enabled.
 
 Example:
 
