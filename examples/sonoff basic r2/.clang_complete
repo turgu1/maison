@@ -6,7 +6,8 @@
 -I/Users/turgu1/Dev/maison/examples/sonoff basic r2/.piolibdeps/ArduinoJson_ID64/src
 -I/Users/turgu1/Dev/maison/examples/sonoff basic r2/.piolibdeps/Maison/src
 -I/Users/turgu1/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266WiFi/src
--I/Users/turgu1/Dev/maison/examples/sonoff basic r2/.piolibdeps/PubSubClient_ID89/src
+-I/Users/turgu1/Dev/maison/examples/sonoff basic r2/.piolibdeps/PubSubClient/src
+-I/Users/turgu1/Dev/maison/examples/sonoff basic r2/.piolibdeps/Maison@src-8f95e0566ece351076b77cbc60b6a590/src
 -I/Users/turgu1/.platformio/lib/ArduinoJson_ID64/src
 -I/Users/turgu1/.platformio/lib/PubSubClient_ID89/src
 -I/Users/turgu1/.platformio/packages/framework-arduinoespressif8266/libraries/ArduinoOTA

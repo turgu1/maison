@@ -78,8 +78,12 @@ QUICK_TURN          |    0      | If = 1, HOURS_24 state is fired every 2 minute
 MAISON_PREFIX_TOPIC | maison/   | All topics used by the framework are prefixed with this text   
 MAISON_STATUS_TOPIC | maison/status | Topic where the framework status are sent
 MAISON_CTRL_TOPIC   | maison/ctrl   | Topic where the framework event controls are sent
+MAISON_LOG_TOPIC    | maison/log    | Topic where free text log messages are sent
 CTRL_SUFFIX_TOPIC   | ctrl          | This is the topic suffix used to identify device-related control topic
 DEFAULT_SHORT_REBOOT_TIME |  5  | This is the default reboot time in seconds when deep sleep is enable. This is used at the end of the following states: *PROCESS_EVENT*, *WAIT_END_EVENT*, *END_EVENT*. For the other states, the wait time is 60 minutes (3600 seconds).
+MQTT_OTA            | 0 | Allow for Over the Air (OTA) code update through MQTT see section MQTT OTA for further details.
+APP_NAME | UNKNOWN | Application name. Required for MQTT OTA as a mean to check the new binary to be compatible with the current.
+APP_VERSION | 1.0.0 | Application version number.
 
 Note that for *MAISON_STATUS_TOPIC* and *MAISON_CTRL_TOPIC*, they will be modified automatically if *MAISON_PREFIX_TOPIC* is changed. For example, if you change *MAISON_PREFIX_TOPIC* to be `home/`, *MAISON_STATUS_TOPIC* will become `home/status` and *MAISON_CTRL_TOPIC* will become `maison/ctrl`.
 
@@ -333,11 +337,13 @@ lost      | Counter of the number of time the connection to the MQTT broker has 
 rssi      | The WiFi signal strength of the connection to the router, a relative signal quality measurement. -50 means a pretty good signal, -75 fearly reasonnable and -100 means no signal.
 heap      | The current value of the free heap space available on the device
 VBAT      | This is the Battery voltage. This parameter is optional. Its presence depends on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
+app_name | The name of the application. This is the functional name of the application, used for MQTT OTA updates.
+app_version | The code version number.
 
 Example:
 
 ```
-{"device":"WATER_SPILL","msg_type":"STATE","ip":"192.168.1.71","mac":"2B:1D:03:31:2A:54","state":32,"return_state":2,hours":7,"millis":8001,"lost":0,"rssi":-63,"heap":16704,"VBAT":3.0}
+{"device":"WATER_SPILL","msg_type":"STATE","ip":"192.168.1.71","mac":"2B:1D:03:31:2A:54","state":32,"return_state":2,hours":7,"millis":8001,"lost":0,"rssi":-63,"heap":16704,"app_name":"BITSENSOR","app_version":"1.0.1","VBAT":3.0}
 ```
 
 ### 7.3 The Watchdog Message
@@ -422,3 +428,31 @@ As the device will be in a deep sleep state almost all the time, it becomes more
 The ESP8266 does not allow for a sleep period longer than 4294967295 microseconds, that corresponds to around 4294 seconds or 71 minutes.
 
 If *DEEP_SLEEP* is not used, there is no wait time other than the code processing time in the `Maison::loop()`. Internally, the framework compute the duration of execution for the next *HOURS_24* state to occur.
+
+## 10. MQTT OTA
+
+The **Maison** framework allows for code update through a MQTT firmware transmission protocol (Over The Air, or OTA). As such, the following aspects must be properly setup:
+
+1. The compilation option MQTT_OTA must be set to 1
+
+2. The APP_NAME compilation option must be set to the functional name of the code. This name will need to be present in the NEW_CODE command shown below.
+
+3. The code must be updated on the chip through a serial (FTDI) connexion at least once. After that, it will be possible to upload new codes through MQTT. Do not omit to power reset the device after the update as a reset from an FTDI upload doesn't allow for OTA update.
+
+To update the code, two messages must be sent. The first one will contain a json structure prefixed with "NEW_CODE:" that will have the following fields:
+
+Field Name | Description
+-----------|------------
+SIZE       | The size of the firmware to be sent as a number of bytes
+APP_NAME   | The name of the code 
+MD5        | The MD5 message digest (fingerprint) of the file to be sent (string of 32 characters)
+
+Here is an example of such a message:
+
+```
+NEW_CODE:{"SIZE":412345,"APP_NAME":"BLINKER","MD5":"06fa77583b007464167bbba866d662c2"}
+```
+
+The second message will contain the binary code of the file. Its length must be the same indicated by the SIZE parameter shown above.
+
+
