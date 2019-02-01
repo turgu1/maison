@@ -265,6 +265,8 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
 {
   SHOW("process_callback()");
 
+  some_message_received = true;
+
   if (strcmp(_topic, my_topic(CTRL_SUFFIX_TOPIC, buffer, sizeof(buffer))) == 0) {
     int len;
 
@@ -410,7 +412,13 @@ void Maison::loop(Process * _process)
     counting_lost_connection = true;
 
     DEBUGLN(F("MQTT Connected."));
-    mqtt_loop();
+
+    // Consume all pending messages
+    do {
+      some_message_received = false;
+      mqtt_loop();
+      if (some_message_received) delay(200);
+    } while (some_message_received);
   }
 
   new_state        = mem.state;

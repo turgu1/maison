@@ -473,6 +473,7 @@ class Maison
     bool         counting_lost_connection;
     uint16_t     deep_sleep_wait_time;
     uint32_t     loop_time_marker;
+    bool         some_message_received;
 
     char         buffer[MQTT_MAX_PACKET_SIZE];
 
