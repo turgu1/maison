@@ -417,7 +417,10 @@ void Maison::loop(Process * _process)
     do {
       some_message_received = false;
       mqtt_loop();
-      if (some_message_received) delay(200);
+      if (some_message_received) {
+        DEBUGLN(F("A message has been received. Check for next one."));
+        delay(200);
+      }
     } while (some_message_received);
   }
 

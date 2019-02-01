@@ -65,9 +65,9 @@ Maison maison(Maison::WATCHDOG_24H  |
 Maison::UserResult process(Maison::State state)
 {
   if (maison.network_is_available()) {
-    maison.send_msg(MAISON_LOG_TOPIC, "State: %d", state);
+    maison.send_msg(MAISON_LOG_TOPIC, "State: %d xmit_count: %d", state, my_mem.xmit_count);
   }
-  
+
   switch (state) {
   
     case Maison::WAIT_FOR_EVENT:
@@ -84,6 +84,7 @@ Maison::UserResult process(Maison::State state)
       if (digitalRead(SENSE_PIN) == LOW)
       {
         maison.set_deep_sleep_wait_time(1);
+        maison.send_msg(MAISON_LOG_TOPIC, "No detection");
         return my_mem.xmit_count == 0 ? Maison::ABORTED : Maison::COMPLETED;
       }
       maison.send_msg(
