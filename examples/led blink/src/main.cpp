@@ -74,4 +74,5 @@ void setup()
 void loop() 
 {
   maison.loop(process);
+  delay(100);
 }
