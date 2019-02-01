@@ -872,7 +872,7 @@ bool Maison::mqtt_connect()
         }
       }
 
-      if (!mqtt_connecte()) {
+      if (!mqtt_connected()) {
         DEBUG(F(" Unable to connect to mqtt. State: "));
         DEBUGLN(mqtt_client.state());
 
