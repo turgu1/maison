@@ -416,7 +416,7 @@ void Maison::loop(Process * _process)
     // Consume all pending messages
     do {
       some_message_received = false;
-      delay(1000)
+      delay(1000);
       mqtt_loop();
       if (some_message_received) {
         DEBUGLN(F("A message has been received. Check for next one."));
