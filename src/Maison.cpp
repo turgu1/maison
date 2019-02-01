@@ -64,9 +64,10 @@ bool Maison::setup()
 
     if (is_hard_reset()) {
       mem.state = mem.return_state = STARTUP;
-      mem.hours_24_count      = 0;
-      mem.one_hour_step_count = 0;
-      mem.lost_count          = 0;
+      mem.callback_initialized = false;
+      mem.hours_24_count       = 0;
+      mem.one_hour_step_count  = 0;
+      mem.lost_count           = 0;
     }
 
     if (network_is_available()) {
@@ -792,6 +793,38 @@ bool Maison::wifi_connect()
   return result;
 }
 
+void Maison::init_callbacks()
+{
+  mqtt_client.setCallback(maison_callback);
+  if (!mqtt_client.subscribe(
+               my_topic(CTRL_SUFFIX_TOPIC, buffer, sizeof(buffer)),
+               use_deep_sleep() ? 1 : 0)) {
+    DEBUG(F(" Hum... unable to subscribe to topic (State:"));
+    DEBUG(mqtt_client.state());
+    DEBUG(F("): "));
+    DEBUGLN(buffer);
+    break;
+  }
+  else {
+    DEBUG(F(" Subscription completed to topic "));
+  }
+
+  DEBUGLN(buffer);
+  if (user_topic != NULL) {
+    if (!mqtt_client.subscribe(user_topic, user_qos)) {
+      DEBUG(F(" Hum... unable to subscribe to user topic (State:"));
+      DEBUG(mqtt_client.state());
+      DEBUG(F("): "));
+      DEBUGLN(user_topic);
+      break;
+    }
+    else {
+      DEBUG(F(" Subscription completed to user topic "));
+      DEBUGLN(user_topic);
+    }
+  }
+}
+
 bool Maison::mqtt_connect()
 {
   SHOW("mqtt_connect()");
@@ -823,46 +856,22 @@ bool Maison::mqtt_connect()
                             config.mqtt_password,
                             NULL, 0, 0, NULL,  // Will message not used
                             false);
+        if (mqtt_connected() && !mem.callback_initialized) {
+          mem.callback_initialized = true;
+          init_callbacks();
+        }
       }
       else {
         DEBUGLN(F(" Connect with clean-session on."));
         mqtt_client.connect(client_name,
                             config.mqtt_username,
                             config.mqtt_password);
-      }
-
-      if (mqtt_connected()) {
-
-        mqtt_client.setCallback(maison_callback);
-        if (!mqtt_client.subscribe(
-                     my_topic(CTRL_SUFFIX_TOPIC, buffer, sizeof(buffer)),
-                     use_deep_sleep() ? 1 : 0)) {
-          DEBUG(F(" Hum... unable to subscribe to topic (State:"));
-          DEBUG(mqtt_client.state());
-          DEBUG(F("): "));
-          DEBUGLN(buffer);
-          break;
-        }
-        else {
-          DEBUG(F(" Subscription completed to topic "));
-        }
-
-        DEBUGLN(buffer);
-        if (user_topic != NULL) {
-          if (!mqtt_client.subscribe(user_topic, user_qos)) {
-            DEBUG(F(" Hum... unable to subscribe to user topic (State:"));
-            DEBUG(mqtt_client.state());
-            DEBUG(F("): "));
-            DEBUGLN(user_topic);
-            break;
-          }
-          else {
-            DEBUG(F(" Subscription completed to user topic "));
-            DEBUGLN(user_topic);
-          }
+        if (mqtt_connected()) {
+          init_callbacks();
         }
       }
-      else {
+      
+      if (!mqtt_connecte()) {
         DEBUG(F(" Unable to connect to mqtt. State: "));
         DEBUGLN(mqtt_client.state());
 

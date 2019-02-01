@@ -455,6 +455,7 @@ class Maison
       uint32_t one_hour_step_count; // Up to 3600 seconds in milliseconds
       uint32_t elapse_time;
       uint32_t magic;
+      bool     callback_initialized;
     } mem;
 
     PubSubClient                mqtt_client;
@@ -510,6 +511,8 @@ class Maison
     bool retrieve_config(JsonObject & _root, Config & _config);
     bool load_config(int _version = 0);
 
+    void init_callbacks();
+    
     bool     save_config();
     void send_config_msg();
     void  send_state_msg();
