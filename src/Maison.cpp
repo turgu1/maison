@@ -247,14 +247,15 @@ void Maison::get_new_config()
     bool   isRunning() { return running;           }
     int     getError() { return Update.getError(); }
     
-    StreamString & getErrorStr() { 
+    StreamString & getErrorStr() {
+      error.flush(); 
       Update.printError(error);
+      error.trim();
       return error; 
     }
 
-    void   showError() { 
-      Update.printError(error); 
-      DEBUG(error); 
+    void   showError() {  
+      DEBUGLN(getErrorStr()); 
     }
   } cons;
 
@@ -274,19 +275,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
     DEBUGLN(buffer);
 
     #if MQTT_OTA
-      if (cons.isRunning()) {
-        if (cons.end() && cons.isCompleted()) {
-          DEBUGLN(F(" Upload Completed. Rebooting..."));
-          log("Code upload completed. Rebooting");
-          delay(5000);
-          ESP.restart();
-          delay(10000);
-        }
-        DEBUGLN(F(" ERROR: Upload not complete!"));
-        log("Error: Code upload not completed: %s", 
-            cons.getErrorStr().c_str());
-      }
-      else if (strncmp(buffer, "NEW_CODE:{", 10) == 0) {
+      if (strncmp(buffer, "NEW_CODE:{", 10) == 0) {
         DynamicJsonBuffer jsonBuffer;
         JsonObject & root = jsonBuffer.parseObject(&buffer[9]);
 
@@ -323,6 +312,20 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         else {
           log("Error: SIZE, MD5 or APP_NAME not present");
         }
+      }
+      else if (cons.isRunning()) {
+        // The transmission is complete. Check if the Updater is satisfied and if
+        // so, restart the device
+        if (cons.end() && cons.isCompleted()) {
+          DEBUGLN(F(" Upload Completed. Rebooting..."));
+          log("Code upload completed. Rebooting");
+          delay(5000);
+          ESP.restart();
+          delay(10000);
+        }
+        DEBUGLN(F(" ERROR: Upload not complete!"));
+        log("Error: Code upload not completed: %s", 
+            cons.getErrorStr().c_str());
       }
       else 
     #endif
