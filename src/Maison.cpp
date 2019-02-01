@@ -793,7 +793,7 @@ bool Maison::wifi_connect()
   return result;
 }
 
-void Maison::init_callbacks()
+bool Maison::init_callbacks()
 {
   mqtt_client.setCallback(maison_callback);
   if (!mqtt_client.subscribe(
@@ -803,7 +803,7 @@ void Maison::init_callbacks()
     DEBUG(mqtt_client.state());
     DEBUG(F("): "));
     DEBUGLN(buffer);
-    break;
+    return false;
   }
   else {
     DEBUG(F(" Subscription completed to topic "));
@@ -816,13 +816,14 @@ void Maison::init_callbacks()
       DEBUG(mqtt_client.state());
       DEBUG(F("): "));
       DEBUGLN(user_topic);
-      break;
+      return false;
     }
     else {
       DEBUG(F(" Subscription completed to user topic "));
       DEBUGLN(user_topic);
     }
   }
+  return true;
 }
 
 bool Maison::mqtt_connect()
@@ -858,7 +859,7 @@ bool Maison::mqtt_connect()
                             false);
         if (mqtt_connected() && !mem.callback_initialized) {
           mem.callback_initialized = true;
-          init_callbacks();
+          if (!init_callbacks()) break;
         }
       }
       else {
@@ -867,10 +868,10 @@ bool Maison::mqtt_connect()
                             config.mqtt_username,
                             config.mqtt_password);
         if (mqtt_connected()) {
-          init_callbacks();
+          if (!init_callbacks()) break;
         }
       }
-      
+
       if (!mqtt_connecte()) {
         DEBUG(F(" Unable to connect to mqtt. State: "));
         DEBUGLN(mqtt_client.state());
