@@ -853,11 +853,11 @@ bool Maison::mqtt_connect()
         mqtt_client.connect(client_name,
                             config.mqtt_username,
                             config.mqtt_password,
-                            NULL, 0, 0, NULL,  // Will message not used
-                            false);
-        if (mqtt_connected() && !mem.callback_initialized) {
-          mem.callback_initialized = true;
+                            NULL, 0, 0, NULL,            // Will message not used
+                            false);  // Permanent session
+        if (mqtt_connected() /*&& !mem.callback_initialized*/) {
           if (!init_callbacks()) break;
+          mem.callback_initialized = true;
         }
       }
       else {
@@ -865,9 +865,7 @@ bool Maison::mqtt_connect()
         mqtt_client.connect(client_name,
                             config.mqtt_username,
                             config.mqtt_password);
-        if (mqtt_connected()) {
-          if (!init_callbacks()) break;
-        }
+        if (mqtt_connected() && (!init_callbacks()) break;
       }
 
       if (!mqtt_connected()) {
