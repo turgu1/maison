@@ -511,7 +511,7 @@ class Maison
     bool retrieve_config(JsonObject & _root, Config & _config);
     bool load_config(int _version = 0);
 
-    bool init_callbacks();
+    bool init_callbacks(bool subscribe);
 
     bool     save_config();
     void send_config_msg();

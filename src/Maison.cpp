@@ -793,24 +793,26 @@ bool Maison::wifi_connect()
   return result;
 }
 
-bool Maison::init_callbacks()
+bool Maison::init_callbacks(bool subscribe)
 {
   mqtt_client.setCallback(maison_callback);
-  if (!mqtt_client.subscribe(
-               my_topic(CTRL_SUFFIX_TOPIC, buffer, sizeof(buffer)),
-               use_deep_sleep() ? 1 : 0)) {
-    DEBUG(F(" Hum... unable to subscribe to topic (State:"));
-    DEBUG(mqtt_client.state());
-    DEBUG(F("): "));
-    DEBUGLN(buffer);
-    return false;
-  }
-  else {
-    DEBUG(F(" Subscription completed to topic "));
+  if (subscribe) {
+    if (!mqtt_client.subscribe(
+                 my_topic(CTRL_SUFFIX_TOPIC, buffer, sizeof(buffer)),
+                 use_deep_sleep() ? 1 : 0)) {
+      DEBUG(F(" Hum... unable to subscribe to topic (State:"));
+      DEBUG(mqtt_client.state());
+      DEBUG(F("): "));
+      DEBUGLN(buffer);
+      return false;
+    }
+    else {
+      DEBUG(F(" Subscription completed to topic "));
+    }
   }
 
   DEBUGLN(buffer);
-  if (user_topic != NULL) {
+  if ((user_topic != NULL) && subscribe) {
     if (!mqtt_client.subscribe(user_topic, user_qos)) {
       DEBUG(F(" Hum... unable to subscribe to user topic (State:"));
       DEBUG(mqtt_client.state());
@@ -857,8 +859,8 @@ bool Maison::mqtt_connect()
                             config.mqtt_password,
                             NULL, 0, 0, NULL,            // Will message not used
                             false);  // Permanent session
-        if (mqtt_connected() && !mem.callback_initialized) {
-          if (!init_callbacks()) break;
+        if (mqtt_connected()) {
+          if (!init_callbacks(!mem.callback_initialized)) break;
           mem.callback_initialized = true;
         }
       }
@@ -867,7 +869,7 @@ bool Maison::mqtt_connect()
         mqtt_client.connect(client_name,
                             config.mqtt_username,
                             config.mqtt_password);
-        if (mqtt_connected() && !init_callbacks()) break;
+        if (mqtt_connected() && !init_callbacks(true)) break;
       }
 
       if (!mqtt_connected()) {
