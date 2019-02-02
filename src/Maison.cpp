@@ -857,7 +857,7 @@ bool Maison::mqtt_connect()
                             config.mqtt_password,
                             NULL, 0, 0, NULL,            // Will message not used
                             false);  // Permanent session
-        if (mqtt_connected() /*&& !mem.callback_initialized*/) {
+        if (mqtt_connected() && !mem.callback_initialized) {
           if (!init_callbacks()) break;
           mem.callback_initialized = true;
         }
