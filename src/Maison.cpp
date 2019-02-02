@@ -865,7 +865,7 @@ bool Maison::mqtt_connect()
         mqtt_client.connect(client_name,
                             config.mqtt_username,
                             config.mqtt_password);
-        if (mqtt_connected() && (!init_callbacks()) break;
+        if (mqtt_connected() && !init_callbacks()) break;
       }
 
       if (!mqtt_connected()) {
