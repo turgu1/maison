@@ -64,10 +64,10 @@ bool Maison::setup()
 
     if (is_hard_reset()) {
       mem.state = mem.return_state = STARTUP;
-      mem.callback_initialized = false;
-      mem.hours_24_count       = 0;
-      mem.one_hour_step_count  = 0;
-      mem.lost_count           = 0;
+      mem.callbacks_initialized = false;
+      mem.hours_24_count        = 0;
+      mem.one_hour_step_count   = 0;
+      mem.lost_count            = 0;
     }
 
     if (network_is_available()) {
@@ -852,6 +852,8 @@ bool Maison::mqtt_connect()
       strcpy(client_name, "client-");
       strcat(client_name, config.device_name);
 
+      DEBUG(F("Client name: ")); DEBUGLN(client_name);
+
       if (use_deep_sleep()) {
         DEBUGLN(F(" Connect with clean-session off."));
         mqtt_client.connect(client_name,
@@ -860,8 +862,8 @@ bool Maison::mqtt_connect()
                             NULL, 0, 0, NULL,            // Will message not used
                             false);  // Permanent session
         if (mqtt_connected()) {
-          if (!init_callbacks(!mem.callback_initialized)) break;
-          mem.callback_initialized = true;
+          if (!init_callbacks(!mem.callbacks_initialized)) break;
+          mem.callbacks_initialized = true;
         }
       }
       else {
