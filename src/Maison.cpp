@@ -808,12 +808,12 @@ bool Maison::init_callbacks(bool subscribe)
         DEBUG(F(" Hum... unable to subscribe to topic (State:"));
         DEBUG(mqtt_client.state());
         DEBUG(F("): "));
-        DEBUGLN(buffer);
+        DEBUGLN(topic);
         break;
       }
       else {
         DEBUG(F(" Subscription completed to topic "));
-        DEBUGLN(user_topic);
+        DEBUGLN(topic);
       }
     }
 
