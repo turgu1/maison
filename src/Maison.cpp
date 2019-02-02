@@ -796,7 +796,7 @@ bool Maison::wifi_connect()
 bool Maison::init_callbacks(bool subscribe)
 {
   mqtt_client.setCallback(maison_callback);
-  if (subscribe) {
+  if (true /*subscribe*/) {
     if (!mqtt_client.subscribe(
                  my_topic(CTRL_SUFFIX_TOPIC, buffer, sizeof(buffer)),
                  use_deep_sleep() ? 1 : 0)) {
@@ -812,7 +812,7 @@ bool Maison::init_callbacks(bool subscribe)
   }
 
   DEBUGLN(buffer);
-  if ((user_topic != NULL) && subscribe) {
+  if ((user_topic != NULL)/* && subscribe*/) {
     if (!mqtt_client.subscribe(user_topic, user_qos)) {
       DEBUG(F(" Hum... unable to subscribe to user topic (State:"));
       DEBUG(mqtt_client.state());
