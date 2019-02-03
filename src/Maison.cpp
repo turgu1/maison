@@ -357,6 +357,9 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
       DEBUGLN("Device is restarting");
       restart();
     }
+    else {
+      log("Warning: Unknown message received.");
+    }
   }
   else if (user_cb != NULL) {
     DEBUGLN(F(" Calling user callback"));
@@ -814,7 +817,7 @@ bool Maison::init_callbacks(bool subscribe)
 
   DO {
     mqtt_client.setCallback(maison_callback);
-    if (subscribe) {
+    // if (subscribe) {
       if (!mqtt_client.subscribe(
                    my_topic(CTRL_SUFFIX_TOPIC, topic, sizeof(topic)),
                    use_deep_sleep() ? 1 : 0)) {
@@ -828,10 +831,10 @@ bool Maison::init_callbacks(bool subscribe)
         DEBUG(F(" Subscription completed to topic "));
         DEBUGLN(topic);
       }
-    }
+    // }
 
     DEBUGLN(buffer);
-    if ((user_topic != NULL) && subscribe) {
+    if ((user_topic != NULL)/* && subscribe*/) {
       if (!mqtt_client.subscribe(user_topic, user_qos)) {
         DEBUG(F(" Hum... unable to subscribe to user topic (State:"));
         DEBUG(mqtt_client.state());
