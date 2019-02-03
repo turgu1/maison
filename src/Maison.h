@@ -475,6 +475,7 @@ class Maison
     uint16_t     deep_sleep_wait_time;
     uint32_t     loop_time_marker;
     bool         some_message_received;
+    bool         wait_for_completion;
 
     char         buffer[MQTT_MAX_PACKET_SIZE];
 

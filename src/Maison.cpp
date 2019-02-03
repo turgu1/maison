@@ -15,7 +15,8 @@ Maison::Maison() :
   user_mem(NULL),
   user_mem_length(0),
   last_time_count(0),
-  counting_lost_connection(true)
+  counting_lost_connection(true),
+  wait_for_completion(false)
 {
   maison = this;
 }
@@ -32,7 +33,8 @@ Maison::Maison(uint8_t _feature_mask) :
   user_mem(NULL),
   user_mem_length(0),
   last_time_count(0),
-  counting_lost_connection(true)
+  counting_lost_connection(true),
+  wait_for_completion(false)
 {
   maison = this;
 }
@@ -49,7 +51,8 @@ Maison::Maison(uint8_t _feature_mask, void * _user_mem, uint16_t _user_mem_lengt
   user_mem(_user_mem),
   user_mem_length(_user_mem_length),
   last_time_count(0),
-  counting_lost_connection(true)
+  counting_lost_connection(true),
+  wait_for_completion(false)
 {
   maison = this;
 }
@@ -298,6 +301,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
               strncpy(tmp, md5, 32);
               log("Code update started with size %d and md5: %s.", 
                   size, tmp);
+              wait_for_completion = true;
             }
             else {
               log("Error: Code upload not started: %s", 
@@ -329,6 +333,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         DEBUGLN(F(" ERROR: Upload not complete!"));
         log("Error: Code upload not completed: %s", 
             cons.getErrorStr().c_str());
+        wait_for_completion = false;
       }
       else 
     #endif
@@ -414,16 +419,24 @@ void Maison::loop(Process * _process)
 
     DEBUGLN(F("MQTT Connected."));
 
-    // Consume all pending messages
+    // Consume all pending messages. For OTA updates, as the message is very long, 
+    // it may require many calls to mqtt_loop to get it completed. The
+    // wait_for_completion flag is set by the callback to signify the need
+    // to wait until the complete new code has been received. The algorithm
+    // below insure that if the code has not been received inside 2 minutes
+    // of wait time, it will be aborted. This is to control battery drain.
+
+    long start = millis();
     do {
       some_message_received = false;
       yield();
       mqtt_loop();
-      if (some_message_received) {
-        DEBUGLN(F("A message has been received. Check for next one."));
-        delay(100);
-      }
-    } while (some_message_received);
+    } while (some_message_received || 
+             (wait_for_completion && ((millis() - start) < 120000)));
+    if ((millis() - start) >= 120000) {
+      wait_for_completion = false;
+      log("Error: Wait for completion too long. Aborted.");
+    }
   }
 
   new_state        = mem.state;
