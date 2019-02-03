@@ -454,6 +454,16 @@ Here is an example of such a message:
 NEW_CODE:{"SIZE":412345,"APP_NAME":"BLINKER","MD5":"06fa77583b007464167bbba866d662c2"}
 ```
 
-The second message will contain the binary code of the file. Its length must be the same indicated by the SIZE parameter shown above.
+Once received, the device will send a log message. For example::
 
+```
+DEVICE_NAME: Code update started with size 412345 and md5: 06fa77583b007464167bbba866d662c2.
+```
 
+The second message sent to the device will contain the binary code of the file. Its length must be the same indicated by the SIZE parameter shown above.
+
+Once the code received, the device will send a log message. For example:
+
+```
+DEVICE_NAME: Code upload completed. Rebooting
+```

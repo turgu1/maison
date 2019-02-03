@@ -147,6 +147,7 @@
 /// actor Device
 /// actor device_ctrl as "maison/WATER_SPILL/ctrl"
 /// actor server_status as "maison/status"
+/// actor server_log as "maison/log"
 ///
 /// group Device actions
 ///   group Reset
@@ -175,6 +176,13 @@
 ///
 ///   group Reset device
 ///     device_ctrl --> Device : "RESTART!"
+///   end
+///
+///   group OTA
+///     device_ctrl --> Device : "NEW_CODE: {params}"
+///     Device --> server_log : "OTA Start"
+///     device_ctrl --> Device : "<binary>"
+///     Device --> server_log : "Completed. Reboot."
 ///   end
 /// end
 /// @enduml
@@ -475,6 +483,7 @@ class Maison
     uint32_t     loop_time_marker;
     bool         some_message_received;
     bool         wait_for_completion;
+    bool         reboot_now;
 
     char         buffer[MQTT_MAX_PACKET_SIZE];
 

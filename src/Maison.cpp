@@ -16,7 +16,8 @@ Maison::Maison() :
   user_mem_length(0),
   last_time_count(0),
   counting_lost_connection(true),
-  wait_for_completion(false)
+  wait_for_completion(false),
+  reboot_now(false)
 {
   maison = this;
 }
@@ -34,7 +35,8 @@ Maison::Maison(uint8_t _feature_mask) :
   user_mem_length(0),
   last_time_count(0),
   counting_lost_connection(true),
-  wait_for_completion(false)
+  wait_for_completion(false),
+  reboot_now(false)
 {
   maison = this;
 }
@@ -52,7 +54,8 @@ Maison::Maison(uint8_t _feature_mask, void * _user_mem, uint16_t _user_mem_lengt
   user_mem_length(_user_mem_length),
   last_time_count(0),
   counting_lost_connection(true),
-  wait_for_completion(false)
+  wait_for_completion(false),
+  reboot_now(false)
 {
   maison = this;
 }
@@ -325,13 +328,13 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         if (cons.end() && cons.isCompleted()) {
           DEBUGLN(F(" Upload Completed. Rebooting..."));
           log("Code upload completed. Rebooting");
-          delay(5000);
-          ESP.restart();
-          delay(10000);
+          reboot_now = true;
         }
-        DEBUGLN(F(" ERROR: Upload not complete!"));
-        log("Error: Code upload not completed: %s", 
-            cons.getErrorStr().c_str());
+        else {
+          DEBUGLN(F(" ERROR: Upload not complete!"));
+          log("Error: Code upload not completed: %s", 
+              cons.getErrorStr().c_str());
+        }
         wait_for_completion = false;
       }
       else 
@@ -439,6 +442,11 @@ void Maison::loop(Process * _process)
     if ((millis() - start) >= 120000) {
       wait_for_completion = false;
       log("Error: Wait for completion too long. Aborted.");
+    }
+    if (reboot_now) {
+      delay(5000);
+      ESP.restart();
+      delay(10000);      
     }
   }
 
