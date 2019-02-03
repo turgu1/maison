@@ -194,7 +194,7 @@ void Maison::get_new_config()
           show_config(config);
         #endif
         save_config();
-        callbacks_initialized = false;
+        mem.callbacks_initialized = false;
       }
       else {
         DEBUGLN(F(" ERROR: New config with a wrong version number. Not saved."));
