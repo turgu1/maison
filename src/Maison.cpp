@@ -198,6 +198,7 @@ void Maison::get_new_config()
       }
       else {
         DEBUGLN(F(" ERROR: New config with a wrong version number. Not saved."));
+        log("Error: Received New Config with wrong version number.");
       }
       send_config_msg();
     }
@@ -359,7 +360,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
     }
     else if (strncmp(buffer, "RESTART!", 8) == 0) {
       DEBUGLN("Device is restarting");
-      restart();
+      reboot_now = true;
     }
     else {
       log("Warning: Unknown message received.");
@@ -445,11 +446,7 @@ void Maison::loop(Process * _process)
       wait_for_completion = false;
       log("Error: Wait for completion too long. Aborted.");
     }
-    if (reboot_now) {
-      delay(5000);
-      ESP.restart();
-      delay(10000);      
-    }
+    if (reboot_now) restart();
   }
 
   new_state        = mem.state;
@@ -861,6 +858,8 @@ bool Maison::init_callbacks(bool subscribe)
     OK_DO;
   }
 
+  SHOW_RESULT("init_callbacks()");
+  
   return result;
 }
 
@@ -1223,7 +1222,7 @@ char * Maison::my_topic(const char * _topic_suffix, char * _buffer, uint16_t _le
 void Maison::restart()
 {
   save_mems();
-  log("Restart requested.");
+  if (mqtt_connected()) log("Info: Restart requested.");
   delay(5000);
   ESP.restart();
   delay(1000);
