@@ -67,7 +67,6 @@ bool Maison::setup()
 
     if (is_hard_reset()) {
       mem.state = mem.return_state = STARTUP;
-      mem.callbacks_initialized = false;
       mem.hours_24_count        = 0;
       mem.one_hour_step_count   = 0;
       mem.lost_count            = 0;
@@ -429,6 +428,7 @@ void Maison::loop(Process * _process)
     // below insure that if the code has not been received inside 2 minutes
     // of wait time, it will be aborted. This is to control battery drain.
 
+    delay(100);
     long start = millis();
     do {
       some_message_received = false;
@@ -809,7 +809,7 @@ bool Maison::wifi_connect()
   return result;
 }
 
-bool Maison::init_callbacks(bool subscribe)
+bool Maison::init_callbacks()
 {
   static char topic[40];
 
@@ -817,24 +817,22 @@ bool Maison::init_callbacks(bool subscribe)
 
   DO {
     mqtt_client.setCallback(maison_callback);
-    // if (subscribe) {
-      if (!mqtt_client.subscribe(
-                   my_topic(CTRL_SUFFIX_TOPIC, topic, sizeof(topic)),
-                   use_deep_sleep() ? 1 : 0)) {
-        DEBUG(F(" Hum... unable to subscribe to topic (State:"));
-        DEBUG(mqtt_client.state());
-        DEBUG(F("): "));
-        DEBUGLN(topic);
-        break;
-      }
-      else {
-        DEBUG(F(" Subscription completed to topic "));
-        DEBUGLN(topic);
-      }
-    // }
+    if (!mqtt_client.subscribe(
+                 my_topic(CTRL_SUFFIX_TOPIC, topic, sizeof(topic)),
+                 use_deep_sleep() ? 1 : 0)) {
+      DEBUG(F(" Hum... unable to subscribe to topic (State:"));
+      DEBUG(mqtt_client.state());
+      DEBUG(F("): "));
+      DEBUGLN(topic);
+      break;
+    }
+    else {
+      DEBUG(F(" Subscription completed to topic "));
+      DEBUGLN(topic);
+    }
 
     DEBUGLN(buffer);
-    if ((user_topic != NULL)/* && subscribe*/) {
+    if (user_topic != NULL) {
       if (!mqtt_client.subscribe(user_topic, user_qos)) {
         DEBUG(F(" Hum... unable to subscribe to user topic (State:"));
         DEBUG(mqtt_client.state());
@@ -888,8 +886,7 @@ bool Maison::mqtt_connect()
                             NULL, 0, 0, NULL,            // Will message not used
                             false);  // Permanent session
         if (mqtt_connected()) {
-          if (!init_callbacks(!mem.callbacks_initialized)) break;
-          mem.callbacks_initialized = true;
+          if (!init_callbacks()) break;
         }
       }
       else {
@@ -897,7 +894,7 @@ bool Maison::mqtt_connect()
         mqtt_client.connect(client_name,
                             config.mqtt_username,
                             config.mqtt_password);
-        if (mqtt_connected() && !init_callbacks(true)) break;
+        if (mqtt_connected() && !init_callbacks()) break;
       }
 
       if (!mqtt_connected()) {
@@ -942,8 +939,7 @@ bool Maison::send_msg(const char * _topic, const char * _format, ...)
     if (!mqtt_connected()) {
       ERROR("Unable to connect to mqtt server");
     }
-
-    if (!mqtt_client.publish(_topic, buffer)) {
+    else if (!mqtt_client.publish(_topic, buffer)) {
       ERROR("Unable to publish message");
     }
 
@@ -975,8 +971,7 @@ bool Maison::log(const char * _format, ...)
     if (!mqtt_connected()) {
       ERROR("Unable to connect to mqtt server");
     }
-
-    if (!mqtt_client.publish(MAISON_LOG_TOPIC, buffer)) {
+    else if (!mqtt_client.publish(MAISON_LOG_TOPIC, buffer)) {
       ERROR("Unable to log message");
     }
 

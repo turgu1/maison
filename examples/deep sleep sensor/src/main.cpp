@@ -64,10 +64,6 @@ Maison maison(Maison::WATCHDOG_24H  |
 
 Maison::UserResult process(Maison::State state)
 {
-  if (maison.network_is_available()) {
-    maison.send_msg(MAISON_LOG_TOPIC, "State: %d xmit_count: %d", state, my_mem.xmit_count);
-  }
-
   switch (state) {
   
     case Maison::WAIT_FOR_EVENT:
