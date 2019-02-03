@@ -70,6 +70,7 @@ bool Maison::setup()
 
     if (is_hard_reset()) {
       mem.state = mem.return_state = STARTUP;
+      mem.callbacks_initialized = false;
       mem.hours_24_count        = 0;
       mem.one_hour_step_count   = 0;
       mem.lost_count            = 0;
@@ -817,7 +818,7 @@ bool Maison::wifi_connect()
   return result;
 }
 
-bool Maison::init_callbacks()
+bool Maison::init_callbacks(bool subscribe)
 {
   static char topic[40];
 
@@ -825,22 +826,24 @@ bool Maison::init_callbacks()
 
   DO {
     mqtt_client.setCallback(maison_callback);
-    if (!mqtt_client.subscribe(
-                 my_topic(CTRL_SUFFIX_TOPIC, topic, sizeof(topic)),
-                 use_deep_sleep() ? 1 : 0)) {
-      DEBUG(F(" Hum... unable to subscribe to topic (State:"));
-      DEBUG(mqtt_client.state());
-      DEBUG(F("): "));
-      DEBUGLN(topic);
-      break;
-    }
-    else {
-      DEBUG(F(" Subscription completed to topic "));
-      DEBUGLN(topic);
+    if (subscribe) {
+      if (!mqtt_client.subscribe(
+                   my_topic(CTRL_SUFFIX_TOPIC, topic, sizeof(topic)),
+                   use_deep_sleep() ? 1 : 0)) {
+        DEBUG(F(" Hum... unable to subscribe to topic (State:"));
+        DEBUG(mqtt_client.state());
+        DEBUG(F("): "));
+        DEBUGLN(topic);
+        break;
+      }
+      else {
+        DEBUG(F(" Subscription completed to topic "));
+        DEBUGLN(topic);
+      }
     }
 
     DEBUGLN(buffer);
-    if (user_topic != NULL) {
+    if ((user_topic != NULL) && subscribe) {
       if (!mqtt_client.subscribe(user_topic, user_qos)) {
         DEBUG(F(" Hum... unable to subscribe to user topic (State:"));
         DEBUG(mqtt_client.state());
@@ -894,7 +897,7 @@ bool Maison::mqtt_connect()
                             NULL, 0, 0, NULL,            // Will message not used
                             false);  // Permanent session
         if (mqtt_connected()) {
-          if (!init_callbacks()) break;
+          if (!init_callbacks(!mem.callbacks_initialized)) break;
         }
       }
       else {
@@ -902,7 +905,7 @@ bool Maison::mqtt_connect()
         mqtt_client.connect(client_name,
                             config.mqtt_username,
                             config.mqtt_password);
-        if (mqtt_connected() && !init_callbacks()) break;
+        if (mqtt_connected() && !init_callbacks(true)) break;
       }
 
       if (!mqtt_connected()) {

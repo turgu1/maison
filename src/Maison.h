@@ -463,6 +463,7 @@ class Maison
       uint32_t one_hour_step_count; // Up to 3600 seconds in milliseconds
       uint32_t elapse_time;
       uint32_t magic;
+      bool     callbacks_initialized;
     } mem;
 
     PubSubClient                mqtt_client;
