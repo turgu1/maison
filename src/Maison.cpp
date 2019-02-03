@@ -17,7 +17,8 @@ Maison::Maison() :
   last_time_count(0),
   counting_lost_connection(true),
   wait_for_completion(false),
-  reboot_now(false)
+  reboot_now(false),
+  restart_now(false)
 {
   maison = this;
 }
@@ -36,7 +37,8 @@ Maison::Maison(uint8_t _feature_mask) :
   last_time_count(0),
   counting_lost_connection(true),
   wait_for_completion(false),
-  reboot_now(false)
+  reboot_now(false),
+  restart_now(false)
 {
   maison = this;
 }
@@ -55,7 +57,8 @@ Maison::Maison(uint8_t _feature_mask, void * _user_mem, uint16_t _user_mem_lengt
   last_time_count(0),
   counting_lost_connection(true),
   wait_for_completion(false),
-  reboot_now(false)
+  reboot_now(false),
+  restart_now(false)
 {
   maison = this;
 }
@@ -360,7 +363,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
     }
     else if (strncmp(buffer, "RESTART!", 8) == 0) {
       DEBUGLN("Device is restarting");
-      reboot_now = true;
+      restart_now = true;
     }
     else {
       log("Warning: Unknown message received.");
@@ -446,7 +449,11 @@ void Maison::loop(Process * _process)
       wait_for_completion = false;
       log("Error: Wait for completion too long. Aborted.");
     }
-    if (reboot_now) restart();
+    if (restart_now) restart();
+    if (reboot_now) {
+      ESP.restart();
+      delay(5000);
+    }
   }
 
   new_state        = mem.state;
@@ -859,7 +866,7 @@ bool Maison::init_callbacks(bool subscribe)
   }
 
   SHOW_RESULT("init_callbacks()");
-  
+
   return result;
 }
 

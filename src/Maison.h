@@ -484,7 +484,8 @@ class Maison
     uint32_t     loop_time_marker;
     bool         some_message_received;
     bool         wait_for_completion;
-    bool         reboot_now;
+    bool         reboot_now;  // reboot after code update
+    bool         restart_now; // restart after saving the state
 
     char         buffer[MQTT_MAX_PACKET_SIZE];
 
