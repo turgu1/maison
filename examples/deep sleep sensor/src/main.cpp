@@ -38,7 +38,7 @@ ADC_MODE(ADC_VCC);
   #define PRINT(a)     Serial.print(a)
   #define PRINTLN(a)   Serial.println(a)
 #else
-  #define LONG_WAIT 600
+  #define LONG_WAIT 60
   #define SETUP_SERIAL
   #define PRINT(a)
   #define PRINTLN(a)

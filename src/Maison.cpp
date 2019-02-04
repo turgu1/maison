@@ -137,7 +137,7 @@ void Maison::send_state_msg()
   mac2str(ma, mac, sizeof(mac));
 
   if (show_voltage()) {
-    snprintf(vbat, 14, ",\"VBAT\":%3.1f", battery_voltage());
+    snprintf(vbat, 14, ",\"VBAT\":%4.2f", battery_voltage());
   }
   else {
     vbat[0] = 0;
@@ -157,10 +157,8 @@ void Maison::send_state_msg()
       ",\"lost\":%u"
       ",\"rssi\":%ld"
       ",\"heap\":%u"
-      #if MQTT_OTA
-        ",\"app_name\":\"" APP_NAME "\""
-        ",\"app_version\":\"" APP_VERSION "\""
-      #endif
+      ",\"app_name\":\"" APP_NAME "\""
+      ",\"app_version\":\"" APP_VERSION "\""
       "%s"
     "}",
     config.device_name,
@@ -479,7 +477,7 @@ void Maison::loop(Process * _process)
   switch (mem.state) {
     case STARTUP:
       if (show_voltage()) {
-        snprintf(vbat, 14, ",\"VBAT\":%3.1f", battery_voltage());
+        snprintf(vbat, 14, ",\"VBAT\":%4.2f", battery_voltage());
       }
       else {
         vbat[0] = 0;
@@ -487,9 +485,11 @@ void Maison::loop(Process * _process)
 
       if (!send_msg(MAISON_STATUS_TOPIC,
                     "{"
-                    "\"device\":\"%s\","
-                    "\"msg_type\":\"%s\","
-                    "\"reason\":%d"
+                     "\"device\":\"%s\""
+                    ",\"msg_type\":\"%s\""
+                    ",\"reason\":%d"
+                    ",\"app_name\":\"" APP_NAME "\""
+                    ",\"app_version\":\"" APP_VERSION "\""
                     "%s"
                     "}",
                     config.device_name,
@@ -553,14 +553,20 @@ void Maison::loop(Process * _process)
       if (mqtt_connected()) mqtt_loop(); // Second chance to process received msgs
       if (watchdog_enabled()) {
         if (show_voltage()) {
-          snprintf(vbat, 14, ",\"VBAT\":%3.1f", battery_voltage());
+          snprintf(vbat, 14, ",\"VBAT\":%4.2f", battery_voltage());
         }
         else {
           vbat[0] = 0;
         }
 
         if (!send_msg(MAISON_STATUS_TOPIC,
-                      "{\"device\":\"%s\",\"msg_type\":\"%s\"%s}",
+                      "{"
+                       "\"device\":\"%s\""
+                      ",\"msg_type\":\"%s\""
+                      ",\"app_name\":\"" APP_NAME "\""
+                      ",\"app_version\":\"" APP_VERSION "\""
+                      "%s"
+                      "}",
                       config.device_name,
                       "WATCHDOG",
                       vbat)) {
