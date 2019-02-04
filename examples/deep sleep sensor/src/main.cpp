@@ -80,7 +80,7 @@ Maison::UserResult process(Maison::State state)
       if (digitalRead(SENSE_PIN) == LOW)
       {
         maison.set_deep_sleep_wait_time(1);
-        maison.send_msg(MAISON_LOG_TOPIC, "No detection");
+        //maison.send_msg(MAISON_LOG_TOPIC, "No detection");
         return my_mem.xmit_count == 0 ? Maison::ABORTED : Maison::COMPLETED;
       }
       maison.send_msg(

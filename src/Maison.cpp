@@ -435,6 +435,9 @@ void Maison::loop(Process * _process)
     // below insure that if the code has not been received inside 2 minutes
     // of wait time, it will be aborted. This is to control battery drain.
 
+    mqtt_loop();
+    delay(100);
+    mqtt_loop();
     delay(100);
     long start = millis();
     do {
@@ -449,6 +452,7 @@ void Maison::loop(Process * _process)
     }
     if (restart_now) restart();
     if (reboot_now) {
+      delay(5000);
       ESP.restart();
       delay(5000);
     }
