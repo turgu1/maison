@@ -961,7 +961,6 @@ bool Maison::send_msg(const char * _topic, const char * _format, ...)
     }
     else if (!mqtt_client.publish(_topic, buffer)) {
       ERROR("Unable to publish message");
-      DEBUGLN2("PUBLISH PROBLEM!!!");
     }
 
     OK_DO;
@@ -969,6 +968,7 @@ bool Maison::send_msg(const char * _topic, const char * _format, ...)
 
   SHOW_RESULT("send_msg()");
 
+  delay(3000);
   return result;
 }
 
