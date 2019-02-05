@@ -968,7 +968,6 @@ bool Maison::send_msg(const char * _topic, const char * _format, ...)
 
   SHOW_RESULT("send_msg()");
 
-  delay(3000);
   return result;
 }
 
@@ -1014,6 +1013,8 @@ void Maison::deep_sleep(bool _back_with_wifi, uint16_t _sleep_time_in_sec)
   DEBUG(" Network enabled on return: ");
   DEBUGLN(_back_with_wifi ? F("YES") : F("NO"));
 
+  WiFi.disconnect();
+  while (wifi_connected()) delay(10);
   delay(10);
 
   uint32_t sleep_time = 1e6 * _sleep_time_in_sec;
