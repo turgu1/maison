@@ -138,7 +138,7 @@ void Maison::send_state_msg()
 
   send_msg(
     MAISON_STATUS_TOPIC,
-    "{"
+    F("{"
        "\"device\":\"%s\""
       ",\"msg_type\":\"STATE\""
       ",\"ip\":\"%s\""
@@ -153,7 +153,7 @@ void Maison::send_state_msg()
       ",\"app_name\":\"" APP_NAME "\""
       ",\"app_version\":\"" APP_VERSION "\""
       "%s"
-    "}",
+    "}"),
     config.device_name,
     ip,
     mac,
@@ -478,14 +478,14 @@ void Maison::loop(Process * _process)
       }
 
       if (!send_msg(MAISON_STATUS_TOPIC,
-                    "{"
-                     "\"device\":\"%s\""
-                    ",\"msg_type\":\"%s\""
-                    ",\"reason\":%d"
-                    ",\"app_name\":\"" APP_NAME "\""
-                    ",\"app_version\":\"" APP_VERSION "\""
-                    "%s"
-                    "}",
+                    F("{"
+                       "\"device\":\"%s\""
+                      ",\"msg_type\":\"%s\""
+                      ",\"reason\":%d"
+                      ",\"app_name\":\"" APP_NAME "\""
+                      ",\"app_version\":\"" APP_VERSION "\""
+                      "%s"
+                    "}"),
                     config.device_name,
                     "STARTUP",
                     reset_reason(),
@@ -554,13 +554,13 @@ void Maison::loop(Process * _process)
         }
 
         if (!send_msg(MAISON_STATUS_TOPIC,
-                      "{"
-                       "\"device\":\"%s\""
-                      ",\"msg_type\":\"%s\""
-                      ",\"app_name\":\"" APP_NAME "\""
-                      ",\"app_version\":\"" APP_VERSION "\""
-                      "%s"
-                      "}",
+                      F("{"
+                         "\"device\":\"%s\""
+                        ",\"msg_type\":\"%s\""
+                        ",\"app_name\":\"" APP_NAME "\""
+                        ",\"app_version\":\"" APP_VERSION "\""
+                        "%s"
+                      "}"),
                       config.device_name,
                       "WATCHDOG",
                       vbat)) {
@@ -941,14 +941,14 @@ bool Maison::mqtt_connect()
   return result;
 }
 
-bool Maison::send_msg(const char * _topic, const char * _format, ...)
+bool Maison::send_msg(const char * _topic, const __FlashStringHelper * _format, ...)
 {
   SHOW("send_msg()");
 
   va_list args;
   va_start (args, _format);
 
-  vsnprintf(buffer, MQTT_MAX_PACKET_SIZE, _format, args);
+  vsnprintf_P(buffer, MQTT_MAX_PACKET_SIZE, (const char *) _format, args);
 
   DO {
     DEBUG(F(" Sending msg to "));
