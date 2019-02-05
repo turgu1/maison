@@ -1016,8 +1016,8 @@ void Maison::deep_sleep(bool _back_with_wifi, uint16_t _sleep_time_in_sec)
   mqtt_client.disconnect();
   while (mqtt_connected()) delay(10);
 
-  wifi_client.disconnect();
-  while (wifi_client.connected()) delay(10);
+  wifi_client->disconnect();
+  while (wifi_client->connected()) delay(10);
   delay(10);
 
   uint32_t sleep_time = 1e6 * _sleep_time_in_sec;
