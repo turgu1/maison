@@ -77,6 +77,7 @@ Maison::UserResult process(Maison::State state)
 
     case Maison::PROCESS_EVENT:
       PRINTLN(F("==> PROCESS_EVENT <=="));
+      maison.log(F("Test %d"), 123);
       if (digitalRead(SENSE_PIN) == LOW)
       {
         maison.set_deep_sleep_wait_time(1);

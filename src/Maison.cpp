@@ -982,7 +982,7 @@ bool Maison::log(const __FlashStringHelper * _format, ...)
   strcat(buffer, ": ");
   int len = strlen(buffer);
 
-  vsnprintf(&buffer[len], MQTT_MAX_PACKET_SIZE-len, (const char *) _format, args);
+  vsnprintf_P(&buffer[len], MQTT_MAX_PACKET_SIZE-len, (const char *) _format, args);
 
   DO {
     DEBUG(F(" Log msg : "));
