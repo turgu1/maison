@@ -76,11 +76,9 @@ byte switch_new_state_count;
 void send_relay_state()
 {
   maison.send_msg(MAISON_STATUS_TOPIC,
-                  "{"
-                  "\"device\":\"%s\","
-                  "\"msg_type\":\"RELAY_STATE\","
-                  "\"content\":\"%s\""
-                  "}",
+                  F("{\"device\":\"%s\""
+                    ",\"msg_type\":\"RELAY_STATE\""
+                    ",\"content\":\"%s\"}"),
                   maison.get_device_name(),
                   relay_is_on ? "ON" : "OFF");
 }

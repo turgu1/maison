@@ -288,7 +288,7 @@ class Maison
     /// @param[in] ... The arguments required by the format string
     /// @return True if the message was sent successfully
 
-    bool send_msg(const char * _topic, const char * _format, ...);
+    bool send_msg(const char * _topic, const __FlashStringHelper * _format, ...);
 
     /// Send a MQTT log msg using printf like construction syntax.
     ///

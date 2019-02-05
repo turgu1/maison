@@ -77,7 +77,6 @@ Maison::UserResult process(Maison::State state)
 
     case Maison::PROCESS_EVENT:
       PRINTLN(F("==> PROCESS_EVENT <=="));
-      maison.log(F("Test %d"), 123);
       if (digitalRead(SENSE_PIN) == LOW)
       {
         maison.set_deep_sleep_wait_time(1);
@@ -86,9 +85,9 @@ Maison::UserResult process(Maison::State state)
       }
       maison.send_msg(
         MAISON_CTRL_TOPIC, 
-        "{\"device\":\"%s\","
-        "\"msg_type\":\"EVENT_DATA\","
-        "\"content\":\"%s\"}",
+        F("{\"device\":\"%s\""
+          ",\"msg_type\":\"EVENT_DATA\""
+          ",\"content\":\"%s\"}"),
         maison.get_device_name(),
         "ON");
       PRINTLN(F("==> YES THERE IS <=="));
@@ -116,9 +115,9 @@ Maison::UserResult process(Maison::State state)
       PRINTLN(F("==> END_EVENT <=="));
       maison.send_msg(
           MAISON_CTRL_TOPIC,
-          "{\"device\":\"%s\","
-          "\"msg_type\":\"EVENT_DATA\","
-          "\"content\":\"%s\"}",
+          F("{\"device\":\"%s\""
+            ",\"msg_type\":\"EVENT_DATA\""
+            ",\"content\":\"%s\"}"),
           maison.get_device_name(),
           "OFF");
       break;
