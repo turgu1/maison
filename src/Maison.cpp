@@ -421,17 +421,14 @@ void Maison::loop(Process * _process)
 
     DEBUGLN(F("MQTT Connected."));
 
-    // Consume all pending messages. For OTA updates, as the message is very long, 
+    // Consume all pending messages. For OTA updates, as the request
+    // is composed of 2 messages, 
     // it may require many calls to mqtt_loop to get it completed. The
     // wait_for_completion flag is set by the callback to signify the need
     // to wait until the complete new code has been received. The algorithm
     // below insure that if the code has not been received inside 2 minutes
     // of wait time, it will be aborted. This is to control battery drain.
 
-    // mqtt_loop();
-    // delay(100);
-    // mqtt_loop();
-    // delay(100);
     long start = millis();
     do {
       some_message_received = false;
@@ -439,7 +436,7 @@ void Maison::loop(Process * _process)
       mqtt_loop();
     } while (some_message_received || 
              (wait_for_completion && ((millis() - start) < 120000)));
-    if ((millis() - start) >= 120000) {
+    if (wait_for_completion) {
       wait_for_completion = false;
       log("Error: Wait for completion too long. Aborted.");
     }
