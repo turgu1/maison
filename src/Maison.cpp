@@ -192,7 +192,7 @@ void Maison::get_new_config()
       }
       else {
         DEBUGLN(F(" ERROR: New config with a wrong version number. Not saved."));
-        log("Error: Received New Config with wrong version number.");
+        log(F("Error: Received New Config with wrong version number."));
       }
       send_config_msg();
     }
@@ -298,25 +298,25 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
               mqtt_client.setStream(cons);
               // log uses buffer too...
               strncpy(tmp, md5, 32);
-              log("Code update started with size %d and md5: %s.", 
+              log(F("Code update started with size %d and md5: %s."), 
                   size, tmp);
               wait_for_completion = true;
             }
             else {
-              log("Error: Code upload not started: %s", 
+              log(F("Error: Code upload not started: %s"), 
                   cons.getErrorStr().c_str());            
             }
           }
           else {
             // log uses buffer too...
             strncpy(tmp, name, 32);
-            log("Error: Code upload aborted. App name differ (%s vs %s)", 
+            log(F("Error: Code upload aborted. App name differ (%s vs %s)"), 
                 APP_NAME, 
                 tmp);
           }
         }
         else {
-          log("Error: SIZE, MD5 or APP_NAME not present");
+          log(F("Error: SIZE, MD5 or APP_NAME not present"));
         }
       }
       else if (cons.isRunning()) {
@@ -324,12 +324,12 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         // so, restart the device
         if (cons.end() && cons.isCompleted()) {
           DEBUGLN(F(" Upload Completed. Rebooting..."));
-          log("Code upload completed. Rebooting");
+          log(F("Code upload completed. Rebooting"));
           reboot_now = true;
         }
         else {
           DEBUGLN(F(" ERROR: Upload not complete!"));
-          log("Error: Code upload not completed: %s", 
+          log(F("Error: Code upload not completed: %s"), 
               cons.getErrorStr().c_str());
         }
         wait_for_completion = false;
@@ -357,7 +357,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
       restart_now = true;
     }
     else {
-      log("Warning: Unknown message received.");
+      log(F("Warning: Unknown message received."));
     }
   }
   else if (user_cb != NULL) {
@@ -438,7 +438,7 @@ void Maison::loop(Process * _process)
              (wait_for_completion && ((millis() - start) < 120000)));
     if (wait_for_completion) {
       wait_for_completion = false;
-      log("Error: Wait for completion too long. Aborted.");
+      log(F("Error: Wait for completion too long. Aborted."));
     }
     if (restart_now) restart();
     if (reboot_now) {
@@ -971,7 +971,7 @@ bool Maison::send_msg(const char * _topic, const char * _format, ...)
   return result;
 }
 
-bool Maison::log(const char * _format, ...)
+bool Maison::log(const __FlashStringHelper * _format, ...)
 {
   SHOW("log()");
 
@@ -982,7 +982,7 @@ bool Maison::log(const char * _format, ...)
   strcat(buffer, ": ");
   int len = strlen(buffer);
 
-  vsnprintf(&buffer[len], MQTT_MAX_PACKET_SIZE-len, _format, args);
+  vsnprintf(&buffer[len], MQTT_MAX_PACKET_SIZE-len, (const char *) _format, args);
 
   DO {
     DEBUG(F(" Log msg : "));
@@ -1013,16 +1013,13 @@ void Maison::deep_sleep(bool _back_with_wifi, uint16_t _sleep_time_in_sec)
   DEBUG(" Network enabled on return: ");
   DEBUGLN(_back_with_wifi ? F("YES") : F("NO"));
 
-  // mqtt_client.disconnect();
-  // while (mqtt_connected()) delay(10);
-
   if (wifi_client != NULL) {
     wifi_client->flush();
     wifi_client->stop();
     while (wifi_client->connected()) delay(10);
     delay(10);
   }
-  
+
   uint32_t sleep_time = 1e6 * _sleep_time_in_sec;
 
   mem.one_hour_step_count += millis() + (1000u * _sleep_time_in_sec);
@@ -1242,7 +1239,7 @@ char * Maison::my_topic(const char * _topic_suffix, char * _buffer, uint16_t _le
 void Maison::restart()
 {
   save_mems();
-  if (mqtt_connected()) log("Info: Restart requested.");
+  if (mqtt_connected()) log(F("Info: Restart requested."));
   delay(5000);
   ESP.restart();
   delay(1000);
