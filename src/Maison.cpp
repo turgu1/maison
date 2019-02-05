@@ -70,14 +70,7 @@ bool Maison::setup()
   DO {
     if (!   load_mems()) ERROR("Unable to load states");
     if (! load_config()) ERROR("Unable to load config");
-
-    if (is_hard_reset()) {
-      mem.state = mem.return_state = STARTUP;
-      mem.callbacks_initialized = false;
-      mem.hours_24_count        = 0;
-      mem.one_hour_step_count   = 0;
-      mem.lost_count            = 0;
-    }
+    if (is_hard_reset()) init_mem();
 
     if (network_is_available()) {
       if (!wifi_connect()) ERROR("WiFi");
@@ -825,9 +818,11 @@ bool Maison::wifi_connect()
       }
     }
 
-    OK_DO;
+    break;
   }
 
+  result = wifi_connected();
+  
   SHOW_RESULT("wifi_connect()");
 
   return result;
@@ -1113,9 +1108,12 @@ bool Maison::init_mem()
 {
   SHOW("init_mem()");
 
-  mem.magic        = RTC_MAGIC;
-  mem.state        = STARTUP;
-  mem.return_state = WAIT_FOR_EVENT;
+  mem.magic                    = RTC_MAGIC;
+  mem.state = mem.return_state = STARTUP;
+  mem.callbacks_initialized    = false;
+  mem.hours_24_count           = 0;
+  mem.one_hour_step_count      = 0;
+  mem.lost_count               = 0;
 
   DEBUG("Sizeof mem_struct: ");
   DEBUGLN(sizeof(mem_struct));
