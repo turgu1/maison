@@ -19,7 +19,11 @@
 
 #include <Maison.h>
 
-#define LED 2
+#if ESP32
+  #define LED 23
+#else
+  #define LED 2
+#endif
 
 int  lit_wait_time;
 bool led_lit;
