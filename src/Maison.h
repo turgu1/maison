@@ -472,7 +472,7 @@ class Maison
     long         last_reconnect_attempt;
     int          connect_retry_count;
     bool         first_connect_trial;
-    Callback   * user_cb;
+    Callback   * user_callback;
     const char * user_sub_topic;
     uint8_t      user_qos;
     uint8_t      feature_mask;

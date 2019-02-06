@@ -8,7 +8,7 @@ Maison::Maison() :
   last_reconnect_attempt(0),
   connect_retry_count(0),
   first_connect_trial(true),
-  user_cb(NULL),
+  user_callback(NULL),
   user_sub_topic(NULL),
   user_qos(0),
   feature_mask(NONE),
@@ -28,7 +28,7 @@ Maison::Maison(uint8_t _feature_mask) :
   last_reconnect_attempt(0),
   connect_retry_count(0),
   first_connect_trial(true),
-  user_cb(NULL),
+  user_callback(NULL),
   user_sub_topic(NULL),
   user_qos(0),
   feature_mask(_feature_mask),
@@ -48,7 +48,7 @@ Maison::Maison(uint8_t _feature_mask, void * _user_mem, uint16_t _user_mem_lengt
   last_reconnect_attempt(0),
   connect_retry_count(0),
   first_connect_trial(true),
-  user_cb(NULL),
+  user_callback(NULL),
   user_sub_topic(NULL),
   user_qos(0),
   feature_mask(_feature_mask),
@@ -300,8 +300,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
               mqtt_client.setStream(cons);
               // log uses buffer too...
               strncpy(tmp, md5, 32);
-              log(F("Code update started with size %d and md5: %s."), 
-                  size, tmp);
+              log(F("Code update started with size %d and md5: %s."), size, tmp);
               wait_for_completion = true;
             }
             else {
@@ -312,9 +311,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
           else {
             // log uses buffer too...
             strncpy(tmp, name, 32);
-            log(F("Error: Code upload aborted. App name differ (%s vs %s)"), 
-                APP_NAME, 
-                tmp);
+            log(F("Error: Code upload aborted. App name differ (%s vs %s)"), APP_NAME, tmp);
           }
         }
         else {
@@ -362,17 +359,17 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
       log(F("Warning: Unknown message received."));
     }
   }
-  else if (user_cb != NULL) {
+  else if (user_callback != NULL) {
     DEBUGLN(F(" Calling user callback"));
-    (*user_cb)(_topic, _payload, _length);
+    (*user_callback)(_topic, _payload, _length);
   }
 }
 
 void Maison::set_msg_callback(Callback * _cb, const char * _sub_topic, uint8_t _qos)
 {
-  user_cb    = _cb;
+  user_callback  = _cb;
   user_sub_topic = _sub_topic;
-  user_qos   = _qos;
+  user_qos       = _qos;
 }
 
 void Maison::loop(Process * _process)
@@ -987,16 +984,6 @@ bool Maison::log(const __FlashStringHelper * _format, ...)
   return result;
 }
 
-void Maison::wifi_flush()
-{
-  if (wifi_client != NULL) {
-    wifi_client->flush();
-    wifi_client->stop();
-    while (wifi_client->connected()) delay(10);
-    delay(10);
-  }  
-}
-
 void Maison::deep_sleep(bool _back_with_wifi, uint16_t _sleep_time_in_sec)
 {
   SHOW("deep_sleep()");
@@ -1224,8 +1211,21 @@ char * Maison::my_topic(const char * _topic_suffix, char * _buffer, uint16_t _le
   return _buffer;
 }
 
+void Maison::wifi_flush()
+{
+  if (wifi_client != NULL) {
+    wifi_client->flush();
+    wifi_client->stop();
+    while (wifi_client->connected()) delay(10);
+    delay(10);
+  }
+}
+
 void Maison::reboot()
 {
+  if (mqtt_connected()) {
+    log(F("Info: Restart requested."));
+  }
   wifi_flush();
   ESP.restart();
   delay(5000);
@@ -1234,7 +1234,6 @@ void Maison::reboot()
 void Maison::restart()
 {
   save_mems();
-  if (mqtt_connected()) log(F("Info: Restart requested."));
   reboot();
 }
 
