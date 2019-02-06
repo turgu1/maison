@@ -62,9 +62,9 @@ Maison::UserResult process(Maison::State state)
     case Maison::PROCESS_EVENT:
       maison.send_msg(
         MAISON_CTRL_TOPIC, 
-        "{\"device\":\"%s\","
-        "\"msg_type\":\"EVENT_DATA\","
-        "\"content\":\"%s\"}",
+        F("{\"device\":\"%s\""
+          ",\"msg_type\":\"EVENT_DATA\""
+          ",\"content\":\"%s\"}"),
         maison.get_device_name(),
         buffer);
       break;

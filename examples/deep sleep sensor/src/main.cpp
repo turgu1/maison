@@ -80,16 +80,17 @@ Maison::UserResult process(Maison::State state)
       if (digitalRead(SENSE_PIN) == LOW)
       {
         maison.set_deep_sleep_wait_time(1);
-        //maison.send_msg(MAISON_LOG_TOPIC, "No detection");
+        PRINTLN(F("==> NOT NOW <=="));
         return my_mem.xmit_count == 0 ? Maison::ABORTED : Maison::COMPLETED;
       }
       maison.send_msg(
         MAISON_CTRL_TOPIC, 
-        "{\"device\":\"%s\","
-        "\"msg_type\":\"EVENT_DATA\","
-        "\"content\":\"%s\"}",
+        F("{\"device\":\"%s\""
+          ",\"msg_type\":\"EVENT_DATA\""
+          ",\"content\":\"%s\"}"),
         maison.get_device_name(),
         "ON");
+      PRINTLN(F("==> YES THERE IS <=="));
       maison.set_deep_sleep_wait_time(LONG_WAIT);
       break;
 
@@ -102,6 +103,7 @@ Maison::UserResult process(Maison::State state)
         }
 
         maison.set_deep_sleep_wait_time(LONG_WAIT);
+        PRINTLN(F("==> NOT YET <=="));
         return Maison::NOT_COMPLETED;
       }
       PRINTLN(F("==> END OF EVENT DETECTED <=="));
@@ -113,9 +115,9 @@ Maison::UserResult process(Maison::State state)
       PRINTLN(F("==> END_EVENT <=="));
       maison.send_msg(
           MAISON_CTRL_TOPIC,
-          "{\"device\":\"%s\","
-          "\"msg_type\":\"EVENT_DATA\","
-          "\"content\":\"%s\"}",
+          F("{\"device\":\"%s\""
+            ",\"msg_type\":\"EVENT_DATA\""
+            ",\"content\":\"%s\"}"),
           maison.get_device_name(),
           "OFF");
       break;

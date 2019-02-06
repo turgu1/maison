@@ -288,16 +288,17 @@ class Maison
     /// @param[in] ... The arguments required by the format string
     /// @return True if the message was sent successfully
 
-    bool send_msg(const char * _topic, const char * _format, ...);
+    bool send_msg(const char * _topic, const __FlashStringHelper * _format, ...);
 
     /// Send a MQTT log msg using printf like construction syntax.
     ///
     /// @param[in] _topic The message topic
-    /// @param[in] _format The format string, as for printf
+    /// @param[in] _format The format string, as for printf (PROGMEM)
     /// @param[in] ... The arguments required by the format string
     /// @return True if the message was sent successfully
 
-    bool log(const char * _format, ...);
+    bool log(const __FlashStringHelper * _format, ...);
+
     /// Returns the ESP8266 reason for reset. The following table lists the ESP8266
     /// potential reasons for reset:
     ///
