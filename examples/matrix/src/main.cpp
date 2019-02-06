@@ -71,13 +71,7 @@ void setup()
   
   maison.setup();
 
-  static char buff[60];
-  maison.my_topic(TERMINAL_TOPIC, buff, 60);
-
-  PRINT("Topic: ");
-  PRINTLN(buff);
-
-  maison.set_msg_callback(matrix_callback, buff, 0);
+  maison.set_msg_callback(matrix_callback, TERMINAL_TOPIC, 0);
 
   init_display();
  

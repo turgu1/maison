@@ -9,7 +9,7 @@ Maison::Maison() :
   connect_retry_count(0),
   first_connect_trial(true),
   user_cb(NULL),
-  user_topic(NULL),
+  user_sub_topic(NULL),
   user_qos(0),
   feature_mask(NONE),
   user_mem(NULL),
@@ -29,7 +29,7 @@ Maison::Maison(uint8_t _feature_mask) :
   connect_retry_count(0),
   first_connect_trial(true),
   user_cb(NULL),
-  user_topic(NULL),
+  user_sub_topic(NULL),
   user_qos(0),
   feature_mask(_feature_mask),
   user_mem(NULL),
@@ -49,7 +49,7 @@ Maison::Maison(uint8_t _feature_mask, void * _user_mem, uint16_t _user_mem_lengt
   connect_retry_count(0),
   first_connect_trial(true),
   user_cb(NULL),
-  user_topic(NULL),
+  user_sub_topic(NULL),
   user_qos(0),
   feature_mask(_feature_mask),
   user_mem(_user_mem),
@@ -183,12 +183,14 @@ void Maison::get_new_config()
     }
     else {
       if (cfg.version > config.version) {
+        mqtt_client.unsubscribe(topic);
+        if (user_sub_topic) mqtt_client.unsubscribe(user_topic);
         config = cfg;
         #if MAISON_TESTING
           show_config(config);
         #endif
         save_config();
-        mem.callbacks_initialized = false;
+        init_callbacks();
       }
       else {
         DEBUGLN(F(" ERROR: New config with a wrong version number. Not saved."));
@@ -366,10 +368,10 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
   }
 }
 
-void Maison::set_msg_callback(Callback * _cb, const char * _topic, uint8_t _qos)
+void Maison::set_msg_callback(Callback * _cb, const char * _sub_topic, uint8_t _qos)
 {
   user_cb    = _cb;
-  user_topic = _topic;
+  user_sub_topic = _sub_topic;
   user_qos   = _qos;
 }
 
@@ -441,11 +443,7 @@ void Maison::loop(Process * _process)
       log(F("Error: Wait for completion too long. Aborted."));
     }
     if (restart_now) restart();
-    if (reboot_now) {
-      delay(5000);
-      ESP.restart();
-      delay(5000);
-    }
+    if (reboot_now) reboot();
   }
 
   new_state        = mem.state;
@@ -825,32 +823,29 @@ bool Maison::wifi_connect()
   return result;
 }
 
-bool Maison::init_callbacks(bool subscribe)
+bool Maison::init_callbacks()
 {
-  static char topic[40];
-
   SHOW("init_callbacks()");
 
   DO {
     mqtt_client.setCallback(maison_callback);
-    //if (subscribe) {
-      if (!mqtt_client.subscribe(
-                   my_topic(CTRL_SUFFIX_TOPIC, topic, sizeof(topic)),
-                   use_deep_sleep() ? 1 : 0)) {
-        DEBUG(F(" Hum... unable to subscribe to topic (State:"));
-        DEBUG(mqtt_client.state());
-        DEBUG(F("): "));
-        DEBUGLN(topic);
-        break;
-      }
-      else {
-        DEBUG(F(" Subscription completed to topic "));
-        DEBUGLN(topic);
-      }
-    //}
+    if (!mqtt_client.subscribe(
+                 my_topic(CTRL_SUFFIX_TOPIC, topic, sizeof(topic)),
+                 use_deep_sleep() ? 1 : 0)) {
+      DEBUG(F(" Hum... unable to subscribe to topic (State:"));
+      DEBUG(mqtt_client.state());
+      DEBUG(F("): "));
+      DEBUGLN(topic);
+      break;
+    }
+    else {
+      DEBUG(F(" Subscription completed to topic "));
+      DEBUGLN(topic);
+    }
 
-    DEBUGLN(buffer);
-    if ((user_topic != NULL) /* && subscribe*/) {
+    if (user_sub_topic != NULL) {
+      maison.my_topic(user_sub_topic, user_topic, sizeof(user_topic));
+
       if (!mqtt_client.subscribe(user_topic, user_qos)) {
         DEBUG(F(" Hum... unable to subscribe to user topic (State:"));
         DEBUG(mqtt_client.state());
@@ -898,26 +893,15 @@ bool Maison::mqtt_connect()
 
       DEBUG(F("Client name: ")); DEBUGLN(client_name);
 
-      if (use_deep_sleep()) {
-        DEBUGLN(F(" Connect with clean-session off."));
-        mqtt_client.connect(client_name,
-                            config.mqtt_username,
-                            config.mqtt_password,
-                            NULL, 0, 0, NULL,            // Will message not used
-                            false);  // Permanent session
-        if (mqtt_connected()) {
-          if (!init_callbacks(!mem.callbacks_initialized)) break;
-        }
+      mqtt_client.connect(client_name,
+                          config.mqtt_username,
+                          config.mqtt_password,
+                          NULL, 0, 0, NULL,    // Will message not used
+                          !use_deep_sleep());  // Permanent session if deep sleep
+      if (mqtt_connected()) {
+        if (!init_callbacks()) break;
       }
       else {
-        DEBUGLN(F(" Connect with clean-session on."));
-        mqtt_client.connect(client_name,
-                            config.mqtt_username,
-                            config.mqtt_password);
-        if (mqtt_connected() && !init_callbacks(true)) break;
-      }
-
-      if (!mqtt_connected()) {
         DEBUG(F(" Unable to connect to mqtt. State: "));
         DEBUGLN(mqtt_client.state());
 
@@ -1003,6 +987,16 @@ bool Maison::log(const __FlashStringHelper * _format, ...)
   return result;
 }
 
+void Maison::wifi_flush()
+{
+  if (wifi_client != NULL) {
+    wifi_client->flush();
+    wifi_client->stop();
+    while (wifi_client->connected()) delay(10);
+    delay(10);
+  }  
+}
+
 void Maison::deep_sleep(bool _back_with_wifi, uint16_t _sleep_time_in_sec)
 {
   SHOW("deep_sleep()");
@@ -1013,12 +1007,7 @@ void Maison::deep_sleep(bool _back_with_wifi, uint16_t _sleep_time_in_sec)
   DEBUG(" Network enabled on return: ");
   DEBUGLN(_back_with_wifi ? F("YES") : F("NO"));
 
-  if (wifi_client != NULL) {
-    wifi_client->flush();
-    wifi_client->stop();
-    while (wifi_client->connected()) delay(10);
-    delay(10);
-  }
+  wifi_flush();
 
   uint32_t sleep_time = 1e6 * _sleep_time_in_sec;
 
@@ -1112,7 +1101,6 @@ bool Maison::init_mem()
 
   mem.magic                    = RTC_MAGIC;
   mem.state = mem.return_state = STARTUP;
-  mem.callbacks_initialized    = false;
   mem.hours_24_count           = 0;
   mem.one_hour_step_count      = 0;
   mem.lost_count               = 0;
@@ -1236,13 +1224,18 @@ char * Maison::my_topic(const char * _topic_suffix, char * _buffer, uint16_t _le
   return _buffer;
 }
 
+void Maison::reboot()
+{
+  wifi_flush();
+  ESP.restart();
+  delay(5000);
+}
+
 void Maison::restart()
 {
   save_mems();
   if (mqtt_connected()) log(F("Info: Restart requested."));
-  delay(5000);
-  ESP.restart();
-  delay(1000);
+  reboot();
 }
 
 char * Maison::ip2str(uint32_t _ip, char *_str, int _length)

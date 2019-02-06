@@ -413,10 +413,10 @@ class Maison
     /// Set the MQTT message callback for the user application.
     ///
     /// @param[in] _cb The Callback function address.
-    /// @param[in] _topic The topic to subscribe to.
+    /// @param[in] _sub_topic The sub_topic to subscribe to.
     /// @param[in] _qos The QOS for the subscription.
 
-    void set_msg_callback(Callback * _cb, const char * _topic, uint8_t _qos = 0);
+    void set_msg_callback(Callback * _cb, const char * _sub_topic, uint8_t _qos = 0);
 
     /// Get device name. The device name is retrieve from the configuration and
     /// sent back to the user as a constant string.
@@ -464,7 +464,6 @@ class Maison
       uint32_t one_hour_step_count; // Up to 3600 seconds in milliseconds
       uint32_t elapse_time;
       uint32_t magic;
-      bool     callbacks_initialized;
     } mem;
 
     PubSubClient                mqtt_client;
@@ -474,7 +473,7 @@ class Maison
     int          connect_retry_count;
     bool         first_connect_trial;
     Callback   * user_cb;
-    const char * user_topic;
+    const char * user_sub_topic;
     uint8_t      user_qos;
     uint8_t      feature_mask;
     void       * user_mem;
@@ -489,9 +488,13 @@ class Maison
     bool         restart_now; // restart after saving the state
 
     char         buffer[MQTT_MAX_PACKET_SIZE];
+    char         topic[60];
+    char         user_topic[60];
 
     bool wifi_connect();
     bool mqtt_connect();
+
+    void wifi_flush();
 
     friend void maison_callback(const char * _topic, byte * _payload, unsigned int _length);
     void process_callback(const char * _topic, byte * _payload, unsigned int _length);
@@ -523,7 +526,7 @@ class Maison
     bool retrieve_config(JsonObject & _root, Config & _config);
     bool load_config(int _version = 0);
 
-    bool init_callbacks(bool subscribe);
+    bool init_callbacks();
 
     bool     save_config();
     void send_config_msg();
@@ -547,6 +550,9 @@ class Maison
     char * ip2str(uint32_t, char *_str, int _length);
     char * mac2str(byte _mac[], char *_str, int _length);
     bool str2ip(const char * _str, uint32_t * _ip);
+
+    void restart();
+    void reboot();
 };
 
 #endif

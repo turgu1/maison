@@ -126,10 +126,7 @@ void setup()
   switch_state = digitalRead(SWITCH) == LOW;
   switch_new_state_count = 0;
 
-  static char buff[60];
-  maison.my_topic(RELAY_TOPIC, buff, 60);
-
-  maison.set_msg_callback(sonoff_callback, buff, 0);
+  maison.set_msg_callback(sonoff_callback, RELAY_TOPIC, 0);
 }
 
 void loop()
