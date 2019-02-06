@@ -551,7 +551,6 @@ class Maison
     char * mac2str(byte _mac[], char *_str, int _length);
     bool str2ip(const char * _str, uint32_t * _ip);
 
-    void restart();
     void reboot();
 };
 
