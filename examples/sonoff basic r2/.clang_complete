@@ -4,10 +4,12 @@
 -I/Users/turgu1/.platformio/packages/framework-arduinoespressif8266/tools/sdk/lwip2/include
 -I/Users/turgu1/.platformio/packages/framework-arduinoespressif8266/variants/generic
 -I/Users/turgu1/Dev/maison/examples/sonoff basic r2/.piolibdeps/ArduinoJson_ID64/src
--I/Users/turgu1/Dev/maison/examples/sonoff basic r2/.piolibdeps/Maison/src
+-I/Users/turgu1/Dev/maison/examples/sonoff basic r2/.piolibdeps/Maison@src-8f95e0566ece351076b77cbc60b6a590/src
 -I/Users/turgu1/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266WiFi/src
 -I/Users/turgu1/Dev/maison/examples/sonoff basic r2/.piolibdeps/PubSubClient/src
--I/Users/turgu1/Dev/maison/examples/sonoff basic r2/.piolibdeps/Maison@src-8f95e0566ece351076b77cbc60b6a590/src
+-I/Users/turgu1/Dev/maison/examples/sonoff basic r2/.piolibdeps/Maison/src
+-I/Users/turgu1/Dev/maison/examples/sonoff basic r2/.piolibdeps/PubSubClient@src-e2d15c6dbad146a1d12b99f1595d9c18/src
+-I/Users/turgu1/Dev/maison/examples/sonoff basic r2/.piolibdeps/PubSubClient_ID89/src
 -I/Users/turgu1/.platformio/lib/ArduinoJson_ID64/src
 -I/Users/turgu1/.platformio/lib/PubSubClient_ID89/src
 -I/Users/turgu1/.platformio/packages/framework-arduinoespressif8266/libraries/ArduinoOTA
@@ -43,12 +45,14 @@
 -I/Users/turgu1/.platformio/packages/tool-unity
 -I/Users/turgu1/Dev/maison/examples/sonoff basic r2/include
 -I/Users/turgu1/Dev/maison/examples/sonoff basic r2/src
--DPLATFORMIO=30603
+-DPLATFORMIO=30604
 -DESP8266
 -DARDUINO_ARCH_ESP8266
 -DESP8266_ESP01
 -DMQTT_MAX_PACKET_SIZE=1024
 -DMQTT_OTA=1
+-DAPP_NAME="SONOFFR2"
+-DAPP_VERSION="1.0.2"
 -DMAISON_TESTING=0
 -DDEBUGGING=0
 -DF_CPU=80000000L
