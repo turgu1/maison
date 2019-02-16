@@ -27,10 +27,6 @@
         {
             "name": "ArduinoJson",
             "version": "~5.13.4"
-        },
-        {
-            "name": "ArduinoBearSSL",
-            "version": "~1.2.0"
         }
     ]
 }

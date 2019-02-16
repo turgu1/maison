@@ -3,14 +3,18 @@
 
 #include <Arduino.h>
 
-#include <FS.h>
-
 #if ESP32
-  #include <WiFi.h>
+  #include <WiFiClientSecure.h>
+  #include <SPIFFS.h>
+  #include <Update.h>
+  #include <rom/rtc.h>
+  #include <esp_wifi.h>
 #else
+  #include <ArduinoBearSSL.h>
   #include <ESP8266WiFi.h>
 #endif
 
+#include <FS.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include <stdio.h>
@@ -26,6 +30,10 @@
 
 #ifndef MQTT_OTA
   #define MQTT_OTA 0
+#endif
+
+#ifndef DEEP_SLEEP_REQUIRED
+  #define DEEP_SLEEP_REQUIRED 0
 #endif
 
 // Insure that MQTT Packet size is big enough for the needs of the framework
@@ -355,7 +363,11 @@ class Maison
     /// @return The battery voltage as read from the ESP8266 ESP.getVcc() call
 
     inline float battery_voltage() {
-      return (ESP.getVcc() * (1.0 / 1024.0));
+      #if ESP32
+        return 0.0;
+      #else
+        return (ESP.getVcc() * (1.0 / 1024.0));
+      #endif
     }
 
     /// Check if a reset is due to something else than Deep Sleep return.
@@ -363,7 +375,11 @@ class Maison
     /// @return True if a reset occurred that is not coming from a Deep Sleep return.
 
     inline bool is_hard_reset() {
-      return reset_reason() != REASON_DEEP_SLEEP_AWAKE;
+      #if ESP32
+        return reset_reason() != DEEPSLEEP_RESET;
+      #else
+        return reset_reason() != REASON_DEEP_SLEEP_AWAKE;
+      #endif
     }
 
     /// Set the deep_sleep period inside an application process function.
@@ -473,71 +489,85 @@ class Maison
     } mem;
 
     PubSubClient                mqtt_client;
-    BearSSL::WiFiClientSecure * wifi_client;
+    #if ESP32
+      WiFiClientSecure *wifi_client;
+    #else
+      BearSSL::WiFiClientSecure *wifi_client;
+    #endif
 
-    long         last_reconnect_attempt;
-    int          connect_retry_count;
-    bool         first_connect_trial;
-    Callback   * user_callback;
-    const char * user_sub_topic;
-    uint8_t      user_qos;
-    uint8_t      feature_mask;
-    void       * user_mem;
-    uint16_t     user_mem_length;
-    long         last_time_count;
-    bool         counting_lost_connection;
-    uint16_t     deep_sleep_wait_time;
-    uint32_t     loop_time_marker;
-    bool         some_message_received;
-    bool         wait_for_completion;
-    bool         reboot_now;  // reboot after code update
-    bool         restart_now; // restart after saving the state
+    long last_reconnect_attempt;
+    int connect_retry_count;
+    bool first_connect_trial;
+    Callback *user_callback;
+    const char *user_sub_topic;
+    uint8_t user_qos;
+    uint8_t feature_mask;
+    void *user_mem;
+    uint16_t user_mem_length;
+    long last_time_count;
+    bool counting_lost_connection;
+    uint16_t deep_sleep_wait_time;
+    uint32_t loop_time_marker;
+    bool some_message_received;
+    bool wait_for_completion;
+    bool reboot_now;  // reboot after code update
+    bool restart_now; // restart after saving the state
 
-    char         buffer[MQTT_MAX_PACKET_SIZE];
-    char         topic[60];
-    char         user_topic[60];
+    char buffer[MQTT_MAX_PACKET_SIZE];
+    char topic[60];
+    char user_topic[60];
 
     bool wifi_connect();
     bool mqtt_connect();
 
     void wifi_flush();
 
-    friend void maison_callback(const char * _topic, byte * _payload, unsigned int _length);
-    void process_callback(const char * _topic, byte * _payload, unsigned int _length);
+    friend void maison_callback(const char *_topic, byte *_payload, unsigned int _length);
+    void process_callback(const char *_topic, byte *_payload, unsigned int _length);
 
-    inline bool   wifi_connected() { return WiFi.status() == WL_CONNECTED;             }
-    inline bool   mqtt_connected() { return mqtt_client.connected();                   }
+    inline bool wifi_connected() { return WiFi.status() == WL_CONNECTED; }
+    inline bool mqtt_connected() { return mqtt_client.connected(); }
 
-    inline void        mqtt_loop() { mqtt_client.loop();                               }
+    inline void mqtt_loop() { mqtt_client.loop(); }
 
-    inline bool     show_voltage() { return (feature_mask & VOLTAGE_CHECK) != 0;       }
-    inline bool   use_deep_sleep() { return (feature_mask & DEEP_SLEEP)    != 0;       }
-    inline bool watchdog_enabled() { return (feature_mask & WATCHDOG_24H ) != 0;       }
+    inline bool show_voltage() { return (feature_mask & VOLTAGE_CHECK) != 0; }
+    
+    #if DEEP_SLEEP_REQUIRED
+      inline bool use_deep_sleep() { return (feature_mask & DEEP_SLEEP) != 0; }
+    #else
+      inline bool use_deep_sleep() { return false; }
+    #endif
 
-    inline bool is_short_reboot_time_needed() {
-      return (mem.state & (PROCESS_EVENT|WAIT_END_EVENT|END_EVENT|HOURS_24)) != 0;
+    inline bool watchdog_enabled() { return (feature_mask & WATCHDOG_24H) != 0; }
+
+    inline bool is_short_reboot_time_needed()
+    {
+      return (mem.state & (PROCESS_EVENT | WAIT_END_EVENT | END_EVENT | HOURS_24)) != 0;
     }
 
-    inline UserResult call_user_process(Process * _process) {
-      if (_process == NULL) {
+    inline UserResult call_user_process(Process *_process)
+    {
+      if (_process == NULL)
+      {
         return COMPLETED;
       }
-      else {
+      else
+      {
         DEBUGLN("Calling user process...");
         return (*_process)(mem.state);
       }
     }
 
     State check_if_24_hours_time(State _default_state);
-    bool retrieve_config(JsonObject & _root, Config & _config);
+    bool retrieve_config(JsonObject &_root, Config &_config);
     bool load_config(int _version = 0);
 
     bool init_callbacks();
 
-    bool     save_config();
+    bool save_config();
     void send_config_msg();
-    void  send_state_msg();
-    void  get_new_config();
+    void send_state_msg();
+    void get_new_config();
 
     #if MAISON_TESTING
       void show_config(Config & _config);

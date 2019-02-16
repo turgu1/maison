@@ -247,6 +247,7 @@ void Maison::get_new_config()
     int available() { return 0; } // not used
     int      read() { return 0; } // not used
     int      peek() { return 0; } // not used
+    void    flush() {           } // not used
 
     bool isCompleted() { return completed;         }
     bool   isRunning() { return running;           }
@@ -776,11 +777,15 @@ bool Maison::update_device_name()
 
 int Maison::reset_reason()
 {
-  rst_info * reset_info = ESP.getResetInfoPtr();
+  #if ESP32
+    return rtc_get_reset_reason(0);
+  #else
+    rst_info * reset_info = ESP.getResetInfoPtr();
 
-  DEBUG(F("Reset reason: ")); DEBUGLN(reset_info->reason);
+    DEBUG(F("Reset reason: ")); DEBUGLN(reset_info->reason);
 
-  return reset_info->reason;
+    return reset_info->reason;
+  #endif
 }
 
 bool Maison::wifi_connect()
@@ -878,9 +883,13 @@ bool Maison::mqtt_connect()
         wifi_client = NULL;
       }
 
-      wifi_client = new BearSSL::WiFiClientSecure;
+      #if ESP32
+        wifi_client = new WiFiClientSecure;
+      #else
+        wifi_client = new BearSSL::WiFiClientSecure;
+        wifi_client->setFingerprint(config.mqtt_fingerprint);
+      #endif
 
-      wifi_client->setFingerprint(config.mqtt_fingerprint);
       mqtt_client.setClient(*wifi_client);
       mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
 
@@ -1003,9 +1012,14 @@ void Maison::deep_sleep(bool _back_with_wifi, uint16_t _sleep_time_in_sec)
 
   save_mems();
 
-  ESP.deepSleep(
-    sleep_time,
-    _back_with_wifi ? WAKE_RF_DEFAULT : WAKE_RF_DISABLED);
+  #if ESP32
+    esp_wifi_stop();
+    ESP.deepSleep(sleep_time);
+  #else
+    ESP.deepSleep(
+      sleep_time,
+      _back_with_wifi ? WAKE_RF_DEFAULT : WAKE_RF_DISABLED);
+  #endif
 
   delay(1000);
   DEBUGLN(" HUM... Not suppose to come here after deep_sleep call...");
@@ -1121,48 +1135,62 @@ bool Maison::read_mem(uint32_t * _data, uint16_t _length, uint16_t _addr)
 {
   SHOW("read_mem()");
 
-  DEBUG(F("  data addr: "));  DEBUGLN((int)_data);
-  DEBUG(F("  length: "));     DEBUGLN(_length);
-  DEBUG(F("  pos in rtc: ")); DEBUGLN(_addr);
+  #if ESP32
+    #if DEEP_SLEEP_REQUIRED
+      #error "DEEP SLEEP ON ESP32 NOT YET SUPPORTED"
+    #endif
+    return false;
+  #else
+    DEBUG(F("  data addr: "));  DEBUGLN((int)_data);
+    DEBUG(F("  length: "));     DEBUGLN(_length);
+    DEBUG(F("  pos in rtc: ")); DEBUGLN(_addr);
 
-  DO {
-    if (!ESP.rtcUserMemoryRead((_addr + 3) >> 2, (uint32_t *) _data, _length)) {
-      ERROR("Unable to read from rtc memory");
+    DO {
+      if (!ESP.rtcUserMemoryRead((_addr + 3) >> 2, (uint32_t *) _data, _length)) {
+        ERROR("Unable to read from rtc memory");
+      }
+
+      uint32_t csum = CRC32((uint8_t *)(&_data[1]), _length - 4);
+
+      if (_data[0] != csum) ERROR("Data in RTC memory with bad checksum!");
+
+      OK_DO;
     }
 
-    uint32_t csum = CRC32((uint8_t *)(&_data[1]), _length - 4);
+    SHOW_RESULT("read_mem()");
 
-    if (_data[0] != csum) ERROR("Data in RTC memory with bad checksum!");
-
-    OK_DO;
-  }
-
-  SHOW_RESULT("read_mem()");
-
-  return result;
+    return result;
+  #endif
 }
 
 bool Maison::write_mem(uint32_t * _data, uint16_t _length, uint16_t _addr)
 {
-  SHOW("write_mem()");
+  #if ESP32
+    #if DEEP_SLEEP_REQUIRED
+      #error "DEEP SLEEP ON ESP32 NOT YET SUPPORTED"
+    #endif
+    return true;
+  #else
+    SHOW("write_mem()");
 
-  DEBUG(F("  data addr: "));  DEBUGLN((int)_data);
-  DEBUG(F("  length: "));     DEBUGLN(_length);
-  DEBUG(F("  pos in rtc: ")); DEBUGLN(_addr);
+    DEBUG(F("  data addr: "));  DEBUGLN((int)_data);
+    DEBUG(F("  length: "));     DEBUGLN(_length);
+    DEBUG(F("  pos in rtc: ")); DEBUGLN(_addr);
 
-  _data[0] = CRC32((uint8_t *)(&_data[1]), _length - 4);
+    _data[0] = CRC32((uint8_t *)(&_data[1]), _length - 4);
 
-  DO {
-    if (!ESP.rtcUserMemoryWrite((_addr + 3) >> 2, (uint32_t *) _data, _length)) {
-      ERROR("Unable to write to rtc memory");
+    DO {
+      if (!ESP.rtcUserMemoryWrite((_addr + 3) >> 2, (uint32_t *) _data, _length)) {
+        ERROR("Unable to write to rtc memory");
+      }
+
+      OK_DO;
     }
 
-    OK_DO;
-  }
+    SHOW_RESULT("write_mem()");
 
-  SHOW_RESULT("write_mem()");
-
-  return result;
+    return result;
+  #endif
 }
 
 uint32_t Maison::CRC32(const uint8_t * _data, size_t _length)
