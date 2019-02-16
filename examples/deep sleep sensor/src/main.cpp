@@ -4,7 +4,9 @@ DEEP_SLEEP SENSOR
 
 An example of using the Maison framework using almost all features available.
 It gets data from GPIO14 pin of an ESP-12E board and when its state changes,
-it sends a message to the MQTT broker. 
+it sends a message to the MQTT broker. Possible values are "ON", "OFF" 
+and "CHIRP". The "CHIRP" value is sent when the device has been awaken 
+but the signal if OFF.
 
 It is expected that hardware connexion  will reset the chip when GPIO14 pin 
 goes high such that the code will gain control before the end of the 
@@ -55,6 +57,8 @@ struct mem_info {
   uint32_t xmit_count;
 } my_mem;
 
+int pin_state;
+
 Maison maison(Maison::WATCHDOG_24H  |
               Maison::VOLTAGE_CHECK |
               Maison::DEEP_SLEEP,
@@ -68,7 +72,7 @@ Maison::UserResult process(Maison::State state)
   
     case Maison::WAIT_FOR_EVENT:
       PRINTLN(F("==> WAIT_FOR_EVENT <=="));
-      if (digitalRead(SENSE_PIN) == HIGH) {
+      if (pin_state == HIGH) {
         maison.set_deep_sleep_wait_time(1);
         PRINTLN(F("==> AN EVENT HAS BEEN DETECTED <=="));
         return Maison::NEW_EVENT;
@@ -77,8 +81,14 @@ Maison::UserResult process(Maison::State state)
 
     case Maison::PROCESS_EVENT:
       PRINTLN(F("==> PROCESS_EVENT <=="));
-      if (digitalRead(SENSE_PIN) == LOW)
-      {
+      if (pin_state == LOW) {
+        maison.send_msg(
+            MAISON_CTRL_TOPIC,
+            F("{\"device\":\"%s\""
+              ",\"msg_type\":\"EVENT_DATA\""
+              ",\"content\":\"%s\"}"),
+            maison.get_device_name(),
+            "CHIRP");
         maison.set_deep_sleep_wait_time(1);
         PRINTLN(F("==> NOT NOW <=="));
         return my_mem.xmit_count == 0 ? Maison::ABORTED : Maison::COMPLETED;
@@ -96,7 +106,7 @@ Maison::UserResult process(Maison::State state)
 
     case Maison::WAIT_END_EVENT:
       PRINTLN(F("==> WAIT_END_EVENT <=="));
-      if (digitalRead(SENSE_PIN) == HIGH) {
+      if (pin_state == HIGH) {
         if (++my_mem.xmit_count < MAX_XMIT_COUNT) {
           maison.set_deep_sleep_wait_time(1);
           return Maison::RETRY;
@@ -152,6 +162,9 @@ void setup()
   PRINTLN(F("==> SETUP <=="));
 
   pinMode(SENSE_PIN, INPUT);
+
+  delay(10);
+  pin_state = digitalRead(SENSE_PIN);
 
   turnOff(0);
   turnOff(2);
