@@ -78,13 +78,13 @@ Maison::UserResult process(Maison::State state)
 
     case Maison::STARTUP:
       PRINTLN(F("==> STARTUP <=="));
-      send_homie("environment",             "name",       true, F("Environment")         );
-      send_homie("environment",             "type",       true, F("DHT")                 );
-      send_homie("environment",             "properties", true, F("temperature,humidity"));
-      send_homie("environment/temperature", "unit",       true, F("°C")                  );
-      send_homie("environment/temperature", "datatype",   true, F("float")               );
-      send_homie("environment/humidity",    "unit",       true, F("%")                   );
-      send_homie("environment/humidity",    "datatype",   true, F("float")               );
+      maison.send_homie("environment",             "name",       true, F("Environment")         );
+      maison.send_homie("environment",             "type",       true, F("DHT")                 );
+      maison.send_homie("environment",             "properties", true, F("temperature,humidity"));
+      maison.send_homie("environment/temperature", "unit",       true, F("°C")                  );
+      maison.send_homie("environment/temperature", "datatype",   true, F("float")               );
+      maison.send_homie("environment/humidity",    "unit",       true, F("%")                   );
+      maison.send_homie("environment/humidity",    "datatype",   true, F("float")               );
       break;
 
     default:
@@ -121,8 +121,8 @@ void loop()
     PRINT("Humidity: ");    PRINTLN(humidity);
 
     #if HOMIE
-      send_homie("environment/temperature", "", true, "%4.1f", temperature);
-      send_homie("environment/humidity",    "", true, "%4.1f", humidity   );
+      maison.send_homie("environment/temperature", "", true, F("%4.1f"), temperature);
+      maison.send_homie("environment/humidity",    "", true, F("%4.1f"), humidity   );
     #else
       char buff[50];
       snprintf(buff, 50, "{\"T\":%4.1f,\"H\":%4.1f}", temperature, humidity);

@@ -132,15 +132,15 @@ void Maison::send_config_msg()
     mac2str(ma, mac, sizeof(mac));
 
     DO {
-      if (!send_homie("", "homie",          true, HOMIE_VERSION)) break;
-      if (!send_homie("", "name",           true, config.device_name)) break;
-      if (!send_homie("", "localip",        true, ip)) break;
-      if (!send_homie("", "mac",            true, mac)) break;
-      if (!send_homie("", "nodes",          true, node_list)) break;
-      if (!send_homie("", "fw/name",        true, APP_NAME)) break;
-      if (!send_homie("", "fw/version",     true, APP_VERSION)) break;
-      if (!send_homie("", "implementation", true, HOMIE_IMPLEMENTATION)) break;
-      if (!send_homie("", "stats/interval", true, "%d", watchdog_interval())) break;
+      if (!send_homie("", "homie",          true, F(HOMIE_VERSION))) break;
+      if (!send_homie("", "name",           true, F("%s"), config.device_name)) break;
+      if (!send_homie("", "localip",        true, F("%s"), ip)) break;
+      if (!send_homie("", "mac",            true, F("%s"), mac)) break;
+      if (!send_homie("", "nodes",          true, F("%s"), node_list)) break;
+      if (!send_homie("", "fw/name",        true, F(APP_NAME))) break;
+      if (!send_homie("", "fw/version",     true, F(APP_VERSION))) break;
+      if (!send_homie("", "implementation", true, F(HOMIE_IMPLEMENTATION))) break;
+      if (!send_homie("", "stats/interval", true, F("%d"), watchdog_interval())) break;
       if (!send_dynamic_state()) break;
       OK_DO;
     }
@@ -151,12 +151,12 @@ void Maison::send_config_msg()
   bool Maison::send_dynamic_state()
   {
     DO {
-      if (!send_homie("", "stats",          true, "uptime,battery,supply,signal,freeheap")) break;
-      if (!send_homie("", "stats/uptime",   true, "%u",    mem.elapse_time_since_startup / 1000u)) break;
-      if (!send_homie("", "stats/battery",  true, "%d",    std::min(100, std::max((int)(20.0 * (battery_voltage() - 2.7)), 0)))) break;
-      if (!send_homie("", "stats/supply",   true, "%4.2f", battery_voltage())) break;
-      if (!send_homie("", "stats/signal",   true, "%d",    std::min(100, std::max(2 * (WiFi.RSSI() + 100)), 0))) break;
-      if (!send_homie("", "stats/freeheap", true, "%u",    ESP.getFreeHeap())) break;
+      if (!send_homie("", "stats",          true, F("uptime,battery,supply,signal,freeheap"))) break;
+      if (!send_homie("", "stats/uptime",   true, F("%u"),    mem.elapse_time_since_startup / 1000u)) break;
+      if (!send_homie("", "stats/battery",  true, F("%d"),    std::min(100, std::max((int)(20.0 * (battery_voltage() - 2.7)), 0)))) break;
+      if (!send_homie("", "stats/supply",   true, F("%4.2f"), battery_voltage())) break;
+      if (!send_homie("", "stats/signal",   true, F("%d"),    std::min(100, std::max(2 * (WiFi.RSSI() + 100)), 0))) break;
+      if (!send_homie("", "stats/freeheap", true, F("%u"),    ESP.getFreeHeap())) break;
       OK_DO;
     }
     return result;
@@ -172,7 +172,7 @@ void Maison::send_config_msg()
       case ALERT:        state = "alert";        break;
       case DISCONNECTED: state = "disconnected"; break;
     }
-    return send_homie("", "state", true, "%s", state);
+    return send_homie("", "state", true, F("%s"), state);
   }
 #else
   void Maison::send_state()
@@ -222,8 +222,9 @@ void Maison::send_config_msg()
       wifi_connected() ? WiFi.RSSI() : 0,
       ESP.getFreeHeap(),
       vbat);
+    }
   }
-}
+#endif
 
 void Maison::get_new_config()
 {
