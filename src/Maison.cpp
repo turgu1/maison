@@ -122,7 +122,6 @@ void Maison::send_config_msg()
 #if HOMIE
   bool Maison::send_startup_state()
   {
-    static char vbat[15];
     static char   ip[20];
     static char  mac[20];
     byte ma[6];
@@ -164,13 +163,14 @@ void Maison::send_config_msg()
 
   bool Maison::send_homie_state(HomieState _state)
   {
-    char * state;
+    const char * state;
     switch (_state) {
       case READY:        state = "ready";        break;
       case SLEEPING:     state = "sleeping";     break;
       case INIT:         state = "init";         break;
       case ALERT:        state = "alert";        break;
       case DISCONNECTED: state = "disconnected"; break;
+      default:           state = "ready";        break;
     }
     return send_homie("", "state", true, F("%s"), state);
   }
@@ -525,7 +525,9 @@ void Maison::loop(Process * _process)
 
   DEBUG(F("User process result: ")); DEBUGLN(res);
 
-  char vbat[15];
+  #if !HOMIE
+    char vbat[15];
+  #endif
 
   switch (mem.state) {
     case STARTUP:
@@ -1060,8 +1062,6 @@ bool Maison::send_msg(const char * _topic, const __FlashStringHelper * _format, 
     }
     va_list args;
     va_start (args, _format);
-
-    int len = strlen(buff);
 
     vsnprintf_P(buffer, MQTT_MAX_PACKET_SIZE, (const char *) _format, args);
 
