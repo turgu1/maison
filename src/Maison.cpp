@@ -63,16 +63,18 @@ Maison::Maison(uint8_t _feature_mask, void * _user_mem, uint16_t _user_mem_lengt
   maison = this;
 }
 
-bool Maison::setup()
+bool Maison::setup(const char * _node_list)
 {
   SHOW("\nMaison::setup()\n");
+
+  node_list = _node_list;
 
   DO {
     if (!   load_mems()) ERROR("Unable to load states");
     if (! load_config()) ERROR("Unable to load config");
     if (is_hard_reset()) init_mem();
 
-    if (network_is_available()) {
+    if (network_is_required()) {
       if (!wifi_connect()) ERROR("WiFi");
       update_device_name();
     }
@@ -117,54 +119,110 @@ void Maison::send_config_msg()
     file.close();
   }
 }
+#if HOMIE
+  bool Maison::send_startup_state()
+  {
+    static char vbat[15];
+    static char   ip[20];
+    static char  mac[20];
+    byte ma[6];
 
-void Maison::send_state_msg()
-{
-  static char vbat[15];
-  static char   ip[20];
-  static char  mac[20];
-  byte ma[6];
+    ip2str(WiFi.localIP(), ip, sizeof(ip));
+    WiFi.macAddress(ma);
+    mac2str(ma, mac, sizeof(mac));
 
-  ip2str(WiFi.localIP(), ip, sizeof(ip));
-  WiFi.macAddress(ma);
-  mac2str(ma, mac, sizeof(mac));
+    DO {
+      if (!send_homie("", "homie",          true, HOMIE_VERSION)) break;
+      if (!send_homie("", "name",           true, config.device_name)) break;
+      if (!send_homie("", "localip",        true, ip)) break;
+      if (!send_homie("", "mac",            true, mac)) break;
+      if (!send_homie("", "nodes",          true, node_list)) break;
+      if (!send_homie("", "fw/name",        true, APP_NAME)) break;
+      if (!send_homie("", "fw/version",     true, APP_VERSION)) break;
+      if (!send_homie("", "implementation", true, HOMIE_IMPLEMENTATION)) break;
+      if (!send_homie("", "stats/interval", true, "%d", watchdog_interval())) break;
+      if (!send_dynamic_state()) break;
+      OK_DO;
+    }
 
-  if (show_voltage()) {
-    snprintf(vbat, 14, ",\"VBAT\":%4.2f", battery_voltage());
+    return result;
   }
-  else {
-    vbat[0] = 0;
+
+  bool Maison::send_dynamic_state()
+  {
+    DO {
+      if (!send_homie("", "stats",          true, "uptime,battery,supply,signal,freeheap")) break;
+      if (!send_homie("", "stats/uptime",   true, "%u",    mem.elapse_time_since_startup / 1000u)) break;
+      if (!send_homie("", "stats/battery",  true, "%d",    MIN(100, MAX((int)(20.0 * (battery_voltage() - 2.7)), 0)))) break;
+      if (!send_homie("", "stats/supply",   true, "%4.2f", battery_voltage())) break;
+      if (!send_homie("", "stats/signal",   true, "%d",    MIN(100, MAX(2 * (WiFi.RSSI() + 100)), 0))) break;
+      if (!send_homie("", "stats/freeheap", true, "%u",    ESP.getFreeHeap())) break;
+      OK_DO;
+    }
+    return result;
   }
 
-  send_msg(
-    MAISON_STATUS_TOPIC,
-    F("{"
-       "\"device\":\"%s\""
-      ",\"msg_type\":\"STATE\""
-      ",\"ip\":\"%s\""
-      ",\"mac\":\"%s\""
-      ",\"state\":%u"
-      ",\"return_state\":%u"
-      ",\"hours\":%u"
-      ",\"millis\":%u"
-      ",\"lost\":%u"
-      ",\"rssi\":%ld"
-      ",\"heap\":%u"
-      ",\"app_name\":\"" APP_NAME "\""
-      ",\"app_version\":\"" APP_VERSION "\""
-      "%s"
-    "}"),
-    config.device_name,
-    ip,
-    mac,
-    mem.state,
-    mem.return_state,
-    mem.hours_24_count,
-    mem.one_hour_step_count,
-    mem.lost_count,
-    wifi_connected() ? WiFi.RSSI() : 0,
-    ESP.getFreeHeap(),
-    vbat);
+  bool Maison::send_homie_state(HomitState state)
+  {
+    char * state;
+    switch (state) {
+      case READY:        state = "ready";        break;
+      case SLEEPING:     state = "sleeping";     break;
+      case INIT:         state = "init";         break;
+      case ALERT:        state = "alert";        break;
+      case DISCONNECTED: state = "disconnected"; break;
+    }
+    return send_homie("", "state", true, "%s", state);
+  }
+#else
+  void Maison::send_state()
+  {
+    static char vbat[15];
+    static char   ip[20];
+    static char  mac[20];
+    byte ma[6];
+
+    ip2str(WiFi.localIP(), ip, sizeof(ip));
+    WiFi.macAddress(ma);
+    mac2str(ma, mac, sizeof(mac));
+
+    if (show_voltage()) {
+      snprintf(vbat, 14, ",\"VBAT\":%4.2f", battery_voltage());
+    }
+    else {
+      vbat[0] = 0;
+    }
+
+    send_msg(
+      MAISON_STATUS_TOPIC,
+      F("{"
+         "\"device\":\"%s\""
+        ",\"msg_type\":\"STATE\""
+        ",\"ip\":\"%s\""
+        ",\"mac\":\"%s\""
+        ",\"state\":%u"
+        ",\"return_state\":%u"
+        ",\"hours\":%u"
+        ",\"millis\":%u"
+        ",\"lost\":%u"
+        ",\"rssi\":%ld"
+        ",\"heap\":%u"
+        ",\"app_name\":\"" APP_NAME "\""
+        ",\"app_version\":\"" APP_VERSION "\""
+        "%s"
+      "}"),
+      config.device_name,
+      ip,
+      mac,
+      mem.state,
+      mem.return_state,
+      mem.hours_24_count,
+      mem.one_hour_step_count,
+      mem.lost_count,
+      wifi_connected() ? WiFi.RSSI() : 0,
+      ESP.getFreeHeap(),
+      vbat);
+  }
 }
 
 void Maison::get_new_config()
@@ -210,7 +268,7 @@ void Maison::get_new_config()
     size_t length;
     bool running;
     bool completed;
-    StreamString error; 
+    StreamString error;
 
   public:
     bool begin(size_t _size, const char * _md5 = NULL) {
@@ -251,16 +309,16 @@ void Maison::get_new_config()
     bool isCompleted() { return completed;         }
     bool   isRunning() { return running;           }
     int     getError() { return Update.getError(); }
-    
+
     StreamString & getErrorStr() {
-      error.flush(); 
+      error.flush();
       Update.printError(error);
       error.trim();
-      return error; 
+      return error;
     }
 
-    void   showError() {  
-      DEBUGLN(getErrorStr()); 
+    void   showError() {
+      DEBUGLN(getErrorStr());
     }
   } cons;
 
@@ -292,7 +350,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
 
         if (size && name && md5) {
           DEBUG(F(" Receive size: ")); DEBUGLN(size);
-          
+
           char tmp[33];
 
           if (strcmp(APP_NAME, name) == 0) {
@@ -304,8 +362,8 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
               wait_for_completion = true;
             }
             else {
-              log(F("Error: Code upload not started: %s"), 
-                  cons.getErrorStr().c_str());            
+              log(F("Error: Code upload not started: %s"),
+                  cons.getErrorStr().c_str());
             }
           }
           else {
@@ -328,12 +386,12 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         }
         else {
           DEBUGLN(F(" ERROR: Upload not complete!"));
-          log(F("Error: Code upload not completed: %s"), 
+          log(F("Error: Code upload not completed: %s"),
               cons.getErrorStr().c_str());
         }
         wait_for_completion = false;
       }
-      else 
+      else
     #endif
 
     if (strncmp(buffer, "CONFIG:", 7) == 0) {
@@ -346,11 +404,13 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
 
       send_config_msg();
     }
-    else if (strncmp(buffer, "STATE?", 6) == 0) {
-      DEBUGLN(F(" Config content requested"));
+    #if !HOMIE
+      else if (strncmp(buffer, "STATE?", 6) == 0) {
+        DEBUGLN(F(" Config content requested"));
 
-      send_state_msg();
-    }
+        send_state();
+      }
+    #endif
     else if (strncmp(buffer, "RESTART!", 8) == 0) {
       DEBUGLN("Device is restarting");
       restart_now = true;
@@ -381,7 +441,7 @@ void Maison::loop(Process * _process)
 
   yield();
 
-  if (network_is_available()) {
+  if (network_is_required()) {
 
     if (first_connect_trial) {
       first_connect_trial    = false;
@@ -419,9 +479,12 @@ void Maison::loop(Process * _process)
     counting_lost_connection = true;
 
     DEBUGLN(F("MQTT Connected."));
+    #if HOMIE
+      send_homie_state(is_hard_reset() ? INIT : READY);
+    #endif
 
     // Consume all pending messages. For OTA updates, as the request
-    // is composed of 2 messages, 
+    // is composed of 2 messages,
     // it may require many calls to mqtt_loop to get it completed. The
     // wait_for_completion flag is set by the callback to signify the need
     // to wait until the complete new code has been received. The algorithm
@@ -433,7 +496,7 @@ void Maison::loop(Process * _process)
       some_message_received = false;
       yield();
       mqtt_loop();
-    } while (some_message_received || 
+    } while (some_message_received ||
              (wait_for_completion && ((millis() - start) < 120000)));
     if (wait_for_completion) {
       wait_for_completion = false;
@@ -450,10 +513,10 @@ void Maison::loop(Process * _process)
     is_short_reboot_time_needed() ? DEFAULT_SHORT_REBOOT_TIME : ONE_HOUR);
 
   if (use_deep_sleep()) {
-    mem.elapse_time += micros();
+    mem.last_loop_elapse_time += micros();
   }
   else {
-    mem.elapse_time  = micros() - loop_time_marker;
+    mem.last_loop_elapse_time  = micros() - loop_time_marker;
   }
   loop_time_marker = micros();
 
@@ -465,28 +528,34 @@ void Maison::loop(Process * _process)
 
   switch (mem.state) {
     case STARTUP:
-      if (show_voltage()) {
-        snprintf(vbat, 14, ",\"VBAT\":%4.2f", battery_voltage());
-      }
-      else {
-        vbat[0] = 0;
-      }
+      #if HOMIE
+        if (!send_startup_state() || !send_homie_state(READY)) {
+          ERROR("Unable to send startup messages");
+        }
+      #else
+        if (show_voltage()) {
+          snprintf(vbat, 14, ",\"VBAT\":%4.2f", battery_voltage());
+        }
+        else {
+          vbat[0] = 0;
+        }
 
-      if (!send_msg(MAISON_STATUS_TOPIC,
-                    F("{"
-                       "\"device\":\"%s\""
-                      ",\"msg_type\":\"%s\""
-                      ",\"reason\":%d"
-                      ",\"app_name\":\"" APP_NAME "\""
-                      ",\"app_version\":\"" APP_VERSION "\""
-                      "%s"
-                    "}"),
-                    config.device_name,
-                    "STARTUP",
-                    reset_reason(),
-                    vbat)) {
-        ERROR("Unable to send startup message");
-      }
+        if (!send_msg(MAISON_STATUS_TOPIC,
+                      F("{"
+                         "\"device\":\"%s\""
+                        ",\"msg_type\":\"%s\""
+                        ",\"reason\":%d"
+                        ",\"app_name\":\"" APP_NAME "\""
+                        ",\"app_version\":\"" APP_VERSION "\""
+                        "%s"
+                      "}"),
+                      config.device_name,
+                      "STARTUP",
+                      reset_reason(),
+                      vbat)) {
+          ERROR("Unable to send startup message");
+        }
+      #endif
 
       if (res != NOT_COMPLETED) {
         new_state        = WAIT_FOR_EVENT;
@@ -541,26 +610,32 @@ void Maison::loop(Process * _process)
       delay(100);
       if (mqtt_connected()) mqtt_loop(); // Second chance to process received msgs
       if (watchdog_enabled()) {
-        if (show_voltage()) {
-          snprintf(vbat, 14, ",\"VBAT\":%4.2f", battery_voltage());
-        }
-        else {
-          vbat[0] = 0;
-        }
+        #if HOMIE
+          if (!send_dynamic_state()) {
+            ERROR("Unable to send watchdog state");
+          }
+        #else
+          if (show_voltage()) {
+            snprintf(vbat, 14, ",\"VBAT\":%4.2f", battery_voltage());
+          }
+          else {
+            vbat[0] = 0;
+          }
 
-        if (!send_msg(MAISON_STATUS_TOPIC,
-                      F("{"
-                         "\"device\":\"%s\""
-                        ",\"msg_type\":\"%s\""
-                        ",\"app_name\":\"" APP_NAME "\""
-                        ",\"app_version\":\"" APP_VERSION "\""
-                        "%s"
-                      "}"),
-                      config.device_name,
-                      "WATCHDOG",
-                      vbat)) {
-          ERROR("Unable to send watchdog message");
-        }
+          if (!send_msg(MAISON_STATUS_TOPIC,
+                        F("{"
+                           "\"device\":\"%s\""
+                          ",\"msg_type\":\"%s\""
+                          ",\"app_name\":\"" APP_NAME "\""
+                          ",\"app_version\":\"" APP_VERSION "\""
+                          "%s"
+                        "}"),
+                        config.device_name,
+                        "WATCHDOG",
+                        vbat)) {
+            ERROR("Unable to send watchdog message");
+          }
+        #endif
       }
 
       new_state = new_return_state;
@@ -573,10 +648,14 @@ void Maison::loop(Process * _process)
   DEBUG(" Next state: "); DEBUGLN(mem.state);
 
   if (use_deep_sleep()) {
-    deep_sleep(network_is_available(), deep_sleep_wait_time);
+    #if HOMIE
+      if (mqtt_connected()) send_homie_state(SLEEPING);
+    #endif
+    deep_sleep(network_is_required(), deep_sleep_wait_time);
   }
   else {
     mem.one_hour_step_count += millis() - last_time_count;
+    mem.mem.elapse_time_since_startup += millis() - last_time_count;;
     last_time_count = millis();
   }
 
@@ -751,7 +830,7 @@ bool Maison::save_config()
 
 char * Maison::mac_to_str(uint8_t * _mac, char * _buff)
 {
-  const char * hex = "0123456789ABCDEF";
+  const char * hex = "0123456789abcdef";
   char * ptr = _buff;
   for (int i = 0; i < 6; i++) {
     *ptr++ = hex[_mac[i] >> 4];
@@ -814,7 +893,7 @@ bool Maison::wifi_connect()
   }
 
   result = wifi_connected();
-  
+
   SHOW_RESULT("wifi_connect()");
 
   return result;
@@ -855,7 +934,7 @@ bool Maison::init_callbacks()
         DEBUGLN(user_topic);
       }
     }
-    
+
     OK_DO;
   }
 
@@ -952,6 +1031,60 @@ bool Maison::send_msg(const char * _topic, const __FlashStringHelper * _format, 
   return result;
 }
 
+#if HOMIE
+  bool Maison::send_homie(
+    const char * _node,
+    const char * _attribute,
+          bool   _retain,
+    const __FlashStringHelper * _format,
+    ...)
+  {
+    SHOW("send_homie()");
+
+    uint8_t mac[6];
+    char buff[120];
+
+    WiFi.macAddress(mac);
+
+    strcpy(buff, HOMIE_PREFIX);
+    strcat(buff, "/");
+    mac_to_str(mac, &buff[strlen(buff)]);
+    if (_node[0]) {
+      strcat(buff, "/");
+      strcat(buff, _node);
+    }
+    strcat(buff, "/$");
+    strcat(buff, _attribute);
+
+    va_list args;
+    va_start (args, _format);
+
+    int len = strlen(buff);
+
+    vsnprintf_P(buffer, MQTT_MAX_PACKET_SIZE, (const char *) _format, args);
+
+    DO {
+      DEBUG(F(" Sending msg to "));
+      DEBUG(buff);
+      DEBUG(F(": "));
+      DEBUGLN(buffer);
+
+      if (!mqtt_connected()) {
+        ERROR("Unable to connect to mqtt server");
+      }
+      else if (!mqtt_client.publish(buff, buffer, _retain)) {
+        ERROR("Unable to publish message");
+      }
+
+      OK_DO;
+    }
+
+    SHOW_RESULT("send_homie()");
+
+    return result;
+  }
+#endif
+
 bool Maison::log(const __FlashStringHelper * _format, ...)
 {
   SHOW("log()");
@@ -998,9 +1131,9 @@ void Maison::deep_sleep(bool _back_with_wifi, uint16_t _sleep_time_in_sec)
 
   uint32_t sleep_time = 1e6 * _sleep_time_in_sec;
 
-  mem.one_hour_step_count += millis() + (1000u * _sleep_time_in_sec);
-  mem.elapse_time = micros() - loop_time_marker + sleep_time;
-
+  mem.one_hour_step_count       += millis() + (1000u * _sleep_time_in_sec);
+  mem.elapse_time_since_startup += millis() + (1000u * _sleep_time_in_sec);
+  mem.last_loop_elapse_time = micros() - loop_time_marker + sleep_time;
   save_mems();
 
   ESP.deepSleep(
@@ -1225,6 +1358,9 @@ void Maison::reboot()
 {
   if (mqtt_connected()) {
     log(F("Info: Restart requested."));
+    #if HOMIE
+      send_homie_state(DISCONNECTED);
+    #endif
   }
   wifi_flush();
   ESP.restart();

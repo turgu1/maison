@@ -22,6 +22,18 @@
   #define MQTT_OTA 0
 #endif
 
+#ifndef HOMIE
+  #define HOMIE 1
+#endif
+
+#if HOMIE
+  #define HOMIE_VERSION        "3.0.1"
+  #define HOMIE_IMPLEMENTATION "esp8266"
+  #ifndef HOMIE_PREFIX
+    #define HOMIE_PREFIX       "homie"
+  #endif
+#endif
+
 // Insure that MQTT Packet size is big enough for the needs of the framework
 // This is an option of the PubSubClient library that can be set through platformio.ini
 
@@ -255,6 +267,16 @@ class Maison
       RETRY          ///< From WAIT_END_EVENT, go back to PROCESS_EVENT
     };
 
+    #if HOMIE
+      enum HomieState : uint8_t {
+        READY = 1,
+        SLEEPING,
+        INIT,
+        ALERT,
+        DISCONNECTED
+      };
+    #endif
+
     /// Application defined process function. To be supplied as a parameter
     /// to the Maison::loop() function.
     /// @param[in] _state The current state of the Finite State Machine.
@@ -277,9 +299,10 @@ class Maison
 
     /// The Maison setup function. Normally to be called inside the application setup()
     /// function.
+    /// @param[in] _node_list A string containing the node names separated with commas.
     /// @return True if setup completed successfully.
 
-    bool setup();
+    bool setup(const char * _node_list);
 
     /// Send a MQTT message using printf like construction syntax.
     ///
@@ -289,6 +312,19 @@ class Maison
     /// @return True if the message was sent successfully
 
     bool send_msg(const char * _topic, const __FlashStringHelper * _format, ...);
+
+    #if HOMIE
+      /// Send a MQTT HOMIE compliant message using printf like construction syntax.
+      ///
+      /// @param[in] _node The node name
+      /// @param[in] _attribute The attribute name
+      /// @param[in] _retain True if the message must be retained
+      /// @param[in] _format The format string, as for printf
+      /// @param[in] ... The arguments required by the format string
+      /// @return True if the message was sent successfully
+
+      bool send_homie(const char * _node, const char * _attribute, bool _retain, const __FlashStringHelper * _format, ...);
+    #endif
 
     /// Send a MQTT log msg using printf like construction syntax.
     ///
@@ -368,21 +404,21 @@ class Maison
       deep_sleep_wait_time = (_seconds > 4294) ? 4294 : _seconds;
     }
 
-    /// Checks if networking is currently available. Always true if *DEEP_SLEEP*
+    /// Checks if networking is currently required. Always true if *DEEP_SLEEP*
     /// is not set in the features.
     ///
     /// @return True if the network is enabled.
 
-    inline bool network_is_available() {
+    inline bool network_is_required() {
       return (!use_deep_sleep()) ||
              ((mem.state & (STARTUP|PROCESS_EVENT|END_EVENT|HOURS_24)) != 0);
     }
 
-    /// Get elapsed time since the last call to user process in the preceding loop call.
+    /// Get elapsed time since the last call to user process in the preceeding loop call.
     /// @return Elapsed time in microseconds.
 
     inline long last_loop_duration() {
-      return mem.elapse_time;
+      return mem.last_loop_elapse_time;
     }
 
     /// Returns a complete device related topic name, built using the default prefix and
@@ -459,10 +495,11 @@ class Maison
       uint32_t csum;
       State    state;
       State    return_state;
-      uint16_t hours_24_count;      // Up to 24 hours
-      uint16_t lost_count;          // How many MQTT lost connections since reset
-      uint32_t one_hour_step_count; // Up to 3600 seconds in milliseconds
-      uint32_t elapse_time;
+      uint16_t hours_24_count;            // Up to 24 hours
+      uint16_t lost_count;                // How many MQTT lost connections since reset
+      uint32_t one_hour_step_count;       // Up to 3600 seconds in milliseconds
+      uint32_t last_loop_elapse_time;     // Time elapsed since last call to user process
+      uint64_t elapse_time_since_startup; // Time elapsed since startup in milliseconds
       uint32_t magic;
     } mem;
 
@@ -474,6 +511,7 @@ class Maison
     bool         first_connect_trial;
     Callback   * user_callback;
     const char * user_sub_topic;
+    const char * node_list;     // Node list implemented by client app
     uint8_t      user_qos;
     uint8_t      feature_mask;
     void       * user_mem;
@@ -507,6 +545,7 @@ class Maison
     inline bool     show_voltage() { return (feature_mask & VOLTAGE_CHECK) != 0;       }
     inline bool   use_deep_sleep() { return (feature_mask & DEEP_SLEEP)    != 0;       }
     inline bool watchdog_enabled() { return (feature_mask & WATCHDOG_24H ) != 0;       }
+    inline int watchdog_interval() { return ONE_HOUR * 24;                             }
 
     inline bool is_short_reboot_time_needed() {
       return (mem.state & (PROCESS_EVENT|WAIT_END_EVENT|END_EVENT|HOURS_24)) != 0;
@@ -530,7 +569,13 @@ class Maison
 
     bool     save_config();
     void send_config_msg();
-    void  send_state_msg();
+    #if HOMIE
+      bool send_startup_state();
+      bool send_dynamic_state();
+      bool send_homie_state(HomitState state);
+    #else
+      void      send_state();
+    #endif
     void  get_new_config();
 
     #if MAISON_TESTING
@@ -547,9 +592,9 @@ class Maison
     bool      read_mem(uint32_t * _data, uint16_t _length, uint16_t _addr);
     bool     write_mem(uint32_t * _data, uint16_t _length, uint16_t _addr);
 
-    char * ip2str(uint32_t, char *_str, int _length);
+    char *  ip2str(uint32_t, char *_str, int _length);
     char * mac2str(byte _mac[], char *_str, int _length);
-    bool str2ip(const char * _str, uint32_t * _ip);
+    bool    str2ip(const char * _str, uint32_t * _ip);
 
     void reboot();
 };
