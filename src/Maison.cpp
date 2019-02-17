@@ -656,7 +656,7 @@ void Maison::loop(Process * _process)
   }
   else {
     mem.one_hour_step_count += millis() - last_time_count;
-    mem.mem.elapse_time_since_startup += millis() - last_time_count;;
+    mem.elapse_time_since_startup += millis() - last_time_count;
     last_time_count = millis();
   }
 
