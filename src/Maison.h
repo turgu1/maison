@@ -572,7 +572,7 @@ class Maison
     #if HOMIE
       bool send_startup_state();
       bool send_dynamic_state();
-      bool send_homie_state(HomitState state);
+      bool send_homie_state(HomieState state);
     #else
       void      send_state();
     #endif

@@ -1053,9 +1053,10 @@ bool Maison::send_msg(const char * _topic, const __FlashStringHelper * _format, 
       strcat(buff, "/");
       strcat(buff, _node);
     }
-    strcat(buff, "/$");
-    strcat(buff, _attribute);
-
+    if (_attribute[0]) {
+      strcat(buff, "/$");
+      strcat(buff, _attribute);
+    }
     va_list args;
     va_start (args, _format);
 
