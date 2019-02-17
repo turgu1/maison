@@ -481,7 +481,7 @@ void Maison::loop(Process * _process)
 
     DEBUGLN(F("MQTT Connected."));
     #if HOMIE
-      send_homie_state(mem.state == STARTUP ? INIT : READY);
+      if (mem.state == STARTUP) send_homie_state(INIT);
     #endif
 
     // Consume all pending messages. For OTA updates, as the request
