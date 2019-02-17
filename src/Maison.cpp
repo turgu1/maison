@@ -153,9 +153,9 @@ void Maison::send_config_msg()
     DO {
       if (!send_homie("", "stats",          true, "uptime,battery,supply,signal,freeheap")) break;
       if (!send_homie("", "stats/uptime",   true, "%u",    mem.elapse_time_since_startup / 1000u)) break;
-      if (!send_homie("", "stats/battery",  true, "%d",    MIN(100, MAX((int)(20.0 * (battery_voltage() - 2.7)), 0)))) break;
+      if (!send_homie("", "stats/battery",  true, "%d",    std::min(100, std::max((int)(20.0 * (battery_voltage() - 2.7)), 0)))) break;
       if (!send_homie("", "stats/supply",   true, "%4.2f", battery_voltage())) break;
-      if (!send_homie("", "stats/signal",   true, "%d",    MIN(100, MAX(2 * (WiFi.RSSI() + 100)), 0))) break;
+      if (!send_homie("", "stats/signal",   true, "%d",    std::min(100, std::max(2 * (WiFi.RSSI() + 100)), 0))) break;
       if (!send_homie("", "stats/freeheap", true, "%u",    ESP.getFreeHeap())) break;
       OK_DO;
     }

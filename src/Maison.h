@@ -9,6 +9,7 @@
 #include <ArduinoJson.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <algorithm>
 
 #ifndef APP_NAME
   #define APP_NAME "UNKNOWN"
