@@ -162,10 +162,10 @@ void Maison::send_config_msg()
     return result;
   }
 
-  bool Maison::send_homie_state(HomieState state)
+  bool Maison::send_homie_state(HomieState _state)
   {
     char * state;
-    switch (state) {
+    switch (_state) {
       case READY:        state = "ready";        break;
       case SLEEPING:     state = "sleeping";     break;
       case INIT:         state = "init";         break;
