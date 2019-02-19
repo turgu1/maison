@@ -83,7 +83,7 @@ Maison::UserResult process(Maison::State state)
       maison.send_homie("environment",             "properties", true, F("temperature,humidity"));
       maison.send_homie("environment/temperature", "unit",       true, F("°C")                  );
       maison.send_homie("environment/temperature", "datatype",   true, F("float")               );
-      maison.send_homie("environment/humidity",    "unit",       true, F("%")                   );
+      maison.send_homie("environment/humidity",    "unit",       true, F("%s"), "%"             );
       maison.send_homie("environment/humidity",    "datatype",   true, F("float")               );
       break;
 
