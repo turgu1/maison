@@ -948,7 +948,7 @@ bool Maison::mqtt_connect()
 
 bool Maison::send_msg(const char * _topic_suffix, const __FlashStringHelper * _format, ...)
 {
-  char buff[50];
+  static char buff[50];
 
   SHOW("send_msg()");
 
@@ -959,7 +959,7 @@ bool Maison::send_msg(const char * _topic_suffix, const __FlashStringHelper * _f
 
   DO {
     DEBUG(F(" Sending msg to "));
-    DEBUG(_topic);
+    DEBUG(build_topic(_topic_suffix, buff, sizeof(buff)));
     DEBUG(F(": "));
     DEBUGLN(buffer);
 
@@ -980,7 +980,7 @@ bool Maison::send_msg(const char * _topic_suffix, const __FlashStringHelper * _f
 
 bool Maison::log(const __FlashStringHelper * _format, ...)
 {
-  char buff[50];
+  static char buff[50];
 
   SHOW("log()");
 
