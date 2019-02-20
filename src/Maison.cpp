@@ -102,10 +102,13 @@ char * Maison::build_topic(const char * _topic_suffix, char * _buffer, uint16_t 
     strcpy(_buffer, MAISON_PREFIX_TOPIC);
     strcat(_buffer, "/");
 
+    uint8_t mac[6];
+    WiFi.macAddress(mac);
+
     mac_to_str(mac, &_buffer[strlen(_buffer)]);
 
     strcat(_buffer, "/");
-    strcat(_buffer, _topic);
+    strcat(_buffer, _topic_suffix);
 
     DEBUG(F("build_topic() result: ")); DEBUGLN(_buffer);
   }
