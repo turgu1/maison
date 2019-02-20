@@ -55,31 +55,39 @@
 // This is prepended to all topics used by the framework
 
 #ifndef MAISON_PREFIX_TOPIC
-  #define MAISON_PREFIX_TOPIC "maison/" ///< Prefix for all Maison framework MQTT topics
+  #define MAISON_PREFIX_TOPIC "maison" ///< Prefix for all Maison framework MQTT topics
 #endif
 
-// This is the topic name to send status information to
+// This is the topic name suffix to send state information to
 //
-// For example: maison/status
+// For example: maison/xxx/state
 
-#ifndef MAISON_STATUS_TOPIC
-  #define MAISON_STATUS_TOPIC MAISON_PREFIX_TOPIC "status" ///< maison server status MQTT topic
+#ifndef MAISON_STATE_TOPIC
+  #define MAISON_STATE_TOPIC "state" ///< maison server state MQTT topic suffix
 #endif
 
-// This is the topic name to send control information to
+// This is the topic name suffix to send configuration to
 //
-// For example: maison/ctrl
+// For example: maison/xxxx/config
 
-#ifndef MAISON_CTRL_TOPIC
-  #define MAISON_CTRL_TOPIC   MAISON_PREFIX_TOPIC "ctrl" ///< maison server control MQTT topic
+#ifndef MAISON_CONFIG_TOPIC
+  #define MAISON_CONFIG_TOPIC "config" ///< maison server config MQTT topic suffix
 #endif
 
-// This is the topic name to send log (free text) information to
+// This is the topic name suffix to send event information to
 //
-// For example: maison/log
+// For example: maison/xxx/event
+
+#ifndef MAISON_EVENT_TOPIC
+  #define MAISON_EVENT_TOPIC "event" ///< maison server event MQTT topic suffix
+#endif
+
+// This is the topic name suffix to send log (free text) information to
+//
+// For example: maison/xxx/log
 
 #ifndef MAISON_LOG_TOPIC
-  #define MAISON_LOG_TOPIC   MAISON_PREFIX_TOPIC "log" ///< maison server log MQTT topic
+  #define MAISON_LOG_TOPIC "log" ///< maison server log MQTT topic suffix
 #endif
 
 // This is the topic name suffix where the device wait for control commands from site
@@ -87,12 +95,12 @@
 //
 // 1) MAISON_PREFIX_TOPIC
 // 2) The device name from config or MAC address if device name is empty
-// 3) CTRL_SUFFIX_TOPIC
+// 3) MAISON_CTRL_TOPIC
 //
 // For example: maison/DEV_TEST/crtl
 
-#ifndef CTRL_SUFFIX_TOPIC
-  #define CTRL_SUFFIX_TOPIC   "ctrl" ///< Suffix for device control topic
+#ifndef MAISON_CTRL_TOPIC
+  #define MAISON_CTRL_TOPIC "ctrl" ///< Suffix for device control topic
 #endif
 
 #ifndef DEFAULT_SHORT_REBOOT_TIME
@@ -288,7 +296,7 @@ class Maison
     /// @param[in] ... The arguments required by the format string
     /// @return True if the message was sent successfully
 
-    bool send_msg(const char * _topic, const __FlashStringHelper * _format, ...);
+    bool send_msg(const char * _topic_suffix, const __FlashStringHelper * _format, ...);
 
     /// Send a MQTT log msg using printf like construction syntax.
     ///
@@ -400,7 +408,7 @@ class Maison
     /// @param[in]  _length The size of the buffer.
     /// @return pointer to the beginning of the buffer.
 
-    char * my_topic(const char * _topic_suffix, char * _buffer, uint16_t _length);
+    char * build_topic(const char * _topic_suffix, char * _buffer, uint16_t _length);
 
     /// Compute a CRC-32 checksum
     ///

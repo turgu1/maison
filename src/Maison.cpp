@@ -96,6 +96,26 @@ void maison_callback(const char * _topic, byte * _payload, unsigned int _length)
   DEBUGLN(F(" End of maison_callback()"));
 }
 
+char * Maison::build_topic(char * _topic_suffix, char * _buffer, uint16_t _length)
+{
+  if (_length > (strlen(MAISON_PREFIX_TOPIC) + 12 + strlen(_topic_suffix) + 3)) {
+    strcpy(_buffer, MAISON_PREFIX_TOPIC);
+    strcat(_buffer, "/");
+
+    mac_to_str(mac, &_buffer[strlen(_buffer)]);
+
+    strcat(_buffer, "/");
+    strcat(_buffer, _topic);
+
+    DEBUG(F("build_topic() result: ")); DEBUGLN(_buffer);
+  }
+  else {
+    DEBUGLN(F("ERROR: build_topic(): Buffer too small!"));
+    _buffer[0] = 0;
+  }
+  return _buffer;
+}
+
 void Maison::send_config_msg()
 {
   File file = SPIFFS.open("/config.json", "r");
@@ -103,7 +123,8 @@ void Maison::send_config_msg()
     DEBUGLN(" ERROR: Unable to open current config file");
   }
   else {
-    mqtt_client.beginPublish(MAISON_STATUS_TOPIC,
+    char buff[50];
+    mqtt_client.beginPublish(build_topic(MAISON_CONFIG_TOPIC, buff, sizeof(buff)),
                              file.size() + strlen(config.device_name) + 44,
                              false);
     mqtt_client.write((uint8_t *) "{\"device\":\"", 11);
@@ -137,7 +158,7 @@ void Maison::send_state_msg()
   }
 
   send_msg(
-    MAISON_STATUS_TOPIC,
+    MAISON_STATE_TOPIC,
     F("{"
        "\"device\":\"%s\""
       ",\"msg_type\":\"STATE\""
@@ -272,7 +293,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
 
   some_message_received = true;
 
-  if (strcmp(_topic, my_topic(CTRL_SUFFIX_TOPIC, buffer, sizeof(buffer))) == 0) {
+  if (strcmp(_topic, build_topic(MAISON_CTRL_TOPIC, buffer, sizeof(buffer))) == 0) {
     int len;
 
     DEBUG(F(" Received MQTT Message: "));
@@ -472,7 +493,7 @@ void Maison::loop(Process * _process)
         vbat[0] = 0;
       }
 
-      if (!send_msg(MAISON_STATUS_TOPIC,
+      if (!send_msg(MAISON_STATE_TOPIC,
                     F("{"
                        "\"device\":\"%s\""
                       ",\"msg_type\":\"%s\""
@@ -548,7 +569,7 @@ void Maison::loop(Process * _process)
           vbat[0] = 0;
         }
 
-        if (!send_msg(MAISON_STATUS_TOPIC,
+        if (!send_msg(MAISON_STATE_TOPIC,
                       F("{"
                          "\"device\":\"%s\""
                         ",\"msg_type\":\"%s\""
@@ -827,7 +848,7 @@ bool Maison::init_callbacks()
   DO {
     mqtt_client.setCallback(maison_callback);
     if (!mqtt_client.subscribe(
-                 my_topic(CTRL_SUFFIX_TOPIC, topic, sizeof(topic)),
+                 build_topic(MAISON_CTRL_TOPIC, topic, sizeof(topic)),
                  use_deep_sleep() ? 1 : 0)) {
       DEBUG(F(" Hum... unable to subscribe to topic (State:"));
       DEBUG(mqtt_client.state());
@@ -841,7 +862,7 @@ bool Maison::init_callbacks()
     }
 
     if (user_sub_topic != NULL) {
-      my_topic(user_sub_topic, user_topic, sizeof(user_topic));
+      build_topic(user_sub_topic, user_topic, sizeof(user_topic));
 
       if (!mqtt_client.subscribe(user_topic, user_qos)) {
         DEBUG(F(" Hum... unable to subscribe to user topic (State:"));
@@ -922,8 +943,10 @@ bool Maison::mqtt_connect()
   return result;
 }
 
-bool Maison::send_msg(const char * _topic, const __FlashStringHelper * _format, ...)
+bool Maison::send_msg(const char * _topic_suffix, const __FlashStringHelper * _format, ...)
 {
+  char buff[50];
+
   SHOW("send_msg()");
 
   va_list args;
@@ -940,7 +963,7 @@ bool Maison::send_msg(const char * _topic, const __FlashStringHelper * _format, 
     if (!mqtt_connected()) {
       ERROR("Unable to connect to mqtt server");
     }
-    else if (!mqtt_client.publish(_topic, buffer)) {
+    else if (!mqtt_client.publish(build_topic(_topic_suffix, buff, sizeof(buff)), buffer)) {
       ERROR("Unable to publish message");
     }
 
@@ -954,6 +977,8 @@ bool Maison::send_msg(const char * _topic, const __FlashStringHelper * _format, 
 
 bool Maison::log(const __FlashStringHelper * _format, ...)
 {
+  char buff[50];
+
   SHOW("log()");
 
   va_list args;
@@ -972,7 +997,7 @@ bool Maison::log(const __FlashStringHelper * _format, ...)
     if (!mqtt_connected()) {
       ERROR("Unable to connect to mqtt server");
     }
-    else if (!mqtt_client.publish(MAISON_LOG_TOPIC, buffer)) {
+    else if (!mqtt_client.publish(build_topic(MAISON_LOG_TOPIC, buff, sizeof(buff)), buffer)) {
       ERROR("Unable to log message");
     }
 
@@ -1192,23 +1217,6 @@ uint32_t Maison::CRC32(const uint8_t * _data, size_t _length)
   DEBUGLN(crc);
 
   return crc;
-}
-
-char * Maison::my_topic(const char * _topic_suffix, char * _buffer, uint16_t _length)
-{
-  if (_length > (strlen(MAISON_PREFIX_TOPIC) + strlen(config.device_name) + strlen(_topic_suffix) + 1)) {
-    strcpy(_buffer, MAISON_PREFIX_TOPIC);
-    strcat(_buffer, config.device_name);
-    strcat(_buffer, "/");
-    strcat(_buffer, _topic_suffix);
-    DEBUG(F("my_topic() result: ")); DEBUGLN(_buffer);
-  }
-  else {
-    DEBUGLN(F("ERROR: my_topic(): Buffer too small!"));
-    _buffer[0] = 0;
-  }
-
-  return _buffer;
 }
 
 void Maison::wifi_flush()

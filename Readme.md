@@ -76,17 +76,16 @@ Option              | Default   | Description
 :------------------:|:---------:|------------------------------------------------------------------------
 MAISON_TESTING      |    0      | If = 1, enable debuging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any **Maison** function.
 QUICK_TURN          |    0      | If = 1, HOURS_24 state is fired every 2 minutes instead of 24 hours. This is automatically the case when *MAISON_TESTING* is set to 1, unless QUICK_TURN is also defined in build_flags.
-MAISON_PREFIX_TOPIC | maison/   | All topics used by the framework are prefixed with this text   
-MAISON_STATUS_TOPIC | maison/status | Topic where the framework status are sent
-MAISON_CTRL_TOPIC   | maison/ctrl   | Topic where the framework event controls are sent
-MAISON_LOG_TOPIC    | maison/log    | Topic where free text log messages are sent
-CTRL_SUFFIX_TOPIC   | ctrl          | This is the topic suffix used to identify device-related control topic
+MAISON_PREFIX_TOPIC | maison | All topics used by the framework are prefixed with this text   
+MAISON_STATE_TOPIC  | state | Topic suffix where the framework state are sent
+MAISON_EVENT_TOPIC  | event | Topic suffix where the framework events are sent
+MAISON_CONFIG_TOPIC  | config | Topic suffix where the framework configuration are sent
+MAISON_LOG_TOPIC    | log | Topic suffix where free text log messages are sent
+MAISON_CTRL_TOPIC   | ctrl | This is the topic suffix used to identify device-related control topic
 DEFAULT_SHORT_REBOOT_TIME |  5  | This is the default reboot time in seconds when deep sleep is enable. This is used at the end of the following states: *PROCESS_EVENT*, *WAIT_END_EVENT*, *END_EVENT*. For the other states, the wait time is 60 minutes (3600 seconds).
 MQTT_OTA            | 0 | Allow for Over the Air (OTA) code update through MQTT see section MQTT OTA for further details.
 APP_NAME | UNKNOWN | Application name. Required for MQTT OTA as a mean to check the new binary to be compatible with the current.
 APP_VERSION | 1.0.0 | Application version number.
-
-Note that for *MAISON_STATUS_TOPIC* and *MAISON_CTRL_TOPIC*, they will be modified automatically if *MAISON_PREFIX_TOPIC* is changed. For example, if you change *MAISON_PREFIX_TOPIC* to be `home/`, *MAISON_STATUS_TOPIC* will become `home/status` and *MAISON_CTRL_TOPIC* will become `maison/ctrl`.
 
 The framework will subscribe to MQTT messages coming from the server on a topic built using *MAISON_PREFIX_TOPIC*, the device name and *CTRL_SUFFIX_TOPIC*. For example, if the device name is "WATER_SPILL", the subscribed topic would be `maison/WATER_SPILL/ctrl`.
 
