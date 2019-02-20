@@ -96,7 +96,7 @@ void maison_callback(const char * _topic, byte * _payload, unsigned int _length)
   DEBUGLN(F(" End of maison_callback()"));
 }
 
-char * Maison::build_topic(char * _topic_suffix, char * _buffer, uint16_t _length)
+char * Maison::build_topic(const char * _topic_suffix, char * _buffer, uint16_t _length)
 {
   if (_length > (strlen(MAISON_PREFIX_TOPIC) + 12 + strlen(_topic_suffix) + 3)) {
     strcpy(_buffer, MAISON_PREFIX_TOPIC);
