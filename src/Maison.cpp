@@ -323,7 +323,8 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
             if (cons.begin(size, md5)) {
               mqtt_client.setStream(cons);
               // log uses buffer too...
-              strncpy(tmp, md5, 32);
+              memcpy(tmp, md5, 32);
+              tmp[32] = 0;
               log(F("Code update started with size %d and md5: %s."), size, tmp);
               wait_for_completion = true;
             }
@@ -335,6 +336,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
           else {
             // log uses buffer too...
             strncpy(tmp, name, 32);
+            tmp[32] = 0;
             log(F("Error: Code upload aborted. App name differ (%s vs %s)"), APP_NAME, tmp);
           }
         }
@@ -852,7 +854,7 @@ bool Maison::init_callbacks()
     mqtt_client.setCallback(maison_callback);
     if (!mqtt_client.subscribe(
                  build_topic(MAISON_CTRL_TOPIC, topic, sizeof(topic)),
-                 use_deep_sleep() ? 1 : 0)) {
+                 1)) {
       DEBUG(F(" Hum... unable to subscribe to topic (State:"));
       DEBUG(mqtt_client.state());
       DEBUG(F("): "));

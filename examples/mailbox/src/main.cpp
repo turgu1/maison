@@ -1,7 +1,7 @@
 // DOOR SENSOR
 //
 // A very simple example of using the Maison framework to
-// check if a door is open through a reed switch, using an ESP-12E 
+// check if a mailbox door is open through a reed switch, using an ESP-12E/F 
 // processor board with DeepSleep.
 //
 // If the door stay open for more than 5 minutes, an "OPEN"
@@ -46,7 +46,7 @@ ADC_MODE(ADC_VCC);
   #define WAIT_TIME 300 // In seconds
 #endif
 
-#define MAX_XMIT_COUNT 5
+#define MAX_XMIT_COUNT 2
 
 struct mem_info
 {
@@ -71,7 +71,7 @@ Maison::UserResult process(Maison::State state)
       PRINTLN(F("==> WAIT_FOR_EVENT <=="));
       if (reed_state == HIGH) {
         PRINTLN(F("==> AN EVENT HAS BEEN DETECTED <=="));
-        maison.set_deep_sleep_wait_time(WAIT_TIME);
+        maison.set_deep_sleep_wait_time(1);
         return Maison::NEW_EVENT;
       }
       break;
@@ -91,6 +91,13 @@ Maison::UserResult process(Maison::State state)
         }
         else {
           PRINTLN(F("==> EVENT ABORTED: NOT LONG ENOUGH <=="));
+          maison.send_msg(
+              MAISON_EVENT_TOPIC,
+              F("{\"device\":\"%s\""
+                ",\"msg_type\":\"EVENT_DATA\""
+                ",\"content\":\"%s\"}"),
+              maison.get_device_name(),
+              "CHIRP");
         }
         maison.set_deep_sleep_wait_time(1);
         return Maison::ABORTED;
