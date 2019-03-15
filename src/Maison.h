@@ -6,6 +6,7 @@
 #include <FS.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+#include <WiFiClientSecure.h>
 #include <ArduinoJson.h>
 #include <stdio.h>
 #include <stdarg.h>
