@@ -4,7 +4,6 @@
 static Maison * maison;
 
 Maison::Maison() :
-  wifi_client(NULL),
   last_reconnect_attempt(0),
   connect_retry_count(0),
   first_connect_trial(true),
@@ -24,7 +23,6 @@ Maison::Maison() :
 }
 
 Maison::Maison(uint8_t _feature_mask) :
-  wifi_client(NULL),
   last_reconnect_attempt(0),
   connect_retry_count(0),
   first_connect_trial(true),
@@ -44,7 +42,6 @@ Maison::Maison(uint8_t _feature_mask) :
 }
 
 Maison::Maison(uint8_t _feature_mask, void * _user_mem, uint16_t _user_mem_length) :
-  wifi_client(NULL),
   last_reconnect_attempt(0),
   connect_retry_count(0),
   first_connect_trial(true),
@@ -901,16 +898,16 @@ bool Maison::mqtt_connect()
 
     if (!mqtt_connected()) {
 
-      if (wifi_client != NULL) {
-        delete wifi_client;
-        wifi_client = NULL;
-      }
+      // if (wifi_client != NULL) {
+      //   delete wifi_client;
+      //   wifi_client = NULL;
+      // }
 
-      wifi_client = new BearSSL::WiFiClientSecure;
+      // wifi_client = new BearSSL::WiFiClientSecure;
 
       //wifi_client->setInsecure();
-      wifi_client->setFingerprint(config.mqtt_fingerprint);
-      mqtt_client.setClient(*wifi_client);
+      wifi_client.setFingerprint(config.mqtt_fingerprint);
+      mqtt_client.setClient(wifi_client);
       mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
 
        strcpy(tmp_buff, "client-");
@@ -931,12 +928,12 @@ bool Maison::mqtt_connect()
         DEBUG(F(" Unable to connect to mqtt. State: "));
         DEBUGLN(mqtt_client.state());
         DEBUG(F(" Last SSL Error: "));
-        DEBUGLN(wifi_client->getLastSSLError());
+        DEBUGLN(wifi_client.getLastSSLError());
 
         if (++connect_retry_count >= 5) {
           DEBUGLN(F(" Too many trials, reconnecting WiFi..."));
           mqtt_client.disconnect();
-          wifi_client->stop();
+          wifi_client.stop();
           WiFi.disconnect();
           connect_retry_count = 0;
         }
@@ -1233,12 +1230,10 @@ uint32_t Maison::CRC32(const uint8_t * _data, size_t _length)
 
 void Maison::wifi_flush()
 {
-  if (wifi_client != NULL) {
-    wifi_client->flush();
-    wifi_client->stop();
-    while (wifi_client->connected()) delay(10);
-    delay(10);
-  }
+  wifi_client.flush();
+  wifi_client.stop();
+  while (wifi_client.connected()) delay(10);
+  delay(10);
 }
 
 void Maison::reboot()

@@ -475,7 +475,7 @@ class Maison
     } mem;
 
     PubSubClient                mqtt_client;
-    BearSSL::WiFiClientSecure * wifi_client;
+    BearSSL::WiFiClientSecure   wifi_client;
 
     long         last_reconnect_attempt;
     int          connect_retry_count;
