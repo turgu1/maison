@@ -908,8 +908,8 @@ bool Maison::mqtt_connect()
 
       wifi_client = new BearSSL::WiFiClientSecure;
 
-      wifi_client->setInsecure();
-      //wifi_client->setFingerprint(config.mqtt_fingerprint);
+      //wifi_client->setInsecure();
+      wifi_client->setFingerprint(config.mqtt_fingerprint);
       mqtt_client.setClient(*wifi_client);
       mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
 
