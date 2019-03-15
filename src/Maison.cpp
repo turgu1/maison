@@ -912,7 +912,7 @@ bool Maison::mqtt_connect()
 
       static char client_name[30];
       strcpy(client_name, "client-");
-      strcat(client_name, config.device_name, 20);
+      strncat(client_name, config.device_name, 20);
 
       DEBUG(F("Client name: ")); DEBUGLN(client_name);
 
@@ -929,7 +929,7 @@ bool Maison::mqtt_connect()
         DEBUGLN(mqtt_client.state());
         DEBUG(F(" Last SSL Error: "));
         DEBUGLN(wifi_client->getLastSSLError());
-        
+
         if (++connect_retry_count >= 5) {
           DEBUGLN(F(" Too many trials, reconnecting WiFi..."));
           mqtt_client.disconnect();
