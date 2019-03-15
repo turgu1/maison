@@ -907,6 +907,14 @@ bool Maison::mqtt_connect()
 
       //wifi_client->setInsecure();
       wifi_client->setFingerprint(config.mqtt_fingerprint);
+
+      if (wifi_client->connect(config.mqtt_server, config.mqtt_port)) {
+        DEBUGLN(F("Successfull Secure WiFi Connecion!"));
+      }
+      else {
+        DEBUGLN(F("Unable to connect with a Secure WiFi Connecion."));
+      }
+
       mqtt_client.setClient(*wifi_client);
       mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
 
