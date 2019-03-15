@@ -914,7 +914,9 @@ bool Maison::mqtt_connect()
       strcpy(client_name, "client-");
       strncat(client_name, config.device_name, 20);
 
-      DEBUG(F("Client name: ")); DEBUGLN(client_name);
+      DEBUG(F("Client name: ")); DEBUGLN(client_name         );
+      DEBUG(F("Username: "   )); DEBUGLN(config.mqtt_username);
+      DEBUG(F("Password: "   )); DEBUGLN(config.mqtt_password);
 
       mqtt_client.connect(client_name,
                           config.mqtt_username,
