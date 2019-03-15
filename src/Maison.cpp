@@ -918,9 +918,12 @@ bool Maison::mqtt_connect()
 
       mqtt_client.connect(tmp_buff,
                           config.mqtt_username,
-                          config.mqtt_password,
-                          NULL, 0, 0, NULL,    // Will message not used
-                          !use_deep_sleep());  // Permanent session if deep sleep
+                          config.mqtt_password);
+      // mqtt_client.connect(tmp_buff,
+      //                     config.mqtt_username,
+      //                     config.mqtt_password,
+      //                     NULL, 0, 0, NULL,    // Will message not used
+      //                     !use_deep_sleep());  // Permanent session if deep sleep
       if (mqtt_connected()) {
         if (!init_callbacks()) break;
       }
