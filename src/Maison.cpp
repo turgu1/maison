@@ -890,6 +890,8 @@ bool Maison::init_callbacks()
   return result;
 }
 
+static char tmp_buff[50]; // Shared by mqtt_connect(), send_msg() and log()
+
 bool Maison::mqtt_connect()
 {
   SHOW("mqtt_connect()");
@@ -910,15 +912,13 @@ bool Maison::mqtt_connect()
       mqtt_client.setClient(*wifi_client);
       mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
 
-      static char client_name[30];
-      strcpy(client_name, "client-");
-      strncat(client_name, config.device_name, 20);
+       strcpy(tmp_buff, "client-");
+      strncat(tmp_buff, config.device_name, 40);
 
-      DEBUG(F("Client name: ")); DEBUGLN(client_name         );
+      DEBUG(F("Client name: ")); DEBUGLN(tmp_buff            );
       DEBUG(F("Username: "   )); DEBUGLN(config.mqtt_username);
-      DEBUG(F("Password: "   )); DEBUGLN(config.mqtt_password);
 
-      mqtt_client.connect(client_name,
+      mqtt_client.connect(tmp_buff,
                           config.mqtt_username,
                           config.mqtt_password,
                           NULL, 0, 0, NULL,    // Will message not used
@@ -954,8 +954,6 @@ bool Maison::mqtt_connect()
 
 bool Maison::send_msg(const char * _topic_suffix, const __FlashStringHelper * _format, ...)
 {
-  static char buff[50];
-
   SHOW("send_msg()");
 
   va_list args;
@@ -965,14 +963,17 @@ bool Maison::send_msg(const char * _topic_suffix, const __FlashStringHelper * _f
 
   DO {
     DEBUG(F(" Sending msg to "));
-    DEBUG(build_topic(_topic_suffix, buff, sizeof(buff)));
+    DEBUG(build_topic(_topic_suffix, tmp_buff, sizeof(tmp_buff)));
     DEBUG(F(": "));
     DEBUGLN(buffer);
 
     if (!mqtt_connected()) {
       ERROR("Unable to connect to mqtt server");
     }
-    else if (!mqtt_client.publish(build_topic(_topic_suffix, buff, sizeof(buff)), buffer)) {
+    else if (!mqtt_client.publish(build_topic(_topic_suffix, 
+                                              tmp_buff, 
+                                              sizeof(tmp_buff)), 
+                                  buffer)) {
       ERROR("Unable to publish message");
     }
 
@@ -986,8 +987,6 @@ bool Maison::send_msg(const char * _topic_suffix, const __FlashStringHelper * _f
 
 bool Maison::log(const __FlashStringHelper * _format, ...)
 {
-  static char buff[50];
-
   SHOW("log()");
 
   va_list args;
@@ -1006,7 +1005,10 @@ bool Maison::log(const __FlashStringHelper * _format, ...)
     if (!mqtt_connected()) {
       ERROR("Unable to connect to mqtt server");
     }
-    else if (!mqtt_client.publish(build_topic(MAISON_LOG_TOPIC, buff, sizeof(buff)), buffer)) {
+    else if (!mqtt_client.publish(build_topic(MAISON_LOG_TOPIC, 
+                                              tmp_buff, 
+                                              sizeof(tmp_buff)), 
+                                  buffer)) {
       ERROR("Unable to log message");
     }
 
