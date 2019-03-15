@@ -1,15 +1,17 @@
-// DOOR SENSOR
+// MAILBOX SENSOR
 //
 // A very simple example of using the Maison framework to
-// check if a mailbox door is open through a reed switch, using an ESP-12E/F 
-// processor board with DeepSleep.
+// check if a mailbox lid has been opened through a reed switch, 
+// using an ESP-12E/F processor board.
 //
-// If the door stay open for more than 5 minutes, an "OPEN"
-// message is sent every 5 minutes 5 times. Once the door is back in a close
-// position, a "CLOSE" message is sent.
+// A first "OPEN" message is sent after the lid has been opened.  
+// A second "OPEN" message is sent with 5 minutes interval if the lid
+// stayed opened. Once the lid is back in a close position, a "CLOSE"
+// message is sent. If the lid is opened for less than ~2 seconds a 
+// "CHIRP" message is sent.
 //
-// The framework requires the presence of a file named "/config.json" 
-// located in the device SPIFFS flash file system. To do so, please 
+// The framework requires the presence of a file named "/config.json"
+// located in the device SPIFFS flash file system. To do so, please
 //
 // 1. Update the supplied data/config.json.sample file to your
 //    network configuration parameters
@@ -18,7 +20,7 @@
 // 4. Launch the "Upload File System Image" task of the PlatformIO IDE.
 //
 // Guy Turcotte
-// 2019/01/15
+// 2019/03/14
 
 #include <Maison.h>
 

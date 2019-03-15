@@ -910,9 +910,9 @@ bool Maison::mqtt_connect()
       mqtt_client.setClient(*wifi_client);
       mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
 
-      char client_name[30];
+      static char client_name[30];
       strcpy(client_name, "client-");
-      strcat(client_name, config.device_name);
+      strcat(client_name, config.device_name, 20);
 
       DEBUG(F("Client name: ")); DEBUGLN(client_name);
 
@@ -927,7 +927,9 @@ bool Maison::mqtt_connect()
       else {
         DEBUG(F(" Unable to connect to mqtt. State: "));
         DEBUGLN(mqtt_client.state());
-
+        DEBUG(F(" Last SSL Error: "));
+        DEBUGLN(wifi_client->getLastSSLError());
+        
         if (++connect_retry_count >= 5) {
           DEBUGLN(F(" Too many trials, reconnecting WiFi..."));
           mqtt_client.disconnect();
