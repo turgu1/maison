@@ -913,6 +913,8 @@ bool Maison::mqtt_connect()
       }
       else {
         DEBUGLN(F("Unable to connect with a Secure WiFi Connecion."));
+        DEBUG(F(" Last SSL Error: "));
+        DEBUGLN(wifi_client->getLastSSLError());
       }
 
       mqtt_client.setClient(*wifi_client);
