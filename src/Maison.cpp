@@ -676,6 +676,8 @@ bool Maison::load_config(int _version)
 
   //SHOW("load_config()");
 
+  return true;
+
   if (_version == 0) {
     strcpy(filename, "/config.json");
   }
@@ -686,8 +688,6 @@ bool Maison::load_config(int _version)
   }
 
   //DEBUG(F(" Config filename: ")); DEBUGLN(filename);
-
-  return true;
   
   DO {
     if (!SPIFFS.begin())          ERROR("SPIFFS.begin() not working");
