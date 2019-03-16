@@ -700,7 +700,7 @@ bool Maison::load_config(int _version)
 
     if (!root.success()) ERROR("Unable to parse JSON content");
 
-    if (!retrieve_config(root, config)) ERROR("Unable to read config elements");
+    //if (!retrieve_config(root, config)) ERROR("Unable to read config elements");
 
     OK_DO;
   }
@@ -746,19 +746,19 @@ bool Maison::save_config()
     JsonArray & arr = root.createNestedArray("mqtt_fingerprint");
     if (!arr.success()) ERROR("Unable to create JSON array object");
 
-    //PUT  (config.version,          root["version"         ]);
-    //PUT  (config.device_name,      root["device_name"     ]);
-    //PUT  (config.wifi_ssid,        root["ssid"            ]);
-    //PUT  (config.wifi_password,    root["wifi_password"   ]);
-    //PUTIP(config.ip,               root["ip"              ]);
-    //PUTIP(config.subnet_mask,      root["subnet_mask"     ]);
-    //PUTIP(config.gateway,          root["gateway"         ]);
-    //PUTIP(config.dns,              root["dns"             ]);
-    //PUT  (config.mqtt_server,      root["mqtt_server_name"]);
-    //PUT  (config.mqtt_username,    root["mqtt_user_name"  ]);
-    //PUT  (config.mqtt_password,    root["mqtt_password"   ]);
-    //PUT  (config.mqtt_port,        root["mqtt_port"       ]);
-    //PUTA (config.mqtt_fingerprint, arr, 20);
+    PUT  (config.version,          root["version"         ]);
+    PUT  (config.device_name,      root["device_name"     ]);
+    PUT  (config.wifi_ssid,        root["ssid"            ]);
+    PUT  (config.wifi_password,    root["wifi_password"   ]);
+    PUTIP(config.ip,               root["ip"              ]);
+    PUTIP(config.subnet_mask,      root["subnet_mask"     ]);
+    PUTIP(config.gateway,          root["gateway"         ]);
+    PUTIP(config.dns,              root["dns"             ]);
+    PUT  (config.mqtt_server,      root["mqtt_server_name"]);
+    PUT  (config.mqtt_username,    root["mqtt_user_name"  ]);
+    PUT  (config.mqtt_password,    root["mqtt_password"   ]);
+    PUT  (config.mqtt_port,        root["mqtt_port"       ]);
+    PUTA (config.mqtt_fingerprint, arr, 20);
 
     if (!root.printTo(file)) ERROR("Unable to send JSON content to file /config.json");
 
