@@ -668,7 +668,7 @@ bool Maison::retrieve_config(JsonObject & _root, Config & _config)
   return result;
 }
 
-bool Maison::load_config(int _version)
+bool Maison::load_config(int _file_version)
 {
   File file;
   char the_filename[32];
@@ -676,13 +676,12 @@ bool Maison::load_config(int _version)
 
   SHOW("load_config()");
 
-  if (_version == 0) {
-    return true;
-    strlcpy(the_filename, "/config.json", 32);
+  if (_file_version == 0) {
+    strcpy(the_filename, "/config.json");
   }
   else {
     strcpy(the_filename, "/config_");
-    strcat(the_filename, itoa(_version, str, 10));
+    strcat(the_filename, itoa(_file_version, str, 10));
     strcat(the_filename, ".json");
   }
 
@@ -707,11 +706,12 @@ bool Maison::load_config(int _version)
   }
 
   file.close();
-  SHOW_RESULT("load_config()");
 
   #if MAISON_TESTING
     if (result) show_config(config);
   #endif
+
+  SHOW_RESULT("load_config()");
 
   return result;
 }
