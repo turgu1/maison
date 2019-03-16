@@ -687,12 +687,12 @@ bool Maison::load_config(int _version)
 
   DEBUG(F(" Config filename: ")); DEBUGLN(filename);
 
-  DO {
-    if (!SPIFFS.begin())          ERROR("SPIFFS.begin() not working");
-    if (!SPIFFS.exists(filename)) ERROR("Config file does not esists");
+  // DO {
+  //   if (!SPIFFS.begin())          ERROR("SPIFFS.begin() not working");
+  //   if (!SPIFFS.exists(filename)) ERROR("Config file does not esists");
 
-    file = SPIFFS.open(filename, "r");
-    if (!file) ERROR("Unable to open file");
+  //   file = SPIFFS.open(filename, "r");
+  //   if (!file) ERROR("Unable to open file");
 
     //DynamicJsonBuffer jsonBuffer;
 
@@ -702,17 +702,18 @@ bool Maison::load_config(int _version)
 
     //if (!retrieve_config(root, config)) ERROR("Unable to read config elements");
 
-    OK_DO;
-  }
+  //   OK_DO;
+  // }
 
-  file.close();
-  SHOW_RESULT("load_config()");
+  // file.close();
+  // SHOW_RESULT("load_config()");
 
-  #if MAISON_TESTING
-    if (result) show_config(config);
-  #endif
+  // #if MAISON_TESTING
+  //   if (result) show_config(config);
+  // #endif
 
-  return result;
+  // return result;
+  return true;
 }
 
 #define PUT(src, dst) dst = src
