@@ -676,14 +676,16 @@ bool Maison::load_config(int _file_version)
 
   SHOW("load_config()");
 
-  if (_file_version == 0) {
-    strcpy(the_filename, "/config.json");
-  }
-  else {
-    strcpy(the_filename, "/config_");
-    strcat(the_filename, itoa(_file_version, str, 10));
-    strcat(the_filename, ".json");
-  }
+  strcpy(the_filename, "/config.json");
+
+  // if (_file_version == 0) {
+  //   strcpy(the_filename, "/config.json");
+  // }
+  // else {
+  //   strcpy(the_filename, "/config_");
+  //   strcat(the_filename, itoa(_file_version, str, 10));
+  //   strcat(the_filename, ".json");
+  // }
 
   DEBUG(F(" Config filename: ")); DEBUGLN(the_filename);
   
