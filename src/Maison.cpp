@@ -668,6 +668,10 @@ bool Maison::retrieve_config(JsonObject & _root, Config & _config)
   return result;
 }
 
+void my_strcpy(char * dst, const char * src) {
+  while (*dst++ = *src++);
+}
+
 bool Maison::load_config(int _version)
 {
   static File file;
@@ -677,7 +681,7 @@ bool Maison::load_config(int _version)
   SHOW("load_config()");
 
   if (_version == 0) {
-    strcpy(filename, "/config.json");
+    my_strcpy(filename, "/config.json");
     return true;
   }
   else {
