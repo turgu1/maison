@@ -674,7 +674,7 @@ bool Maison::load_config(int _version)
   char filename[32];
   char str[20];
 
-  SHOW("load_config()");
+  //SHOW("load_config()");
 
   if (_version == 0) {
     strcpy(filename, "/config.json");
@@ -685,7 +685,7 @@ bool Maison::load_config(int _version)
     strcat(filename, ".json");
   }
 
-  DEBUG(F(" Config filename: ")); DEBUGLN(filename);
+  //DEBUG(F(" Config filename: ")); DEBUGLN(filename);
 
   return true;
   
