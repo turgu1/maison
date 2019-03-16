@@ -69,7 +69,7 @@ bool Maison::setup()
 
   DO {
     if (!   load_mems()) ERROR("Unable to load states");
-    if (! load_config()) ERROR("Unable to load config");
+    //if (! load_config()) ERROR("Unable to load config");
     if (is_hard_reset()) init_mem();
 
     if (network_is_available()) {
@@ -687,33 +687,32 @@ bool Maison::load_config(int _version)
 
   DEBUG(F(" Config filename: ")); DEBUGLN(filename);
 
-  // DO {
-  //   if (!SPIFFS.begin())          ERROR("SPIFFS.begin() not working");
-  //   if (!SPIFFS.exists(filename)) ERROR("Config file does not esists");
+  DO {
+    if (!SPIFFS.begin())          ERROR("SPIFFS.begin() not working");
+    if (!SPIFFS.exists(filename)) ERROR("Config file does not esists");
 
-  //   file = SPIFFS.open(filename, "r");
-  //   if (!file) ERROR("Unable to open file");
+    file = SPIFFS.open(filename, "r");
+    if (!file) ERROR("Unable to open file");
 
-    //DynamicJsonBuffer jsonBuffer;
+    DynamicJsonBuffer jsonBuffer;
 
-    //JsonObject & root = jsonBuffer.parseObject(file);
+    JsonObject & root = jsonBuffer.parseObject(file);
 
-    //if (!root.success()) ERROR("Unable to parse JSON content");
+    if (!root.success()) ERROR("Unable to parse JSON content");
 
-    //if (!retrieve_config(root, config)) ERROR("Unable to read config elements");
+    if (!retrieve_config(root, config)) ERROR("Unable to read config elements");
 
-  //   OK_DO;
-  // }
+    OK_DO;
+  }
 
-  // file.close();
-  // SHOW_RESULT("load_config()");
+  file.close();
+  SHOW_RESULT("load_config()");
 
-  // #if MAISON_TESTING
-  //   if (result) show_config(config);
-  // #endif
+  #if MAISON_TESTING
+    if (result) show_config(config);
+  #endif
 
-  // return result;
-  return true;
+  return result;
 }
 
 #define PUT(src, dst) dst = src
