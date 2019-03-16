@@ -823,8 +823,7 @@ bool Maison::wifi_connect()
                     config.gateway,
                     config.subnet_mask);
       }
-      WiFi.begin("joanie$$gt", "tatarklo1957");
-      //WiFi.begin(config.wifi_ssid, config.wifi_password);
+      WiFi.begin(config.wifi_ssid, config.wifi_password);
       delay(100);
 
       int attempt = 0;
@@ -909,15 +908,6 @@ bool Maison::mqtt_connect()
 
       wifi_client = new WiFiClientSecure;
 
-      static uint8_t fingerprint[20] = { 213, 207, 175, 246, 184, 45, 80, 117, 183, 43, 198, 151, 39, 75, 137, 77, 35, 165, 190, 169 };
-      wifi_client->setFingerprint(fingerprint);
-
-      mqtt_client.setClient(*wifi_client);
-      mqtt_client.setServer("maison", 8883);
-      mqtt_client.connect("toto", "device", "a*g&y(hshC@#Vsdg1gshs2", NULL, 0, 0, NULL, true);
-
-      //wifi_client->setInsecure();
-      #if 0
       wifi_client->setFingerprint(config.mqtt_fingerprint);
       mqtt_client.setClient(*wifi_client);
       mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
@@ -933,7 +923,6 @@ bool Maison::mqtt_connect()
                           config.mqtt_password,
                           NULL, 0, 0, NULL,    // Will message not used
                           !use_deep_sleep());  // Permanent session if deep sleep
-      #endif
 
       if (mqtt_connected()) {
         if (!init_callbacks()) break;
