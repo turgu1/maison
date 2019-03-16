@@ -69,7 +69,7 @@ bool Maison::setup()
 
   DO {
     if (!   load_mems()) ERROR("Unable to load states");
-    //if (! load_config()) ERROR("Unable to load config");
+    if (! load_config()) ERROR("Unable to load config");
     if (is_hard_reset()) init_mem();
 
     if (network_is_available()) {
@@ -676,6 +676,8 @@ bool Maison::load_config(int _version)
 
   SHOW("load_config()");
 
+  return true;
+  
   if (_version == 0) {
     strcpy(filename, "/config.json");
   }
