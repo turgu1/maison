@@ -68,9 +68,12 @@ bool Maison::setup()
   SHOW("\nMaison::setup()\n");
 
   DO {
-    if (!   load_mems()) ERROR("Unable to load states");
-    if (! load_config()) ERROR("Unable to load config");
-    if (is_hard_reset()) init_mem();
+    load_config();
+    init_mem();
+  
+    // if (!   load_mems()) ERROR("Unable to load states");
+    // if (! load_config()) ERROR("Unable to load config");
+    // if (is_hard_reset()) init_mem();
 
     if (network_is_available()) {
       if (!wifi_connect()) ERROR("WiFi");
