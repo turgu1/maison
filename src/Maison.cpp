@@ -1033,7 +1033,15 @@ void Maison::deep_sleep(bool _back_with_wifi, uint16_t _sleep_time_in_sec)
 
   uint32_t sleep_time = 1e6 * _sleep_time_in_sec;
 
-  mem.one_hour_step_count += millis() + (1000u * _sleep_time_in_sec);
+  // When _sleep_time_in_sec is 0, will sleep only for 100ms
+  if (sleep_time == 0) {
+    sleep_time = 100000;
+    mem.one_hour_step_count += millis() + 100;
+  }
+  else {
+    mem.one_hour_step_count += millis() + (1000u * _sleep_time_in_sec);
+  }
+
   mem.elapse_time = micros() - loop_time_marker + sleep_time;
 
   save_mems();

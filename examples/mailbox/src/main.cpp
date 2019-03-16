@@ -73,7 +73,7 @@ Maison::UserResult process(Maison::State state)
       PRINTLN(F("==> WAIT_FOR_EVENT <=="));
       if (reed_state == HIGH) {
         PRINTLN(F("==> AN EVENT HAS BEEN DETECTED <=="));
-        maison.set_deep_sleep_wait_time(1);
+        maison.set_deep_sleep_wait_time(0); // Quick sleep (100ms) to get back with WiFi enabled
         return Maison::NEW_EVENT;
       }
       break;
