@@ -668,35 +668,31 @@ bool Maison::retrieve_config(JsonObject & _root, Config & _config)
   return result;
 }
 
-void my_strcpy(char * dst, const char * src) {
-  while (*dst++ = *src++);
-}
-
 bool Maison::load_config(int _version)
 {
-  static File file;
-  static char filename[32];
-  static char str[20];
+  File file;
+  char the_filename[32];
+  char str[20];
 
   SHOW("load_config()");
 
   if (_version == 0) {
-    my_strcpy(filename, "/config.json");
+    strcpy(the_filename, "/config.json");
     return true;
   }
   else {
-    strcpy(filename, "/config_");
-    strcat(filename, itoa(_version, str, 10));
-    strcat(filename, ".json");
+    strcpy(the_filename, "/config_");
+    strcat(the_filename, itoa(_version, str, 10));
+    strcat(the_filename, ".json");
   }
 
-  DEBUG(F(" Config filename: ")); DEBUGLN(filename);
+  DEBUG(F(" Config filename: ")); DEBUGLN(the_filename);
   
   DO {
-    if (!SPIFFS.begin())          ERROR("SPIFFS.begin() not working");
-    if (!SPIFFS.exists(filename)) ERROR("Config file does not esists");
+    if (!SPIFFS.begin())              ERROR("SPIFFS.begin() not working");
+    if (!SPIFFS.exists(the_filename)) ERROR("Config file does not esists");
 
-    file = SPIFFS.open(filename, "r");
+    file = SPIFFS.open(the_filename, "r");
     if (!file) ERROR("Unable to open file");
 
     DynamicJsonBuffer jsonBuffer;
