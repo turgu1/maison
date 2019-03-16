@@ -671,8 +671,8 @@ bool Maison::retrieve_config(JsonObject & _root, Config & _config)
 bool Maison::load_config(int _version)
 {
   File file;
-  char the_filename[32];
   char str[20];
+  char the_filename[32];
 
   SHOW("load_config()");
 
