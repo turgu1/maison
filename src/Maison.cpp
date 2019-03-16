@@ -694,7 +694,7 @@ bool Maison::load_config(int _version)
     file = SPIFFS.open(filename, "r");
     if (!file) ERROR("Unable to open file");
 
-    DynamicJsonBuffer jsonBuffer;
+    //DynamicJsonBuffer jsonBuffer;
 
     //JsonObject & root = jsonBuffer.parseObject(file);
 
