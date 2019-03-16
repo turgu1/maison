@@ -68,7 +68,7 @@ bool Maison::setup()
   SHOW("\nMaison::setup()\n");
 
   DO {
-    //load_config();
+    load_config();
     init_mem();
   
     // if (!   load_mems()) ERROR("Unable to load states");
@@ -933,7 +933,7 @@ bool Maison::mqtt_connect()
                           NULL, 0, 0, NULL,    // Will message not used
                           !use_deep_sleep());  // Permanent session if deep sleep
       #endif
-      
+
       if (mqtt_connected()) {
         if (!init_callbacks()) break;
       }
