@@ -747,13 +747,13 @@ bool Maison::save_config()
     if (!arr.success()) ERROR("Unable to create JSON array object");
 
     //PUT  (config.version,          root["version"         ]);
-    PUT  (config.device_name,      root["device_name"     ]);
+    //PUT  (config.device_name,      root["device_name"     ]);
     //PUT  (config.wifi_ssid,        root["ssid"            ]);
     //PUT  (config.wifi_password,    root["wifi_password"   ]);
-    PUTIP(config.ip,               root["ip"              ]);
-    PUTIP(config.subnet_mask,      root["subnet_mask"     ]);
-    PUTIP(config.gateway,          root["gateway"         ]);
-    PUTIP(config.dns,              root["dns"             ]);
+    //PUTIP(config.ip,               root["ip"              ]);
+    //PUTIP(config.subnet_mask,      root["subnet_mask"     ]);
+    //PUTIP(config.gateway,          root["gateway"         ]);
+    //PUTIP(config.dns,              root["dns"             ]);
     //PUT  (config.mqtt_server,      root["mqtt_server_name"]);
     //PUT  (config.mqtt_username,    root["mqtt_user_name"  ]);
     //PUT  (config.mqtt_password,    root["mqtt_password"   ]);
