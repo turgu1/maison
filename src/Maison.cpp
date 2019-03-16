@@ -676,12 +676,9 @@ bool Maison::load_config(int _version)
 
   SHOW("load_config()");
 
-  strcpy(filename, "/config.json");
-
-  return true;
-
   if (_version == 0) {
     strcpy(filename, "/config.json");
+    return true;
   }
   else {
     strcpy(filename, "/config_");
