@@ -1096,7 +1096,7 @@ bool Maison::load_mems()
 bool Maison::save_mems()
 {
   SHOW("save_mems()");
-
+  return true;
   DO {
     if (!write_mem((uint32_t *) &mem, sizeof(mem), 0)) {
       ERROR("Unable to update Maison state in rtc memory");
@@ -1129,6 +1129,7 @@ bool Maison::init_mem()
   DEBUG("Sizeof mem_struct: ");
   DEBUGLN(sizeof(mem_struct));
 
+  return true;
   bool result = write_mem((uint32_t *) &mem, sizeof(mem), 0);
 
   SHOW_RESULT("init_mem()");
@@ -1144,6 +1145,7 @@ bool Maison::init_user_mem()
 
   memset(user_mem, 0, user_mem_length);
 
+  return true;
   bool result = write_mem((uint32_t *) user_mem, user_mem_length, sizeof(mem));
 
   SHOW_RESULT("init_user_mem()");
