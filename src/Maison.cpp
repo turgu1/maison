@@ -68,12 +68,9 @@ bool Maison::setup()
   SHOW("\nMaison::setup()\n");
 
   DO {
-    load_config();
-    init_mem();
-  
-    // if (!   load_mems()) ERROR("Unable to load states");
-    // if (! load_config()) ERROR("Unable to load config");
-    // if (is_hard_reset()) init_mem();
+    if (!   load_mems()) ERROR("Unable to load states");
+    if (! load_config()) ERROR("Unable to load config");
+    if (is_hard_reset()) init_mem();
 
     if (network_is_available()) {
       if (!wifi_connect()) ERROR("WiFi");
@@ -749,19 +746,19 @@ bool Maison::save_config()
     JsonArray & arr = root.createNestedArray("mqtt_fingerprint");
     if (!arr.success()) ERROR("Unable to create JSON array object");
 
-    PUT  (config.version,          root["version"         ]);
+    //PUT  (config.version,          root["version"         ]);
     PUT  (config.device_name,      root["device_name"     ]);
-    PUT  (config.wifi_ssid,        root["ssid"            ]);
-    PUT  (config.wifi_password,    root["wifi_password"   ]);
+    //PUT  (config.wifi_ssid,        root["ssid"            ]);
+    //PUT  (config.wifi_password,    root["wifi_password"   ]);
     PUTIP(config.ip,               root["ip"              ]);
     PUTIP(config.subnet_mask,      root["subnet_mask"     ]);
     PUTIP(config.gateway,          root["gateway"         ]);
     PUTIP(config.dns,              root["dns"             ]);
-    PUT  (config.mqtt_server,      root["mqtt_server_name"]);
-    PUT  (config.mqtt_username,    root["mqtt_user_name"  ]);
-    PUT  (config.mqtt_password,    root["mqtt_password"   ]);
-    PUT  (config.mqtt_port,        root["mqtt_port"       ]);
-    PUTA (config.mqtt_fingerprint, arr, 20);
+    //PUT  (config.mqtt_server,      root["mqtt_server_name"]);
+    //PUT  (config.mqtt_username,    root["mqtt_user_name"  ]);
+    //PUT  (config.mqtt_password,    root["mqtt_password"   ]);
+    //PUT  (config.mqtt_port,        root["mqtt_port"       ]);
+    //PUTA (config.mqtt_fingerprint, arr, 20);
 
     if (!root.printTo(file)) ERROR("Unable to send JSON content to file /config.json");
 
@@ -823,7 +820,8 @@ bool Maison::wifi_connect()
                     config.gateway,
                     config.subnet_mask);
       }
-      WiFi.begin(config.wifi_ssid, config.wifi_password);
+      WiFi.begin("joanie$$gt", "tatarklo1957");
+      //WiFi.begin(config.wifi_ssid, config.wifi_password);
       delay(100);
 
       int attempt = 0;
@@ -1109,7 +1107,7 @@ bool Maison::load_mems()
 bool Maison::save_mems()
 {
   SHOW("save_mems()");
-  return true;
+
   DO {
     if (!write_mem((uint32_t *) &mem, sizeof(mem), 0)) {
       ERROR("Unable to update Maison state in rtc memory");
@@ -1142,7 +1140,6 @@ bool Maison::init_mem()
   DEBUG("Sizeof mem_struct: ");
   DEBUGLN(sizeof(mem_struct));
 
-  return true;
   bool result = write_mem((uint32_t *) &mem, sizeof(mem), 0);
 
   SHOW_RESULT("init_mem()");
@@ -1158,7 +1155,6 @@ bool Maison::init_user_mem()
 
   memset(user_mem, 0, user_mem_length);
 
-  return true;
   bool result = write_mem((uint32_t *) user_mem, user_mem_length, sizeof(mem));
 
   SHOW_RESULT("init_user_mem()");
