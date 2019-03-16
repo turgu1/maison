@@ -99,16 +99,16 @@ void maison_callback(const char * _topic, byte * _payload, unsigned int _length)
 char * Maison::build_topic(const char * _topic_suffix, char * _buffer, uint16_t _length)
 {
   if (_length > (strlen(MAISON_PREFIX_TOPIC) + 12 + strlen(_topic_suffix) + 3)) {
-    strcpy(_buffer, MAISON_PREFIX_TOPIC);
-    strcat(_buffer, "/");
+    strlcpy(_buffer, MAISON_PREFIX_TOPIC, _length);
+    strlcat(_buffer, "/", _length);
 
     uint8_t mac[6];
     WiFi.macAddress(mac);
 
     mac_to_str(mac, &_buffer[strlen(_buffer)]);
 
-    strcat(_buffer, "/");
-    strcat(_buffer, _topic_suffix);
+    strlcat(_buffer, "/", _length);
+    strlcat(_buffer, _topic_suffix, _length);
 
     DEBUG(F("build_topic() result: ")); DEBUGLN(_buffer);
   }
@@ -335,8 +335,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
           }
           else {
             // log uses buffer too...
-            strncpy(tmp, name, 32);
-            tmp[32] = 0;
+            strlcpy(tmp, name, 32);
             log(F("Error: Code upload aborted. App name differ (%s vs %s)"), APP_NAME, tmp);
           }
         }
@@ -676,15 +675,15 @@ bool Maison::load_config(int _file_version)
 
   SHOW("load_config()");
 
-  strcpy(the_filename, "/config.json");
+  strlcpy(the_filename, "/config.json", 32);
 
   // if (_file_version == 0) {
-  //   strcpy(the_filename, "/config.json");
+  //   strlcpy(the_filename, "/config.json", 32);
   // }
   // else {
-  //   strcpy(the_filename, "/config_");
-  //   strcat(the_filename, itoa(_file_version, str, 10));
-  //   strcat(the_filename, ".json");
+  //   strlcpy(the_filename, "/config_", 32);
+  //   strlcat(the_filename, itoa(_file_version, str, 10), 32);
+  //   strlcat(the_filename, ".json", 32);
   // }
 
   DEBUG(F(" Config filename: ")); DEBUGLN(the_filename);
@@ -794,7 +793,7 @@ bool Maison::update_device_name()
     uint8_t mac[6];
     char str[20];
     WiFi.macAddress(mac);
-    strcpy(config.device_name, mac_to_str(mac, str));
+    strlcpy(config.device_name, mac_to_str(mac, str), strlen(config.device_name));
     return true;
   }
   return false;
@@ -912,11 +911,11 @@ bool Maison::mqtt_connect()
       mqtt_client.setClient(*wifi_client);
       mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
 
-       strcpy(tmp_buff, "client-");
-      strncat(tmp_buff, config.device_name, 40);
+      strlcpy(tmp_buff, "client-", 50);
+      strlcat(tmp_buff, config.device_name, 50);
 
-      DEBUG(F("Client name: ")); DEBUGLN(tmp_buff            );
-      DEBUG(F("Username: "   )); DEBUGLN(config.mqtt_username);
+      DEBUG(F(" Client name: ")); DEBUGLN(tmp_buff            );
+      DEBUG(F(" Username: "   )); DEBUGLN(config.mqtt_username);
 
       mqtt_client.connect(tmp_buff,
                           config.mqtt_username,
@@ -993,8 +992,9 @@ bool Maison::log(const __FlashStringHelper * _format, ...)
   va_list args;
   va_start (args, _format);
 
-  strcpy(buffer, get_device_name());
-  strcat(buffer, ": ");
+  strlcpy(buffer, config.device_name, strlen(config.device_name));
+  strlcat(buffer, ": ",               strlen(config.device_name) + 3);
+
   int len = strlen(buffer);
 
   vsnprintf_P(&buffer[len], MQTT_MAX_PACKET_SIZE-len, (const char *) _format, args);
