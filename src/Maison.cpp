@@ -696,9 +696,9 @@ bool Maison::load_config(int _version)
 
     DynamicJsonBuffer jsonBuffer;
 
-    JsonObject & root = jsonBuffer.parseObject(file);
+    //JsonObject & root = jsonBuffer.parseObject(file);
 
-    if (!root.success()) ERROR("Unable to parse JSON content");
+    //if (!root.success()) ERROR("Unable to parse JSON content");
 
     //if (!retrieve_config(root, config)) ERROR("Unable to read config elements");
 
