@@ -671,13 +671,13 @@ bool Maison::retrieve_config(JsonObject & _root, Config & _config)
 bool Maison::load_config(int _version)
 {
   File file;
-  char str[20];
   char the_filename[32];
+  char str[20];
 
   SHOW("load_config()");
 
   if (_version == 0) {
-    strcpy(the_filename, "/config.json");
+    strlcpy(the_filename, "/config.json", 32);
     return true;
   }
   else {
