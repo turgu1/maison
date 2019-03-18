@@ -4,7 +4,7 @@ A very simple example of using the Maison framework to
 check if a mailbox lid has been opened through a reed switch, using an ESP-12E 
 processor board.
 
-A first "OPEN" message is sent after the lid has been opened.  A second "OPEN" message is sent with 5 minutes interval if the lid stayed opened. Once the lid is back in a close position, a "CLOSE" message is sent. If the lid is opened for less than ~2 seconds a "CHIRP" message is sent.
+A first "OPEN" message is sent after the lid has been opened.  A second "STILL" message is sent with 1 minutes interval if the lid stayed opened. Once the lid is back in a close position, a "CLOSE" message is sent.
 
 The framework requires the presence of a file named "/config.json" 
 located in the device SPIFFS flash file system. To do so, please 

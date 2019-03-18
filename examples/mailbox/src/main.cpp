@@ -5,10 +5,9 @@
 // using an ESP-12E/F processor board.
 //
 // A first "OPEN" message is sent after the lid has been opened.  
-// A second "OPEN" message is sent with 5 minutes interval if the lid
+// A second "STILL" message is sent with 1 minutes interval if the lid
 // stayed opened. Once the lid is back in a close position, a "CLOSE"
-// message is sent. If the lid is opened for less than ~2 seconds a 
-// "CHIRP" message is sent.
+// message is sent. 
 //
 // The framework requires the presence of a file named "/config.json"
 // located in the device SPIFFS flash file system. To do so, please
@@ -45,7 +44,7 @@ ADC_MODE(ADC_VCC);
 #if DEBUGGING
   #define WAIT_TIME 30  // In seconds
 #else
-  #define WAIT_TIME 300 // In seconds
+  #define WAIT_TIME 60 // In seconds
 #endif
 
 #define MAX_XMIT_COUNT 2
@@ -53,8 +52,7 @@ ADC_MODE(ADC_VCC);
 struct mem_info
 {
   int32_t crc;
-  uint32_t xmit_count;
-  bool close_event_required;
+  bool first_pass;
 } my_mem;
 
 int reed_state;
@@ -74,52 +72,29 @@ Maison::UserResult process(Maison::State state)
       if (reed_state == HIGH) {
         PRINTLN(F("==> AN EVENT HAS BEEN DETECTED <=="));
         maison.set_deep_sleep_wait_time(0); // Quick sleep (100ms) to get back with WiFi enabled
+        my_mem.first_pass = true;
         return Maison::NEW_EVENT;
       }
       break;
 
     case Maison::PROCESS_EVENT:
       PRINTLN(F("==> PROCESS_EVENT <=="));
-      if (reed_state == LOW) {
-        if (my_mem.close_event_required) {
-          my_mem.close_event_required = false;
-          maison.send_msg(
-            MAISON_EVENT_TOPIC,
-            F("{\"device\":\"%s\""
-              ",\"msg_type\":\"EVENT_DATA\""
-              ",\"content\":\"%s\"}"),
-            maison.get_device_name(),
-            "CLOSE");
-        }
-        else {
-          PRINTLN(F("==> EVENT ABORTED: NOT LONG ENOUGH <=="));
-          maison.send_msg(
-              MAISON_EVENT_TOPIC,
-              F("{\"device\":\"%s\""
-                ",\"msg_type\":\"EVENT_DATA\""
-                ",\"content\":\"%s\"}"),
-              maison.get_device_name(),
-              "CHIRP");
-        }
-        maison.set_deep_sleep_wait_time(1);
-        return Maison::ABORTED;
-      }
       PRINTLN(F("==> SENDING OPEN MESSAGE <=="));
       maison.send_msg(
-        MAISON_EVENT_TOPIC,
-        F("{\"device\":\"%s\""
-          ",\"msg_type\":\"EVENT_DATA\""
-          ",\"content\":\"%s\"}"),
-        maison.get_device_name(),
-        "OPEN");
-      my_mem.close_event_required = true;
+          MAISON_EVENT_TOPIC,
+          F("{\"device\":\"%s\""
+            ",\"msg_type\":\"EVENT_DATA\""
+            ",\"content\":\"%s\"}"),
+          maison.get_device_name(),
+          my_mem.first_pass ? "OPEN" : "STILL");
       maison.set_deep_sleep_wait_time(WAIT_TIME);
       break;
 
     case Maison::WAIT_END_EVENT:
       PRINTLN(F("==> WAIT_END_EVENT <=="));
       if (reed_state == HIGH) {
-        if (++my_mem.xmit_count < MAX_XMIT_COUNT) {
+        if (my_mem.first_pass) {
+          my_mem.first_pass = false;
           maison.set_deep_sleep_wait_time(1);
           return Maison::RETRY; // Will return to PROCESS_EVENT in 1 second
         }
@@ -130,8 +105,6 @@ Maison::UserResult process(Maison::State state)
       }
       PRINTLN(F("==> END OF EVENT DETECTED <=="));
       maison.set_deep_sleep_wait_time(1);
-      my_mem.xmit_count = 0;
-      my_mem.close_event_required = false;
       break;
 
     case Maison::END_EVENT:
@@ -170,16 +143,16 @@ inline void turnOff(int pin, int val = 1)
 
 void setup() 
 {
+  pinMode(REED_SWITCH, INPUT);
+  delay(10);
+  reed_state = digitalRead(REED_SWITCH);
+
   delay(100);
 
   SERIAL_SETUP;
 
   PRINTLN(F("==> SETUP <=="));
 
-  pinMode(REED_SWITCH, INPUT);
-
-  delay(10);
-  reed_state = digitalRead(REED_SWITCH);
 
   turnOff(0);
   turnOff(2);
@@ -197,8 +170,7 @@ void setup()
 
   if (maison.is_hard_reset()) {
     PRINTLN(F("==> HARD RESET! <=="));
-    my_mem.xmit_count = 0;
-    my_mem.close_event_required = false;
+    my_mem.first_pass = false;
   }
   else {
     PRINTLN(F("==> DEEP SLEEP WAKEUP <=="));
