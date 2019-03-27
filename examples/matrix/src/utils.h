@@ -39,6 +39,7 @@ void init_display();
 void init_buzzer();
 void init_blink();
 
+void buzz_small();
 void buzz1();
 void buzz3();
 void blink(int count);

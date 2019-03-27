@@ -41,18 +41,24 @@ void matrix_callback(const char * topic, byte * payload, unsigned int length)
   
   if (length > 200) length = 199;
 
-  // To ring the buzzer, the payload must have a CTRL_G (binary 7) as the first character
+  // To ring the buzzer, the payload must have "[1]" or "[3]" as the first characters
 
   i = 0;
-  if (payload[0] == 7) {
-    buzz3();
-    i = 1;
-    length--;
+  if ((payload[0] == '[') && (payload[2] == ']')) {
+    if (payload[1] == '3') {
+      buzz3();
+    }
+    else if (payload[1] == '1')
+    {
+      buzz_small();
+    }
+    i = 3;
+    length -= 3;
   }
-
+   
   // The rest of the payload is put in the msg buffer.
   // msq_len != 0 will trigger the display on the matrix cells
-  
+
   memcpy(msg, &payload[i], length);
   msg[length] = 0;
   msg_len = length;

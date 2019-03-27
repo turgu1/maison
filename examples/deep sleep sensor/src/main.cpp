@@ -83,7 +83,7 @@ Maison::UserResult process(Maison::State state)
       PRINTLN(F("==> PROCESS_EVENT <=="));
       if (pin_state == LOW) {
         maison.send_msg(
-            MAISON_CTRL_TOPIC,
+            MAISON_EVENT_TOPIC,
             F("{\"device\":\"%s\""
               ",\"msg_type\":\"EVENT_DATA\""
               ",\"content\":\"%s\"}"),
@@ -94,7 +94,7 @@ Maison::UserResult process(Maison::State state)
         return my_mem.xmit_count == 0 ? Maison::ABORTED : Maison::COMPLETED;
       }
       maison.send_msg(
-        MAISON_CTRL_TOPIC, 
+        MAISON_EVENT_TOPIC, 
         F("{\"device\":\"%s\""
           ",\"msg_type\":\"EVENT_DATA\""
           ",\"content\":\"%s\"}"),
@@ -124,7 +124,7 @@ Maison::UserResult process(Maison::State state)
     case Maison::END_EVENT:
       PRINTLN(F("==> END_EVENT <=="));
       maison.send_msg(
-          MAISON_CTRL_TOPIC,
+          MAISON_EVENT_TOPIC,
           F("{\"device\":\"%s\""
             ",\"msg_type\":\"EVENT_DATA\""
             ",\"content\":\"%s\"}"),
@@ -155,16 +155,15 @@ inline void turnOff(int pin, int val = 1)
 
 void setup() 
 {
+  pinMode(SENSE_PIN, INPUT);
+  delay(10);
+  pin_state = digitalRead(SENSE_PIN);
+
   delay(100);
 
   SETUP_SERIAL;
 
   PRINTLN(F("==> SETUP <=="));
-
-  pinMode(SENSE_PIN, INPUT);
-
-  delay(10);
-  pin_state = digitalRead(SENSE_PIN);
 
   turnOff(0);
   turnOff(2);

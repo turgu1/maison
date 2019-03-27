@@ -30,6 +30,14 @@ void init_buzzer()
   buzz1();
 }
 
+void buzz_small()
+{
+  digitalWrite(BUZZER, HIGH);
+  delay(100);
+  digitalWrite(BUZZER, LOW);
+  delay(100);
+}
+
 void buzz1()
 {
   digitalWrite(BUZZER, HIGH);
