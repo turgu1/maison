@@ -69,31 +69,39 @@
 // This is prepended to all topics used by the framework
 
 #ifndef MAISON_PREFIX_TOPIC
-  #define MAISON_PREFIX_TOPIC "maison/" ///< Prefix for all Maison framework MQTT topics
+  #define MAISON_PREFIX_TOPIC "maison" ///< Prefix for all Maison framework MQTT topics
 #endif
 
-// This is the topic name to send status information to
+// This is the topic name suffix to send state information to
 //
-// For example: maison/status
+// For example: maison/xxx/state
 
-#ifndef MAISON_STATUS_TOPIC
-  #define MAISON_STATUS_TOPIC MAISON_PREFIX_TOPIC "status" ///< maison server status MQTT topic
+#ifndef MAISON_STATE_TOPIC
+  #define MAISON_STATE_TOPIC "state" ///< maison server state MQTT topic suffix
 #endif
 
-// This is the topic name to send control information to
+// This is the topic name suffix to send configuration to
 //
-// For example: maison/ctrl
+// For example: maison/xxxx/config
 
-#ifndef MAISON_CTRL_TOPIC
-  #define MAISON_CTRL_TOPIC   MAISON_PREFIX_TOPIC "ctrl" ///< maison server control MQTT topic
+#ifndef MAISON_CONFIG_TOPIC
+  #define MAISON_CONFIG_TOPIC "config" ///< maison server config MQTT topic suffix
 #endif
 
-// This is the topic name to send log (free text) information to
+// This is the topic name suffix to send event information to
 //
-// For example: maison/log
+// For example: maison/xxx/event
+
+#ifndef MAISON_EVENT_TOPIC
+  #define MAISON_EVENT_TOPIC "event" ///< maison server event MQTT topic suffix
+#endif
+
+// This is the topic name suffix to send log (free text) information to
+//
+// For example: maison/xxx/log
 
 #ifndef MAISON_LOG_TOPIC
-  #define MAISON_LOG_TOPIC   MAISON_PREFIX_TOPIC "log" ///< maison server log MQTT topic
+  #define MAISON_LOG_TOPIC "log" ///< maison server log MQTT topic suffix
 #endif
 
 // This is the topic name suffix where the device wait for control commands from site
@@ -101,12 +109,12 @@
 //
 // 1) MAISON_PREFIX_TOPIC
 // 2) The device name from config or MAC address if device name is empty
-// 3) CTRL_SUFFIX_TOPIC
+// 3) MAISON_CTRL_TOPIC
 //
 // For example: maison/DEV_TEST/crtl
 
-#ifndef CTRL_SUFFIX_TOPIC
-  #define CTRL_SUFFIX_TOPIC   "ctrl" ///< Suffix for device control topic
+#ifndef MAISON_CTRL_TOPIC
+  #define MAISON_CTRL_TOPIC "ctrl" ///< Suffix for device control topic
 #endif
 
 #ifndef DEFAULT_SHORT_REBOOT_TIME
@@ -302,7 +310,7 @@ class Maison
     /// @param[in] ... The arguments required by the format string
     /// @return True if the message was sent successfully
 
-    bool send_msg(const char * _topic, const __FlashStringHelper * _format, ...);
+    bool send_msg(const char * _topic_suffix, const __FlashStringHelper * _format, ...);
 
     /// Send a MQTT log msg using printf like construction syntax.
     ///
@@ -422,7 +430,7 @@ class Maison
     /// @param[in]  _length The size of the buffer.
     /// @return pointer to the beginning of the buffer.
 
-    char * my_topic(const char * _topic_suffix, char * _buffer, uint16_t _length);
+    char * build_topic(const char * _topic_suffix, char * _buffer, uint16_t _length);
 
     /// Compute a CRC-32 checksum
     ///
@@ -495,79 +503,75 @@ class Maison
       BearSSL::WiFiClientSecure *wifi_client;
     #endif
 
-    long last_reconnect_attempt;
-    int connect_retry_count;
-    bool first_connect_trial;
-    Callback *user_callback;
-    const char *user_sub_topic;
-    uint8_t user_qos;
-    uint8_t feature_mask;
-    void *user_mem;
-    uint16_t user_mem_length;
-    long last_time_count;
-    bool counting_lost_connection;
-    uint16_t deep_sleep_wait_time;
-    uint32_t loop_time_marker;
-    bool some_message_received;
-    bool wait_for_completion;
-    bool reboot_now;  // reboot after code update
-    bool restart_now; // restart after saving the state
+    long         last_reconnect_attempt;
+    int          connect_retry_count;
+    bool         first_connect_trial;
+    Callback   * user_callback;
+    const char * user_sub_topic;
+    uint8_t      user_qos;
+    uint8_t      feature_mask;
+    void       * user_mem;
+    uint16_t     user_mem_length;
+    long         last_time_count;
+    bool         counting_lost_connection;
+    uint16_t     deep_sleep_wait_time;
+    uint32_t     loop_time_marker;
+    bool         some_message_received;
+    bool         wait_for_completion;
+    bool         reboot_now;  // reboot after code update
+    bool         restart_now; // restart after saving the state
 
-    char buffer[MQTT_MAX_PACKET_SIZE];
-    char topic[60];
-    char user_topic[60];
+    char         buffer[MQTT_MAX_PACKET_SIZE];
+    char         topic[60];
+    char         user_topic[60];
 
     bool wifi_connect();
     bool mqtt_connect();
 
     void wifi_flush();
 
-    friend void maison_callback(const char *_topic, byte *_payload, unsigned int _length);
-    void process_callback(const char *_topic, byte *_payload, unsigned int _length);
+    friend void maison_callback(const char * _topic, byte * _payload, unsigned int _length);
+    void process_callback(const char * _topic, byte * _payload, unsigned int _length);
 
-    inline bool wifi_connected() { return WiFi.status() == WL_CONNECTED; }
-    inline bool mqtt_connected() { return mqtt_client.connected(); }
+    inline bool   wifi_connected() { return WiFi.status() == WL_CONNECTED;             }
+    inline bool   mqtt_connected() { return mqtt_client.connected();                   }
 
-    inline void mqtt_loop() { mqtt_client.loop(); }
+    inline void        mqtt_loop() { mqtt_client.loop();                               }
 
-    inline bool show_voltage() { return (feature_mask & VOLTAGE_CHECK) != 0; }
+    inline bool     show_voltage() { return (feature_mask & VOLTAGE_CHECK) != 0;       }
     
     #if DEEP_SLEEP_REQUIRED
-      inline bool use_deep_sleep() { return (feature_mask & DEEP_SLEEP) != 0; }
+      inline bool use_deep_sleep() { return (feature_mask & DEEP_SLEEP)    != 0;       }
     #else
-      inline bool use_deep_sleep() { return false; }
+      inline bool use_deep_sleep() { return false;                                     }
     #endif
 
-    inline bool watchdog_enabled() { return (feature_mask & WATCHDOG_24H) != 0; }
+    inline bool watchdog_enabled() { return (feature_mask & WATCHDOG_24H ) != 0;       }
 
-    inline bool is_short_reboot_time_needed()
-    {
-      return (mem.state & (PROCESS_EVENT | WAIT_END_EVENT | END_EVENT | HOURS_24)) != 0;
+    inline bool is_short_reboot_time_needed() {
+      return (mem.state & (PROCESS_EVENT|WAIT_END_EVENT|END_EVENT|HOURS_24)) != 0;
     }
 
-    inline UserResult call_user_process(Process *_process)
-    {
-      if (_process == NULL)
-      {
+    inline UserResult call_user_process(Process * _process) {
+      if (_process == NULL) {
         return COMPLETED;
       }
-      else
-      {
+      else {
         DEBUGLN("Calling user process...");
         return (*_process)(mem.state);
       }
     }
 
     State check_if_24_hours_time(State _default_state);
-    bool retrieve_config(JsonObject &_root, Config &_config);
+    bool retrieve_config(JsonObject & _root, Config & _config);
     bool load_config(int _version = 0);
 
     bool init_callbacks();
 
-    bool save_config();
+    bool     save_config();
     void send_config_msg();
-    void send_state_msg();
-    void get_new_config();
+    void  send_state_msg();
+    void  get_new_config();
 
     #if MAISON_TESTING
       void show_config(Config & _config);
