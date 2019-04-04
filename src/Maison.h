@@ -539,7 +539,7 @@ class Maison
 
     bool     save_config();
     void send_config_msg();
-    void  send_state_msg();
+    void  send_state_msg(const char * _msg_type);
     void  get_new_config();
 
     #if MAISON_TESTING

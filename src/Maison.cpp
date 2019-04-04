@@ -142,7 +142,7 @@ void Maison::send_config_msg()
   }
 }
 
-void Maison::send_state_msg()
+void Maison::send_state_msg(const char * _msg_type)
 {
   static char vbat[15];
   static char   ip[20];
@@ -164,9 +164,10 @@ void Maison::send_state_msg()
     MAISON_STATE_TOPIC,
     F("{"
        "\"device\":\"%s\""
-      ",\"msg_type\":\"STATE\""
+      ",\"msg_type\":\"%s\""
       ",\"ip\":\"%s\""
       ",\"mac\":\"%s\""
+      ",\"reason\":%d"
       ",\"state\":%u"
       ",\"return_state\":%u"
       ",\"hours\":%u"
@@ -179,8 +180,10 @@ void Maison::send_state_msg()
       "%s"
     "}"),
     config.device_name,
+    _msg_type,
     ip,
     mac,
+    reset_reason(),
     mem.state,
     mem.return_state,
     mem.hours_24_count,
@@ -371,7 +374,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
     }
     else if (strncmp(buffer, "STATE?", 6) == 0) {
       DEBUGLN(F(" Config content requested"));
-      send_state_msg();
+      send_state_msg("STATE");
     }
     else if (strncmp(buffer, "RESTART!", 8) == 0) {
       DEBUGLN("Device is restarting");
@@ -483,33 +486,9 @@ void Maison::loop(Process * _process)
 
   DEBUG(F("User process result: ")); DEBUGLN(res);
 
-  char vbat[15];
-
   switch (mem.state) {
     case STARTUP:
-      if (show_voltage()) {
-        snprintf(vbat, 14, ",\"VBAT\":%4.2f", battery_voltage());
-      }
-      else {
-        vbat[0] = 0;
-      }
-
-      if (!send_msg(MAISON_STATE_TOPIC,
-                    F("{"
-                       "\"device\":\"%s\""
-                      ",\"msg_type\":\"%s\""
-                      ",\"reason\":%d"
-                      ",\"app_name\":\"" APP_NAME "\""
-                      ",\"app_version\":\"" APP_VERSION "\""
-                      "%s"
-                    "}"),
-                    config.device_name,
-                    "STARTUP",
-                    reset_reason(),
-                    vbat)) {
-        ERROR("Unable to send startup message");
-      }
-
+      send_state_msg("STARTUP");
       if (res != NOT_COMPLETED) {
         new_state        = WAIT_FOR_EVENT;
         new_return_state = WAIT_FOR_EVENT;
@@ -563,26 +542,7 @@ void Maison::loop(Process * _process)
       delay(100);
       if (mqtt_connected()) mqtt_loop(); // Second chance to process received msgs
       if (watchdog_enabled()) {
-        if (show_voltage()) {
-          snprintf(vbat, 14, ",\"VBAT\":%4.2f", battery_voltage());
-        }
-        else {
-          vbat[0] = 0;
-        }
-
-        if (!send_msg(MAISON_STATE_TOPIC,
-                      F("{"
-                         "\"device\":\"%s\""
-                        ",\"msg_type\":\"%s\""
-                        ",\"app_name\":\"" APP_NAME "\""
-                        ",\"app_version\":\"" APP_VERSION "\""
-                        "%s"
-                      "}"),
-                      config.device_name,
-                      "WATCHDOG",
-                      vbat)) {
-          ERROR("Unable to send watchdog message");
-        }
+        send_state_msg("WATCHDOG");
       }
 
       new_state = new_return_state;
