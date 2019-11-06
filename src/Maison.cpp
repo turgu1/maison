@@ -269,11 +269,11 @@ void Maison::get_new_config()
       return completed;
     }
 
-    OTAConsumer()   { running = false; }
+    OTAConsumer()      { running = false;          }
 
-    int available() { return 0; } // not used
-    int      read() { return 0; } // not used
-    int      peek() { return 0; } // not used
+    int    available() { return 0;                 } // not used
+    int         read() { return 0;                 } // not used
+    int         peek() { return 0;                 } // not used
 
     bool isCompleted() { return completed;         }
     bool   isRunning() { return running;           }
@@ -313,7 +313,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         DynamicJsonBuffer jsonBuffer;
         JsonObject & root = jsonBuffer.parseObject(&buffer[9]);
 
-        long size = root["SIZE"].as<long>();
+        long         size = root["SIZE"].as<long>();
         const char * name = root["APP_NAME"].as<const char *>();
         const char * md5  = root["MD5"].as<const char *>();
 

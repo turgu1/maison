@@ -5,8 +5,8 @@
 // processor board with DeepSleep.
 //
 // If the door stay open for more than 5 minutes, an "OPEN"
-// message is sent every 5 minutes 5 times. Once the door is back in a close
-// position, a "CLOSE" message is sent.
+// message is sent every 5 minutes 5 times. Once the door is back in a closed
+// position, a "CLOSED" message is sent.
 //
 // The framework requires the presence of a file named "/config.json" 
 // located in the device SPIFFS flash file system. To do so, please 
@@ -52,7 +52,7 @@ struct mem_info
 {
   int32_t crc;
   uint32_t xmit_count;
-  bool close_event_required;
+  bool closed_event_required;
 } my_mem;
 
 int reed_state;
@@ -79,15 +79,15 @@ Maison::UserResult process(Maison::State state)
     case Maison::PROCESS_EVENT:
       PRINTLN(F("==> PROCESS_EVENT <=="));
       if (reed_state == LOW) {
-        if (my_mem.close_event_required) {
-          my_mem.close_event_required = false;
+        if (my_mem.closed_event_required) {
+          my_mem.closed_event_required = false;
           maison.send_msg(
             MAISON_EVENT_TOPIC,
             F("{\"device\":\"%s\""
               ",\"msg_type\":\"EVENT_DATA\""
               ",\"content\":\"%s\"}"),
             maison.get_device_name(),
-            "CLOSE");
+            "CLOSED");
         }
         else {
           PRINTLN(F("==> EVENT ABORTED: NOT LONG ENOUGH <=="));
@@ -103,7 +103,7 @@ Maison::UserResult process(Maison::State state)
           ",\"content\":\"%s\"}"),
         maison.get_device_name(),
         "OPEN");
-      my_mem.close_event_required = true;
+      my_mem.closed_event_required = true;
       maison.set_deep_sleep_wait_time(WAIT_TIME);
       break;
 
@@ -122,19 +122,19 @@ Maison::UserResult process(Maison::State state)
       PRINTLN(F("==> END OF EVENT DETECTED <=="));
       maison.set_deep_sleep_wait_time(1);
       my_mem.xmit_count = 0;
-      my_mem.close_event_required = false;
+      my_mem.closed_event_required = false;
       break;
 
     case Maison::END_EVENT:
       PRINTLN(F("==> END_EVENT <=="));
-      PRINTLN(F("==> SENDING CLOSE MESSAGE <=="));
+      PRINTLN(F("==> SENDING CLOSED MESSAGE <=="));
       maison.send_msg(
         MAISON_EVENT_TOPIC,
         F("{\"device\":\"%s\""
           ",\"msg_type\":\"EVENT_DATA\""
           ",\"content\":\"%s\"}"),
         maison.get_device_name(),
-        "CLOSE");
+        "CLOSED");
       maison.set_deep_sleep_wait_time(1);
       break;
 
@@ -189,7 +189,7 @@ void setup()
   if (maison.is_hard_reset()) {
     PRINTLN(F("==> HARD RESET! <=="));
     my_mem.xmit_count = 0;
-    my_mem.close_event_required = false;
+    my_mem.closed_event_required = false;
   }
   else {
     PRINTLN(F("==> DEEP SLEEP WAKEUP <=="));

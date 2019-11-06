@@ -119,7 +119,7 @@ void loop()
 }
 ```
 
-This piece of code won't do much at the user application level, but it will set the scene to the automation of exchanges with a MQTT message broker, sending startup/watchdog messages, answering information requests, changes of configuration, completely automated through **Maison** framework.
+This piece of code won't do much at the user application level, but it will set the scene to the automation of exchanges with a MQTT message broker, sending startup/watchdog messages, answering information requests, changes of configuration, completely automated through the **Maison** framework.
 
 Here is a more complete example of code to be used to initialize the framework with optional features and integrate it in the loop() function. It shows both option parameters, calls to the framework with message callback and finite state machine functions:
 
@@ -176,7 +176,7 @@ The `#include <Maison.h>` integrates the **Maison** header into the user applica
 
 ### 4.2 **Maison** Declaration
 
-The `Maison maison(...)` declaration create an instance of the framework. This declaration accepts the following parameters:
+The `Maison maison(...)` declaration creates an instance of the framework. This declaration accepts the following parameters:
 
 * An optional [feature mask](#feature-mask), to enable some aspects of the framework (see table below).
 * An optional [user application state structure](#user-application-state-structure) (here named `my_state`) and it's size to be automatically saved in non-volatile memory when DeepSleep is enabled.
@@ -204,7 +204,7 @@ ADC_MODE(ADC_VCC);
 
 The user application state structure (here named `user_data`) **shall** have a `uint32_t` item as the first element in the structure. This is used by the framework to verify that the content saved in non-volatile memory is valid using a CRC-32 checksum. The whole content will be initialized (zeroed) if the checksum is bad. The checksum is computed by the framework, the user application just need to supplied the space in the structure.
 
-This structure is optional and could be required by the application when the *DEEP_SLEEP* feature is selected. It will allow for the saving and retrieval of the current application state as the Deep Sleep feature induce processor resets that invalidate the memory content.
+This structure is optional and could be required by the application when the *DEEP_SLEEP* feature is selected. It will allow for the saving and retrieval of the current application state as the Deep Sleep feature induce processor resets that invalidate memory content.
 
 ### 4.3 maison.loop()
 
@@ -461,7 +461,7 @@ DEVICE_NAME: Code update started with size 412345 and md5: 06fa77583b007464167bb
 
 The second message sent to the device will contain the binary code of the file. Its length must be the same indicated by the SIZE parameter shown above.
 
-Once the code received, the device will send a log message. For example:
+Once the code has been received, the device will send a log message. For example:
 
 ```
 DEVICE_NAME: Code upload completed. Rebooting

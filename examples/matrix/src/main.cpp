@@ -48,6 +48,10 @@ void matrix_callback(const char * topic, byte * payload, unsigned int length)
     if (payload[1] == '3') {
       buzz3();
     }
+    else if (payload[1] == '2')
+    {
+      buzz2();
+    }
     else if (payload[1] == '1')
     {
       buzz_small();

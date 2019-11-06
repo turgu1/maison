@@ -41,6 +41,7 @@ void init_blink();
 
 void buzz_small();
 void buzz1();
+void buzz2();
 void buzz3();
 void blink(int count);
 bool displayText(char * theText, int len);

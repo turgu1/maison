@@ -3,8 +3,7 @@
 A very simple example of using the Maison framework to
 flash the LED of an ESP-12E processor board every second.
 
-The framework requires the presence of a file named "/config.json" 
-located in the device SPIFFS flash file system. To do so, please 
+The framework requires the presence of a file named "/config.json" located in the device SPIFFS flash file system. To do so, please:
 
 1. Update the supplied data/config.json.sample file to your
    network configuration parameters

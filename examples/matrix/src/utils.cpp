@@ -46,6 +46,17 @@ void buzz1()
   delay(200);
 }
 
+void buzz2()
+{
+  for (int i = 0; i < 2; i++)
+  {
+    digitalWrite(BUZZER, HIGH);
+    delay(200);
+    digitalWrite(BUZZER, LOW);
+    delay(200);
+  }
+}
+
 void buzz3()
 {
   for (int i = 0; i < 3; i++) {

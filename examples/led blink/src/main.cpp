@@ -35,7 +35,7 @@ Maison::UserResult process(Maison::State state)
 
       // Generate an event every 500 mS
 
-      if (lit_wait_time > (1e3 * 500)) {
+      if (lit_wait_time > (1e3 * 200)) {
         lit_wait_time = 0;
         return Maison::NEW_EVENT;
       }

@@ -5,7 +5,8 @@ check if a door is open through a reed switch, using an ESP-12E
 processor board.
 
 If the door stay open for more than 5 minutes, an "OPEN"
-message is sent every 5 minutes. Once the door is back in a close
+message is sent every 5 minutes. Once the door is back in a closed
+position, a "CLOSED" message is sent.
 
 The framework requires the presence of a file named "/config.json" 
 located in the device SPIFFS flash file system. To do so, please 

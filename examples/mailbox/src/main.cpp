@@ -6,7 +6,7 @@
 //
 // A first "OPEN" message is sent after the lid has been opened.  
 // A second "STILL" message is sent with 1 minutes interval if the lid
-// stayed opened. Once the lid is back in a close position, a "CLOSE"
+// stayed opened. Once the lid is back in a closed position, a "CLOSED"
 // message is sent. 
 //
 // The framework requires the presence of a file named "/config.json"
@@ -63,16 +63,27 @@ Maison maison(Maison::WATCHDOG_24H |
               &my_mem,
               sizeof(my_mem));
 
+void send(const char *str)
+{
+  maison.send_msg(
+      MAISON_EVENT_TOPIC,
+      F("{\"device\":\"%s\""
+        ",\"msg_type\":\"EVENT_DATA\""
+        ",\"content\":\"%s\"}"),
+      maison.get_device_name(),
+      str);
+}
+
 Maison::UserResult process(Maison::State state)
 {
   switch (state) {
 
     case Maison::WAIT_FOR_EVENT:
       PRINTLN(F("==> WAIT_FOR_EVENT <=="));
+      my_mem.first_pass = true;
       if (reed_state == HIGH) {
         PRINTLN(F("==> AN EVENT HAS BEEN DETECTED <=="));
         maison.set_deep_sleep_wait_time(0); // Quick sleep (100ms) to get back with WiFi enabled
-        my_mem.first_pass = true;
         return Maison::NEW_EVENT;
       }
       break;
@@ -80,13 +91,7 @@ Maison::UserResult process(Maison::State state)
     case Maison::PROCESS_EVENT:
       PRINTLN(F("==> PROCESS_EVENT <=="));
       PRINTLN(F("==> SENDING OPEN MESSAGE <=="));
-      maison.send_msg(
-          MAISON_EVENT_TOPIC,
-          F("{\"device\":\"%s\""
-            ",\"msg_type\":\"EVENT_DATA\""
-            ",\"content\":\"%s\"}"),
-          maison.get_device_name(),
-          my_mem.first_pass ? "OPEN" : "STILL");
+      send(my_mem.first_pass ? "OPEN" : "STILL");
       maison.set_deep_sleep_wait_time(WAIT_TIME);
       break;
 
@@ -109,14 +114,8 @@ Maison::UserResult process(Maison::State state)
 
     case Maison::END_EVENT:
       PRINTLN(F("==> END_EVENT <=="));
-      PRINTLN(F("==> SENDING CLOSE MESSAGE <=="));
-      maison.send_msg(
-        MAISON_EVENT_TOPIC,
-        F("{\"device\":\"%s\""
-          ",\"msg_type\":\"EVENT_DATA\""
-          ",\"content\":\"%s\"}"),
-        maison.get_device_name(),
-        "CLOSE");
+      PRINTLN(F("==> SENDING CLOSED MESSAGE <=="));
+      send("CLOSED");
       maison.set_deep_sleep_wait_time(1);
       break;
 
@@ -152,7 +151,6 @@ void setup()
   SERIAL_SETUP;
 
   PRINTLN(F("==> SETUP <=="));
-
 
   turnOff(0);
   turnOff(2);
