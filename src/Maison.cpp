@@ -196,16 +196,16 @@ void Maison::send_state_msg(const char * _msg_type)
 
 void Maison::get_new_config()
 {
-  DynamicJsonDocument jsonBuffer[2048];
-  JsonObject & root = jsonBuffer.parseObject(&buffer[7]);
+  DynamicJsonDocument doc(2048);
+  DeserializationError error = deserializeJson(doc, &buffer[7]);
 
-  if (!root.success()) {
+  if (error) {
     DEBUGLN(F(" ERROR: Unable to parse JSON content"));
   }
   else {
     Config cfg;
 
-    if (!retrieve_config(root, cfg)) {
+    if (!retrieve_config(doc, cfg)) {
       DEBUGLN(F(" ERROR: Unable to retrieve config from received message"));
     }
     else {
@@ -310,40 +310,45 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
 
     #if MQTT_OTA
       if (strncmp(buffer, "NEW_CODE:{", 10) == 0) {
-        DynamicJsonDocument jsonBuffer[2048];
-        JsonObject & root = jsonBuffer.parseObject(&buffer[9]);
+        DynamicJsonDocument doc(2048);
+        DeserializationError error = deserializeJson(doc, &buffer[9]);
 
-        long         size = root["SIZE"].as<long>();
-        const char * name = root["APP_NAME"].as<const char *>();
-        const char * md5  = root["MD5"].as<const char *>();
+        if (error) {
+          log(F("Error: JSON content is in a wrong format"));
+        }
+        else {
+          long         size = doc["SIZE"].as<long>();
+          const char * name = doc["APP_NAME"].as<const char *>();
+          const char * md5  = doc["MD5"].as<const char *>();
 
-        if (size && name && md5) {
-          DEBUG(F(" Receive size: ")); DEBUGLN(size);
-          
-          char tmp[33];
+          if (size && name && md5) {
+            DEBUG(F(" Receive size: ")); DEBUGLN(size);
+            
+            char tmp[33];
 
-          if (strcmp(APP_NAME, name) == 0) {
-            if (cons.begin(size, md5)) {
-              mqtt_client.setStream(cons);
-              // log uses buffer too...
-              memcpy(tmp, md5, 32);
-              tmp[32] = 0;
-              log(F("Code update started with size %d and md5: %s."), size, tmp);
-              wait_for_completion = true;
+            if (strcmp(APP_NAME, name) == 0) {
+              if (cons.begin(size, md5)) {
+                mqtt_client.setStream(cons);
+                // log uses buffer too...
+                memcpy(tmp, md5, 32);
+                tmp[32] = 0;
+                log(F("Code update started with size %d and md5: %s."), size, tmp);
+                wait_for_completion = true;
+              }
+              else {
+                log(F("Error: Code upload not started: %s"), 
+                    cons.getErrorStr().c_str());            
+              }
             }
             else {
-              log(F("Error: Code upload not started: %s"), 
-                  cons.getErrorStr().c_str());            
+              // log uses buffer too...
+              strlcpy(tmp, name, sizeof(tmp));
+              log(F("Error: Code upload aborted. App name differ (%s vs %s)"), APP_NAME, tmp);
             }
           }
           else {
-            // log uses buffer too...
-            strlcpy(tmp, name, sizeof(tmp));
-            log(F("Error: Code upload aborted. App name differ (%s vs %s)"), APP_NAME, tmp);
+            log(F("Error: SIZE, MD5 or APP_NAME not present"));
           }
-        }
-        else {
-          log(F("Error: SIZE, MD5 or APP_NAME not present"));
         }
       }
       else if (cons.isRunning()) {
@@ -598,26 +603,26 @@ void Maison::loop(Process * _process)
   if (!str2ip(src, &dst)) \
     ERROR(" Bad IP Address or Mask format for " STRINGIZE(dst))
 
-bool Maison::retrieve_config(JsonObject & _root, Config & _config)
+bool Maison::retrieve_config(JsonObject & _doc, Config & _config)
 {
   SHOW("retrieve_config()");
 
   DO {
     const char * tmp;
 
-    GETI (_config.version,          _root["version"         ]);
-    GETS (_config.device_name,      _root["device_name"     ], sizeof(_config.device_name     ));
-    GETS (_config.wifi_ssid,        _root["ssid"            ], sizeof(_config.wifi_ssid       ));
-    GETS (_config.wifi_password,    _root["wifi_password"   ], sizeof(_config.wifi_password   ));
-    GETS (_config.mqtt_server,      _root["mqtt_server_name"], sizeof(_config.mqtt_server     ));
-    GETS (_config.mqtt_username,    _root["mqtt_user_name"  ], sizeof(_config.mqtt_username   ));
-    GETS (_config.mqtt_password,    _root["mqtt_password"   ], sizeof(_config.mqtt_password   ));
-    GETI (_config.mqtt_port,        _root["mqtt_port"       ]);
-    GETA (_config.mqtt_fingerprint, _root["mqtt_fingerprint"], 20);
-    GETIP(_config.ip,               _root["ip"              ]);
-    GETIP(_config.subnet_mask,      _root["subnet_mask"     ]);
-    GETIP(_config.gateway,          _root["gateway"         ]);
-    GETIP(_config.dns,              _root["dns"             ]);
+    GETI (_config.version,          _doc["version"         ]);
+    GETS (_config.device_name,      _doc["device_name"     ], sizeof(_config.device_name     ));
+    GETS (_config.wifi_ssid,        _doc["ssid"            ], sizeof(_config.wifi_ssid       ));
+    GETS (_config.wifi_password,    _doc["wifi_password"   ], sizeof(_config.wifi_password   ));
+    GETS (_config.mqtt_server,      _doc["mqtt_server_name"], sizeof(_config.mqtt_server     ));
+    GETS (_config.mqtt_username,    _doc["mqtt_user_name"  ], sizeof(_config.mqtt_username   ));
+    GETS (_config.mqtt_password,    _doc["mqtt_password"   ], sizeof(_config.mqtt_password   ));
+    GETI (_config.mqtt_port,        _doc["mqtt_port"       ]);
+    GETA (_config.mqtt_fingerprint, _doc["mqtt_fingerprint"], 20);
+    GETIP(_config.ip,               _doc["ip"              ]);
+    GETIP(_config.subnet_mask,      _doc["subnet_mask"     ]);
+    GETIP(_config.gateway,          _doc["gateway"         ]);
+    GETIP(_config.dns,              _doc["dns"             ]);
 
     OK_DO;
   }
@@ -653,13 +658,12 @@ bool Maison::load_config(int _file_version)
     file = SPIFFS.open(the_filename, "r");
     if (!file) ERROR("Unable to open file");
 
-    DynamicJsonDocument jsonBuffer[2048];
+    DynamicJsonDocument doc(2048);
+    DeserializationError error = deserializeJson(doc, file);
 
-    JsonObject & root = jsonBuffer.parseObject(file);
+    if (error) ERROR("Unable to parse JSON content");
 
-    if (!root.success()) ERROR("Unable to parse JSON content");
-
-    if (!retrieve_config(root, config)) ERROR("Unable to read config elements");
+    if (!retrieve_config(doc, config)) ERROR("Unable to read config elements");
 
     OK_DO;
   }
@@ -698,29 +702,26 @@ bool Maison::save_config()
 
     if (!file) ERROR("Unable to open file /config.json");
 
-    DynamicJsonDocument jsonBuffer[2048];
+    DynamicJsonDocument doc(2048);
 
-    JsonObject & root = jsonBuffer.createObject();
-    if (!root.success()) ERROR("Unable to create JSON root object");
-
-    JsonArray & arr = root.createNestedArray("mqtt_fingerprint");
+    JsonArray & arr = doc.createNestedArray("mqtt_fingerprint");
     if (!arr.success()) ERROR("Unable to create JSON array object");
 
-    PUT  (config.version,          root["version"         ]);
-    PUT  (config.device_name,      root["device_name"     ]);
-    PUT  (config.wifi_ssid,        root["ssid"            ]);
-    PUT  (config.wifi_password,    root["wifi_password"   ]);
-    PUTIP(config.ip,               root["ip"              ]);
-    PUTIP(config.subnet_mask,      root["subnet_mask"     ]);
-    PUTIP(config.gateway,          root["gateway"         ]);
-    PUTIP(config.dns,              root["dns"             ]);
-    PUT  (config.mqtt_server,      root["mqtt_server_name"]);
-    PUT  (config.mqtt_username,    root["mqtt_user_name"  ]);
-    PUT  (config.mqtt_password,    root["mqtt_password"   ]);
-    PUT  (config.mqtt_port,        root["mqtt_port"       ]);
+    PUT  (config.version,          doc["version"         ]);
+    PUT  (config.device_name,      doc["device_name"     ]);
+    PUT  (config.wifi_ssid,        doc["ssid"            ]);
+    PUT  (config.wifi_password,    doc["wifi_password"   ]);
+    PUTIP(config.ip,               doc["ip"              ]);
+    PUTIP(config.subnet_mask,      doc["subnet_mask"     ]);
+    PUTIP(config.gateway,          doc["gateway"         ]);
+    PUTIP(config.dns,              doc["dns"             ]);
+    PUT  (config.mqtt_server,      doc["mqtt_server_name"]);
+    PUT  (config.mqtt_username,    doc["mqtt_user_name"  ]);
+    PUT  (config.mqtt_password,    doc["mqtt_password"   ]);
+    PUT  (config.mqtt_port,        doc["mqtt_port"       ]);
     PUTA (config.mqtt_fingerprint, arr, 20);
 
-    if (!root.printTo(file)) ERROR("Unable to send JSON content to file /config.json");
+    if (!doc.printTo(file)) ERROR("Unable to send JSON content to file /config.json");
 
     OK_DO;
   }
