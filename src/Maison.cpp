@@ -200,13 +200,13 @@ void Maison::get_new_config()
   DeserializationError error = deserializeJson(doc, &buffer[7]);
 
   if (error) {
-    DEBUGLN(F(" ERROR: Unable to parse JSON content"));
+    JSON_DEBUGLN(F(" ERROR: Unable to parse JSON content"));
   }
   else {
     Config cfg;
 
     if (!retrieve_config(doc, cfg)) {
-      DEBUGLN(F(" ERROR: Unable to retrieve config from received message"));
+      JSON_DEBUGLN(F(" ERROR: Unable to retrieve config from received message"));
     }
     else {
       if (cfg.version > config.version) {
@@ -220,7 +220,7 @@ void Maison::get_new_config()
         init_callbacks();
       }
       else {
-        DEBUGLN(F(" ERROR: New config with a wrong version number. Not saved."));
+        JSON_DEBUGLN(F(" ERROR: New config with a wrong version number. Not saved."));
         log(F("Error: Received New Config with wrong version number."));
       }
       send_config_msg();
@@ -315,6 +315,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
 
         if (error) {
           log(F("Error: JSON content is in a wrong format"));
+          OTA_DEBUG(F("Error: JSON content is in a wrong format"));
         }
         else {
           long         size = doc["SIZE"].as<long>();
@@ -322,8 +323,9 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
           const char * md5  = doc["MD5"].as<const char *>();
 
           if (size && name && md5) {
-            DEBUG(F(" Receive size: ")); DEBUGLN(size);
-            
+            OTA_DEBUG(F(" Receive size: "));
+            OTA_DEBUGLN(size);
+
             char tmp[33];
 
             if (strcmp(APP_NAME, name) == 0) {
@@ -332,21 +334,26 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
                 // log uses buffer too...
                 memcpy(tmp, md5, 32);
                 tmp[32] = 0;
+                OTA_DEBUGLN(F("Code update started with size %d and md5: %s."), size, tmp);
                 log(F("Code update started with size %d and md5: %s."), size, tmp);
                 wait_for_completion = true;
               }
               else {
-                log(F("Error: Code upload not started: %s"), 
-                    cons.getErrorStr().c_str());            
+                OTA_DEBUGLN(F("Error: Code upload not started: %s"),
+                            cons.getErrorStr().c_str());
+                log(F("Error: Code upload not started: %s"),
+                    cons.getErrorStr().c_str());
               }
             }
             else {
               // log uses buffer too...
               strlcpy(tmp, name, sizeof(tmp));
+              OTA_DEBUGLN(F("Error: Code upload aborted. App name differ (%s vs %s)"), APP_NAME, tmp);
               log(F("Error: Code upload aborted. App name differ (%s vs %s)"), APP_NAME, tmp);
             }
           }
           else {
+            OTA_DEBUGLN(F("Error: SIZE, MD5 or APP_NAME not present"));
             log(F("Error: SIZE, MD5 or APP_NAME not present"));
           }
         }
@@ -355,12 +362,13 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         // The transmission is complete. Check if the Updater is satisfied and if
         // so, restart the device
         if (cons.end() && cons.isCompleted()) {
-          DEBUGLN(F(" Upload Completed. Rebooting..."));
+          OTA_DEBUGLN(F(" Upload Completed. Rebooting..."));
           log(F("Code upload completed. Rebooting"));
           reboot_now = true;
         }
         else {
-          DEBUGLN(F(" ERROR: Upload not complete!"));
+          OTA_DEBUGLN(F("Error: Code upload not completed: %s"),
+                      cons.getErrorStr().c_str());
           log(F("Error: Code upload not completed: %s"), 
               cons.getErrorStr().c_str());
         }
@@ -575,38 +583,35 @@ void Maison::loop(Process * _process)
   DEBUGLN("End of Maison::loop()");
 }
 
-#define GETS(dst, src, size) \
-  if ((tmp = src)) { \
-    strlcpy(dst, tmp, size); \
-  } \
-  else { \
-    DEBUG(F(" ERROR: Unable to get ")); \
-    DEBUGLN(STRINGIZE(src)); \
-    break; \
+#define GETS(dst, src, size)                 \
+  if ((tmp = src)) {                         \
+    strlcpy(dst, tmp, size);                 \
+  }                                          \
+  else {                                     \
+    JSON_DEBUG(F(" ERROR: Unable to get ")); \
+    JSON_DEBUGLN(STRINGIZE(src));            \
+    break;                                   \
   }
 
-#define GETI(dst, src) \
-  if (src) { \
-    dst = src; \
-  } \
-  else { \
-    DEBUG(F(" ERROR: Unable to get ")); \
-    DEBUGLN(STRINGIZE(src)); \
-    break; \
+#define GETI(dst, src)                       \
+  if (src) {                                 \
+    dst = src;                               \
+  }                                          \
+  else {                                     \
+    JSON_DEBUG(F(" ERROR: Unable to get ")); \
+    JSON_DEBUGLN(STRINGIZE(src));            \
+    break;                                   \
   }
 
 #define GETA(dst, src, size) copyArray(src, dst)
-//\
-//  if (src.as<JsonArray>().copyTo(dst) != size) \
-//    ERROR(" Copy To " STRINGIZE(dst) " with inconsistent size")
 
 #define GETIP(dst, src) \
   if (!str2ip(src, &dst)) \
-    ERROR(" Bad IP Address or Mask format for " STRINGIZE(dst))
+    JSON_ERROR(" Bad IP Address or Mask format for " STRINGIZE(dst))
 
 bool Maison::retrieve_config(DynamicJsonDocument _doc, Config & _config)
 {
-  SHOW("retrieve_config()");
+  JSON_SHOW("retrieve_config()");
 
   DO {
     const char * tmp;
@@ -628,7 +633,7 @@ bool Maison::retrieve_config(DynamicJsonDocument _doc, Config & _config)
     OK_DO;
   }
 
-  SHOW_RESULT("retrieve_config()");
+  JSON_SHOW_RESULT("retrieve_config()");
 
   return result;
 }
@@ -639,7 +644,7 @@ bool Maison::load_config(int _file_version)
   char the_filename[32];
   char str[20];
 
-  SHOW("load_config()");
+  JSON_SHOW("load_config()");
 
   if (_file_version == 0) {
     strlcpy(the_filename, "/config.json", sizeof(the_filename));
@@ -650,32 +655,33 @@ bool Maison::load_config(int _file_version)
     strlcat(the_filename, ".json",                      sizeof(the_filename));
   }
 
-  DEBUG(F(" Config filename: ")); DEBUGLN(the_filename);
-  
+  JSON_DEBUG(F(" Config filename: "));
+  JSON_DEBUGLN(the_filename);
+
   DO {
-    if (!SPIFFS.begin())              ERROR("SPIFFS.begin() not working");
-    if (!SPIFFS.exists(the_filename)) ERROR("Config file does not esists");
+    if (!SPIFFS.begin())              JSON_ERROR("SPIFFS.begin() not working");
+    if (!SPIFFS.exists(the_filename)) JSON_ERROR("Config file does not esists");
 
     file = SPIFFS.open(the_filename, "r");
-    if (!file) ERROR("Unable to open file");
+    if (!file) JSON_ERROR("Unable to open file");
 
     DynamicJsonDocument doc(2048);
     DeserializationError error = deserializeJson(doc, file);
 
-    if (error) ERROR("Unable to parse JSON content");
+    if (error) JSON_ERROR("Unable to parse JSON content");
 
-    if (!retrieve_config(doc, config)) ERROR("Unable to read config elements");
+    if (!retrieve_config(doc, config)) JSON_ERROR("Unable to read config elements");
 
     OK_DO;
   }
 
   file.close();
 
-  #if MAISON_TESTING
+  #if JSON_TESTING
     if (result) show_config(config);
   #endif
 
-  SHOW_RESULT("load_config()");
+  JSON_SHOW_RESULT("load_config()");
 
   return result;
 }
@@ -688,7 +694,7 @@ bool Maison::save_config()
 {
   File file;
 
-  SHOW("save_config()");
+  JSON_SHOW("save_config()");
 
   DO {
     if (!SPIFFS.begin()) ERROR(" SPIFFS.begin() not working");
@@ -701,7 +707,7 @@ bool Maison::save_config()
 
     file = SPIFFS.open("/config.json", "w");
 
-    if (!file) ERROR("Unable to open file /config.json");
+    if (!file) JSON_ERROR("Unable to open file /config.json");
 
     DynamicJsonDocument doc(2048);
 
@@ -729,7 +735,7 @@ bool Maison::save_config()
 
   file.close();
 
-  SHOW_RESULT("save_config()");
+  JSON_SHOW_RESULT("save_config()");
 
   return result;
 }
@@ -1299,34 +1305,34 @@ bool Maison::str2ip(const char * _str, uint32_t * _ip)
   return (*_str == 0) && (idx == 3);
 }
 
-#if MAISON_TESTING
+#if JSON_TESTING
 
   void Maison::show_config(Config & _config)
   {
-    DEBUGLN(F("\nConfiguration:\n-------------"));
+    JSON_DEBUGLN(F("\nConfiguration:\n-------------"));
 
-    DEBUG(F("Version       : ")); DEBUGLN(_config.version         );
-    DEBUG(F("Device Name   : ")); DEBUGLN(_config.device_name     );
-    DEBUG(F("WiFi SSID     : ")); DEBUGLN(_config.wifi_ssid       );
-    DEBUG(F("WiFi Password : ")); DEBUGLN(F("<Hidden>")           );
+    JSON_DEBUG(F("Version       : ")); JSON_DEBUGLN(_config.version         );
+    JSON_DEBUG(F("Device Name   : ")); JSON_DEBUGLN(_config.device_name     );
+    JSON_DEBUG(F("WiFi SSID     : ")); JSON_DEBUGLN(_config.wifi_ssid       );
+    JSON_DEBUG(F("WiFi Password : ")); JSON_DEBUGLN(F("<Hidden>")           );
 
-    DEBUG(F("IP            : ")); DEBUGLN(ip2str(config.ip,          buffer, 50));
-    DEBUG(F("DNS           : ")); DEBUGLN(ip2str(config.dns,         buffer, 50));
-    DEBUG(F("Gateway       : ")); DEBUGLN(ip2str(config.gateway,     buffer, 50));
-    DEBUG(F("Subnet Mask   : ")); DEBUGLN(ip2str(config.subnet_mask, buffer, 50));
+    JSON_DEBUG(F("IP            : ")); JSON_DEBUGLN(ip2str(config.ip,          buffer, 50));
+    JSON_DEBUG(F("DNS           : ")); JSON_DEBUGLN(ip2str(config.dns,         buffer, 50));
+    JSON_DEBUG(F("Gateway       : ")); JSON_DEBUGLN(ip2str(config.gateway,     buffer, 50));
+    JSON_DEBUG(F("Subnet Mask   : ")); JSON_DEBUGLN(ip2str(config.subnet_mask, buffer, 50));
 
-    DEBUG(F("MQTT Server   : ")); DEBUGLN(_config.mqtt_server     );
-    DEBUG(F("MQTT Username : ")); DEBUGLN(_config.mqtt_username   );
-    DEBUG(F("MQTT Password : ")); DEBUGLN(F("<Hidden>")           );
-    DEBUG(F("MQTT Port     : ")); DEBUGLN(_config.mqtt_port       );
+    JSON_DEBUG(F("MQTT Server   : ")); JSON_DEBUGLN(_config.mqtt_server     );
+    JSON_DEBUG(F("MQTT Username : ")); JSON_DEBUGLN(_config.mqtt_username   );
+    JSON_DEBUG(F("MQTT Password : ")); JSON_DEBUGLN(F("<Hidden>")           );
+    JSON_DEBUG(F("MQTT Port     : ")); JSON_DEBUGLN(_config.mqtt_port       );
 
-    DEBUG(F("MQTT Fingerprint : ["));
+    JSON_DEBUG(F("MQTT Fingerprint : ["));
     for (int i = 0; i < 20; i++) {
-      DEBUG(_config.mqtt_fingerprint[i]);
-      if (i < 19) DEBUG(F(","));
+      JSON_DEBUG(_config.mqtt_fingerprint[i]);
+      if (i < 19) JSON_DEBUG(F(","));
     }
-    DEBUGLN(F("]"));
-    DEBUGLN(F("---- The End ----"));
+    JSON_DEBUGLN(F("]"));
+    JSON_DEBUGLN(F("---- The End ----"));
   }
 
 #endif

@@ -53,12 +53,16 @@
   #define NET_TESTING 0
 #endif
 
+#ifndef JSON_TESTING
+  #define JSON_TESTING 0
+#endif
+
 #ifndef SERIAL_NEEDED
-  #if MAISON_TESTING||OTA_TESTING||NET_TESTING
-    #define SERIAL_NEEDED 1
-  #else
-    #define SERIAL_NEEDED 0
-  #endif
+#if MAISON_TESTING || OTA_TESTING || NET_TESTING || JSON_TESTING
+#define SERIAL_NEEDED 1
+#else
+#define SERIAL_NEEDED 0
+#endif
 #endif
 
 #ifndef QUICK_TURN
@@ -172,6 +176,22 @@
   #define NET_SHOW(f)
   #define NET_SHOW_RESULT(f)
   #define NET_ERROR(m)  { break; } ///< Exit the loop with an ERROR message
+#endif
+
+#if JSON_TESTING
+  #define JSON_DEBUG(a) Serial.print(a)
+  #define JSON_DEBUGLN(a) Serial.println(a)
+  #define JSON_SHOW(f) JSON_DEBUGLN(F(f));
+  #define JSON_SHOW_RESULT(f)         \
+    JSON_DEBUG(F(" Result " f ": ")); \
+    JSON_DEBUGLN(result ? F("success") : F("FAILURE"))
+  #define JSON_ERROR(m)  { JSON_DEBUGLN(F(" ERROR: " m)); break; } ///< Exit the loop with an ERROR message
+#else
+  #define JSON_DEBUG(a)
+  #define JSON_DEBUGLN(a)
+  #define JSON_SHOW(f)
+  #define JSON_SHOW_RESULT(f)
+  #define JSON_ERROR(m)  { break; } ///< Exit the loop with an ERROR message
 #endif
 
 #define STRINGIZE(a) #a
