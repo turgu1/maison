@@ -595,9 +595,10 @@ void Maison::loop(Process * _process)
     break; \
   }
 
-#define GETA(dst, src, size) \
-  if (src.as<JsonArray>().copyTo(dst) != size) \
-    ERROR(" Copy To " STRINGIZE(dst) " with inconsistent size")
+#define GETA(dst, src, size) copyArray(src, dst)
+//\
+//  if (src.as<JsonArray>().copyTo(dst) != size) \
+//    ERROR(" Copy To " STRINGIZE(dst) " with inconsistent size")
 
 #define GETIP(dst, src) \
   if (!str2ip(src, &dst)) \
@@ -680,7 +681,7 @@ bool Maison::load_config(int _file_version)
 }
 
 #define PUT(src, dst) dst = src
-#define PUTA(src, dst, len) dst.copyFrom(src)
+#define PUTA(src, dst, len) copyArray(src, dst)
 #define PUTIP(src, dst) ip2str(src, buffer, 50); dst = buffer;
 
 bool Maison::save_config()
@@ -705,7 +706,7 @@ bool Maison::save_config()
     DynamicJsonDocument doc(2048);
 
     JsonArray arr = doc.createNestedArray("mqtt_fingerprint");
-    if (!arr.success()) ERROR("Unable to create JSON array object");
+    //if (!arr.success()) ERROR("Unable to create JSON array object");
 
     PUT  (config.version,          doc["version"         ]);
     PUT  (config.device_name,      doc["device_name"     ]);
@@ -721,7 +722,7 @@ bool Maison::save_config()
     PUT  (config.mqtt_port,        doc["mqtt_port"       ]);
     PUTA (config.mqtt_fingerprint, arr, 20);
 
-    if (!doc.printTo(file)) ERROR("Unable to send JSON content to file /config.json");
+    serializeJson(doc, file);
 
     OK_DO;
   }
