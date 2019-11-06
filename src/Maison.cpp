@@ -334,13 +334,16 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
                 // log uses buffer too...
                 memcpy(tmp, md5, 32);
                 tmp[32] = 0;
-                OTA_DEBUGLN(F("Code update started with size %d and md5: %s."), size, tmp);
+                OTA_DEBUG(F("Code update started with size "));
+                OTA_DEBUG(size); 
+                OTA_DEBUG(F(" and ")); 
+                OTA_DEBUGLN(tmp);
                 log(F("Code update started with size %d and md5: %s."), size, tmp);
                 wait_for_completion = true;
               }
               else {
-                OTA_DEBUGLN(F("Error: Code upload not started: %s"),
-                            cons.getErrorStr().c_str());
+                OTA_DEBUG(F("Error: Code upload not started: ");
+                OTA_DEBUGLN(cons.getErrorStr().c_str());
                 log(F("Error: Code upload not started: %s"),
                     cons.getErrorStr().c_str());
               }
@@ -348,7 +351,11 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
             else {
               // log uses buffer too...
               strlcpy(tmp, name, sizeof(tmp));
-              OTA_DEBUGLN(F("Error: Code upload aborted. App name differ (%s vs %s)"), APP_NAME, tmp);
+              OTA_DEBUG(F("Error: Code upload aborted. App name differ (");
+              OTA_DEBUG(APP_NAME);
+              OTA_DEBUG(F(" vs "));
+              OTA_DEBUG(tmp);
+              OTA_DEBUGLN(F(")"));
               log(F("Error: Code upload aborted. App name differ (%s vs %s)"), APP_NAME, tmp);
             }
           }

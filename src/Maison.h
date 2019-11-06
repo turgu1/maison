@@ -613,7 +613,7 @@ class Maison
     void  send_state_msg(const char * _msg_type);
     void  get_new_config();
 
-    #if MAISON_TESTING
+    #if JSON_TESTING
       void show_config(Config & _config);
     #endif
 
