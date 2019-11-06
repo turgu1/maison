@@ -698,7 +698,7 @@ bool Maison::save_config()
 
     if (!file) ERROR("Unable to open file /config.json");
 
-    DynamicJsonBuffer jsonBuffer;
+    DynamicJsonDocument jsonBuffer[2048];
 
     JsonObject & root = jsonBuffer.createObject();
     if (!root.success()) ERROR("Unable to create JSON root object");
