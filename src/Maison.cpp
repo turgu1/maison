@@ -704,7 +704,7 @@ bool Maison::save_config()
 
     DynamicJsonDocument doc(2048);
 
-    JsonArray & arr = doc.createNestedArray("mqtt_fingerprint");
+    JsonArray arr = doc.createNestedArray("mqtt_fingerprint");
     if (!arr.success()) ERROR("Unable to create JSON array object");
 
     PUT  (config.version,          doc["version"         ]);
