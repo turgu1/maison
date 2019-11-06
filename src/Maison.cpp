@@ -196,7 +196,7 @@ void Maison::send_state_msg(const char * _msg_type)
 
 void Maison::get_new_config()
 {
-  DynamicJsonBuffer jsonBuffer;
+  DynamicJsonDocument jsonBuffer[2048];
   JsonObject & root = jsonBuffer.parseObject(&buffer[7]);
 
   if (!root.success()) {
@@ -310,7 +310,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
 
     #if MQTT_OTA
       if (strncmp(buffer, "NEW_CODE:{", 10) == 0) {
-        DynamicJsonBuffer jsonBuffer;
+        DynamicJsonDocument jsonBuffer[2048];
         JsonObject & root = jsonBuffer.parseObject(&buffer[9]);
 
         long         size = root["SIZE"].as<long>();
@@ -653,7 +653,7 @@ bool Maison::load_config(int _file_version)
     file = SPIFFS.open(the_filename, "r");
     if (!file) ERROR("Unable to open file");
 
-    DynamicJsonBuffer jsonBuffer;
+    DynamicJsonDocument jsonBuffer[2048];
 
     JsonObject & root = jsonBuffer.parseObject(file);
 
