@@ -583,7 +583,7 @@ class Maison
     }
 
     State check_if_24_hours_time(State _default_state);
-    bool retrieve_config(JsonObject _doc, Config & _config);
+    bool retrieve_config(DynamicJsonDocument _doc, Config &_config);
     bool load_config(int _version = 0);
 
     bool init_callbacks();
