@@ -768,7 +768,7 @@ int Maison::reset_reason()
 
 bool Maison::wifi_connect()
 {
-  SHOW("wifi_connect()");
+  NET_SHOW("wifi_connect()");
 
   DO {
     if (!wifi_connected()) {
@@ -786,9 +786,9 @@ bool Maison::wifi_connect()
       int attempt = 0;
       while (!wifi_connected()) {
         delay(200);
-        DEBUG(F("."));
+        NET_DEBUG(F("."));
         if (++attempt >= 150) {
-          ERROR("Unable to connect to WiFi");
+          NET_ERROR("Unable to connect to WiFi");
         }
       }
     }
@@ -798,7 +798,7 @@ bool Maison::wifi_connect()
 
   result = wifi_connected();
   
-  SHOW_RESULT("wifi_connect()");
+  NET_SHOW_RESULT("wifi_connect()");
 
   return result;
 }
@@ -851,10 +851,10 @@ static char tmp_buff[50]; // Shared by mqtt_connect(), send_msg() and log()
 
 bool Maison::mqtt_connect()
 {
-  SHOW("mqtt_connect()");
+  NET_SHOW("mqtt_connect()");
 
   DO {
-    if (!wifi_connect()) ERROR("WiFi");
+    if (!wifi_connect()) NET_ERROR("WiFi");
 
     if (!mqtt_connected()) {
 
@@ -872,8 +872,8 @@ bool Maison::mqtt_connect()
       strlcpy(tmp_buff, "client-",          sizeof(tmp_buff));
       strlcat(tmp_buff, config.device_name, sizeof(tmp_buff));
 
-      DEBUG(F(" Client name: ")); DEBUGLN(tmp_buff            );
-      DEBUG(F(" Username: "   )); DEBUGLN(config.mqtt_username);
+      NET_DEBUG(F(" Client name: ")); NET_DEBUGLN(tmp_buff            );
+      NET_DEBUG(F(" Username: "   )); NET_DEBUGLN(config.mqtt_username);
 
       mqtt_client.connect(tmp_buff,
                           config.mqtt_username,
@@ -885,13 +885,13 @@ bool Maison::mqtt_connect()
         if (!init_callbacks()) break;
       }
       else {
-        DEBUG(F(" Unable to connect to mqtt. State: "));
-        DEBUGLN(mqtt_client.state());
-        DEBUG(F(" Last SSL Error: "));
-        DEBUGLN(wifi_client->getLastSSLError());
+        NET_DEBUG(F(" Unable to connect to mqtt. State: "));
+        NET_DEBUGLN(mqtt_client.state());
+        NET_DEBUG(F(" Last SSL Error: "));
+        NET_DEBUGLN(wifi_client->getLastSSLError());
 
         if (++connect_retry_count >= 5) {
-          DEBUGLN(F(" Too many trials, reconnecting WiFi..."));
+          NET_DEBUGLN(F(" Too many trials, reconnecting WiFi..."));
           mqtt_client.disconnect();
           wifi_client->stop();
           WiFi.disconnect();
@@ -905,14 +905,14 @@ bool Maison::mqtt_connect()
     OK_DO;
   }
 
-  SHOW_RESULT("mqtt_connect()");
+  NET_SHOW_RESULT("mqtt_connect()");
 
   return result;
 }
 
 bool Maison::send_msg(const char * _topic_suffix, const __FlashStringHelper * _format, ...)
 {
-  SHOW("send_msg()");
+  NET_SHOW("send_msg()");
 
   va_list args;
   va_start (args, _format);
@@ -920,32 +920,32 @@ bool Maison::send_msg(const char * _topic_suffix, const __FlashStringHelper * _f
   vsnprintf_P(buffer, MQTT_MAX_PACKET_SIZE, (const char *) _format, args);
 
   DO {
-    DEBUG(F(" Sending msg to "));
-    DEBUG(build_topic(_topic_suffix, tmp_buff, sizeof(tmp_buff)));
-    DEBUG(F(": "));
-    DEBUGLN(buffer);
+    NET_DEBUG(F(" Sending msg to "));
+    NET_DEBUG(build_topic(_topic_suffix, tmp_buff, sizeof(tmp_buff)));
+    NET_DEBUG(F(": "));
+    NET_DEBUGLN(buffer);
 
     if (!mqtt_connected()) {
-      ERROR("Unable to connect to mqtt server");
+      NET_ERROR("Unable to connect to mqtt server");
     }
     else if (!mqtt_client.publish(build_topic(_topic_suffix, 
                                               tmp_buff, 
                                               sizeof(tmp_buff)), 
                                   buffer)) {
-      ERROR("Unable to publish message");
+      NET_ERROR("Unable to publish message");
     }
 
     OK_DO;
   }
 
-  SHOW_RESULT("send_msg()");
+  NET_SHOW_RESULT("send_msg()");
 
   return result;
 }
 
 bool Maison::log(const __FlashStringHelper * _format, ...)
 {
-  SHOW("log()");
+  NET_SHOW("log()");
 
   va_list args;
   va_start (args, _format);
@@ -958,23 +958,23 @@ bool Maison::log(const __FlashStringHelper * _format, ...)
   vsnprintf_P(&buffer[len], MQTT_MAX_PACKET_SIZE-len, (const char *) _format, args);
 
   DO {
-    DEBUG(F(" Log msg : "));
-    DEBUGLN(buffer);
+    NET_DEBUG(F(" Log msg : "));
+    NET_DEBUGLN(buffer);
 
     if (!mqtt_connected()) {
-      ERROR("Unable to connect to mqtt server");
+      NET_ERROR("Unable to connect to mqtt server");
     }
     else if (!mqtt_client.publish(build_topic(MAISON_LOG_TOPIC, 
                                               tmp_buff, 
                                               sizeof(tmp_buff)), 
                                   buffer)) {
-      ERROR("Unable to log message");
+      NET_ERROR("Unable to log message");
     }
 
     OK_DO;
   }
 
-  SHOW_RESULT("log()");
+  NET_SHOW_RESULT("log()");
 
   return result;
 }

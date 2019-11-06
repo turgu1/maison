@@ -56,7 +56,9 @@ Maison::UserResult process(Maison::State state)
 void setup() 
 {
   delay(100);
-  Serial.begin(74880);
+  #if SERIAL_NEEDED
+    Serial.begin(74880);
+  #endif
   
   pinMode(LED, OUTPUT);
   digitalWrite(LED, HIGH); // Turn LED off

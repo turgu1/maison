@@ -45,6 +45,22 @@
   #define MAISON_TESTING 0
 #endif
 
+#ifndef OTA_TESTING
+  #define OTA_TESTING 0
+#endif
+
+#ifndef NET_TESTING
+  #define NET_TESTING 0
+#endif
+
+#ifndef SERIAL_NEEDED
+  #if MAISON_TESTING||OTA_TESTING||NET_TESTING
+    #define SERIAL_NEEDED 1
+  #else
+    #define SERIAL_NEEDED 0
+  #endif
+#endif
+
 #ifndef QUICK_TURN
   #if MAISON_TESTING
     #define QUICK_TURN 1
@@ -115,22 +131,57 @@
   #define     DEBUGLN(a) Serial.println(a)
   #define        SHOW(f) DEBUGLN(F(f));
   #define SHOW_RESULT(f) DEBUG(F(" Result " f ": ")); DEBUGLN(result ? F("success") : F("FAILURE"))
+  #define OTA_TESTING 1
+  #define NET_TESTING 1
+  #define ERROR(m)  { DEBUGLN(F(" ERROR: " m)); break; } ///< Exit the loop with an ERROR message
 #else
   #define       DEBUG(a)
   #define     DEBUGLN(a)
   #define        SHOW(f)
   #define SHOW_RESULT(f)
+  #define       ERROR(m) { break; } ///< Exit the loop with an ERROR message
 #endif
 
-#define    STRINGIZE(a) #a
-#define       DEBUG2(a) Serial.print(a)
-#define     DEBUGLN2(a) Serial.println(a)
+#if OTA_TESTING
+  #define OTA_DEBUG(a) Serial.print(a)
+  #define OTA_DEBUGLN(a) Serial.println(a)
+  #define OTA_SHOW(f) OTA_DEBUGLN(F(f));
+  #define OTA_SHOW_RESULT(f)         \
+    OTA_DEBUG(F(" Result " f ": ")); \
+    OTA_DEBUGLN(result ? F("success") : F("FAILURE"))
+  #define OTA_ERROR(m)  { OTA_DEBUGLN(F(" ERROR: " m)); break; } ///< Exit the loop with an ERROR message
+#else
+  #define OTA_DEBUG(a)
+  #define OTA_DEBUGLN(a)
+  #define OTA_SHOW(f)
+  #define OTA_SHOW_RESULT(f)
+  #define ERROR(m)  { break; } ///< Exit the loop with an ERROR message
+#endif
+
+#if NET_TESTING
+  #define NET_DEBUG(a) Serial.print(a)
+  #define NET_DEBUGLN(a) Serial.println(a)
+  #define NET_SHOW(f) NET_DEBUGLN(F(f));
+  #define NET_SHOW_RESULT(f)         \
+    NET_DEBUG(F(" Result " f ": ")); \
+    NET_DEBUGLN(result ? F("success") : F("FAILURE"))
+  #define NET_ERROR(m)  { NET_DEBUGLN(F(" ERROR: " m)); break; } ///< Exit the loop with an ERROR message
+#else
+  #define NET_DEBUG(a)
+  #define NET_DEBUGLN(a)
+  #define NET_SHOW(f)
+  #define NET_SHOW_RESULT(f)
+  #define NET_ERROR(m)  { break; } ///< Exit the loop with an ERROR message
+#endif
+
+#define STRINGIZE(a) #a
+#define    DEBUG2(a) Serial.print(a)
+#define  DEBUGLN2(a) Serial.println(a)
 
 // Syntactic sugar
 
 #define DO        bool result = false; while (true)    ///< Beginning of a DO loop
 #define OK_DO     { result = true; break; }            ///< Successful exit of a DO loop
-#define ERROR(m)  { DEBUGLN(F(" ERROR: " m)); break; } ///< Exit the loop with an ERROR message
 
 // To get WATCHDOG Time faster during tests
 
