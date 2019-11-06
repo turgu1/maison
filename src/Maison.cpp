@@ -213,7 +213,7 @@ void Maison::get_new_config()
         mqtt_client.unsubscribe(topic);
         if (user_sub_topic) mqtt_client.unsubscribe(user_topic);
         config = cfg;
-        #if MAISON_TESTING
+        #if JSON_TESTING
           show_config(config);
         #endif
         save_config();

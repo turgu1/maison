@@ -45,16 +45,30 @@
   #define MAISON_TESTING 0
 #endif
 
-#ifndef OTA_TESTING
-  #define OTA_TESTING 0
-#endif
+#if MAISON_TESTING
+  #ifndef OTA_TESTING
+    #define OTA_TESTING 1
+  #endif
 
-#ifndef NET_TESTING
-  #define NET_TESTING 0
-#endif
+  #ifndef NET_TESTING
+    #define NET_TESTING 1
+  #endif
 
-#ifndef JSON_TESTING
-  #define JSON_TESTING 0
+  #ifndef JSON_TESTING
+    #define JSON_TESTING 1
+  #endif
+#else
+  #ifndef OTA_TESTING
+    #define OTA_TESTING 0
+  #endif
+
+  #ifndef NET_TESTING
+    #define NET_TESTING 0
+  #endif
+
+  #ifndef JSON_TESTING
+    #define JSON_TESTING 0
+  #endif
 #endif
 
 #ifndef SERIAL_NEEDED
@@ -135,8 +149,6 @@
   #define     DEBUGLN(a) Serial.println(a)
   #define        SHOW(f) DEBUGLN(F(f));
   #define SHOW_RESULT(f) DEBUG(F(" Result " f ": ")); DEBUGLN(result ? F("success") : F("FAILURE"))
-  #define OTA_TESTING 1
-  #define NET_TESTING 1
   #define ERROR(m)  { DEBUGLN(F(" ERROR: " m)); break; } ///< Exit the loop with an ERROR message
 #else
   #define       DEBUG(a)
