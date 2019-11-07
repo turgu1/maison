@@ -72,15 +72,15 @@
 #endif
 
 #ifndef SERIAL_NEEDED
-#if MAISON_TESTING || OTA_TESTING || NET_TESTING || JSON_TESTING
-#define SERIAL_NEEDED 1
-#else
-#define SERIAL_NEEDED 0
-#endif
+  #if MAISON_TESTING || OTA_TESTING || NET_TESTING || JSON_TESTING
+    #define SERIAL_NEEDED 1
+  #else
+    #define SERIAL_NEEDED 0
+  #endif
 #endif
 
 #ifndef QUICK_TURN
-  #if MAISON_TESTING
+  #if MAISON_TESTING || OTA_TESTING || NET_TESTING || JSON_TESTING
     #define QUICK_TURN 1
   #else
     #define QUICK_TURN 0

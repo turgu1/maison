@@ -450,11 +450,11 @@ void Maison::loop(Process * _process)
 
       if (use_deep_sleep()) {
         NET_DEBUGLN(F("Unable to connect to MQTT Server. Deep Sleep for 1 hour."));
-        deep_sleep(true, 3600);
+        deep_sleep(true, ONE_HOUR);
       }
       else {
         long now = millis();
-        if ((now - last_reconnect_attempt) > 3600000) {
+        if ((now - last_reconnect_attempt) > (ONE_HOUR * 1000)) {
           last_reconnect_attempt = now;
           if (!mqtt_connect()) return;
         }
@@ -488,7 +488,7 @@ void Maison::loop(Process * _process)
 
     if (wait_for_completion) {
       wait_for_completion = false;
-      NET_DEBUGLN(F("Error: Wait for completion too long. Aborted."));
+      OTA_DEBUGLN(F("Error: Wait for completion too long. Aborted."));
       log(F("Error: Wait for completion too long. Aborted."));
     }
 
