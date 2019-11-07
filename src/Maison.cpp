@@ -434,9 +434,9 @@ void Maison::loop(Process * _process)
 
     if (first_connect_trial) {
       first_connect_trial    = false;
-      last_reconnect_attempt = millis();
       NET_DEBUGLN(F("First Connection Trial"));
       mqtt_connect();
+      last_reconnect_attempt = millis();
     }
 
     if (!mqtt_connected()) {
@@ -455,11 +455,13 @@ void Maison::loop(Process * _process)
       else {
         long now = millis();
         if ((now - last_reconnect_attempt) > (1000L * ONE_HOUR)) {
-          last_reconnect_attempt = now;
           NET_DEBUG(F("Been waiting for "));
           NET_DEBUG(ONE_HOUR);
           NET_DEBUGLN(F(" Seconds. Trying again..."));
-          if (!mqtt_connect()) return;
+          if (!mqtt_connect()) {
+            last_reconnect_attempt = millis();
+            return;
+          }
         }
         else {
           NET_DEBUG("-");
