@@ -601,8 +601,8 @@ void Maison::loop(Process * _process)
   }
 
 #define GETI(dst, src)                       \
-  if (src) {                                 \
-    dst = src;                               \
+  if (src.as<int>()) {                       \
+    dst = src.as<int>();                     \
   }                                          \
   else {                                     \
     JSON_DEBUG(F(" ERROR: Unable to get ")); \
