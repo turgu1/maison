@@ -295,18 +295,20 @@ void Maison::get_new_config()
 
 void Maison::process_callback(const char * _topic, byte * _payload, unsigned int _length)
 {
-  SHOW("process_callback()");
+  NET_SHOW("process_callback()");
 
   some_message_received = true;
 
   if (strcmp(_topic, build_topic(MAISON_CTRL_TOPIC, buffer, sizeof(buffer))) == 0) {
     int len;
 
-    DEBUG(F(" Received MQTT Message: "));
 
     memcpy(buffer, _payload, len = (_length >= sizeof(buffer)) ? (sizeof(buffer) - 1) : _length);
     buffer[len] = 0;
-    DEBUGLN(buffer);
+    if (!cons.isRunning()) {
+      NET_DEBUG(F(" Received MQTT Message: "));
+      NET_DEBUGLN(buffer);
+    }
 
     #if MQTT_OTA
       if (strncmp(buffer, "NEW_CODE:{", 10) == 0) {
@@ -385,22 +387,23 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
     #endif
 
     if (strncmp(buffer, "CONFIG:", 7) == 0) {
-      DEBUGLN(F(" New config received"));
+      NET_DEBUGLN(F(" New config received"));
       get_new_config();
     }
     else if (strncmp(buffer, "CONFIG?", 7) == 0) {
-      DEBUGLN(F(" Config content requested"));
+      NET_DEBUGLN(F(" Config content requested"));
       send_config_msg();
     }
     else if (strncmp(buffer, "STATE?", 6) == 0) {
-      DEBUGLN(F(" Config content requested"));
+      NET_DEBUGLN(F(" Config content requested"));
       send_state_msg("STATE");
     }
     else if (strncmp(buffer, "RESTART!", 8) == 0) {
-      DEBUGLN("Device is restarting");
+      NET_DEBUGLN("Device is restarting");
       restart_now = true;
     }
     else {
+      NET_DEBUGLN(F(" Warning: Unknown message received."));
       log(F("Warning: Unknown message received."));
     }
   }
@@ -431,7 +434,7 @@ void Maison::loop(Process * _process)
     if (first_connect_trial) {
       first_connect_trial    = false;
       last_reconnect_attempt = millis();
-      DEBUGLN(F("First Connection Trial"));
+      NET_DEBUGLN(F("First Connection Trial"));
       mqtt_connect();
     }
 
@@ -440,12 +443,12 @@ void Maison::loop(Process * _process)
       if (counting_lost_connection) {
         mem.lost_count += 1;
         counting_lost_connection = false;
-        DEBUG(F(" Connection Lost Count: "));
-        DEBUGLN(mem.lost_count);
+        NET_DEBUG(F(" Connection Lost Count: "));
+        NET_DEBUGLN(mem.lost_count);
       }
 
       if (use_deep_sleep()) {
-        DEBUGLN(F("Unable to connect to MQTT Server. Deep Sleep for 5 seconds."));
+        NET_DEBUGLN(F("Unable to connect to MQTT Server. Deep Sleep for 5 seconds."));
         deep_sleep(true, 5);
       }
       else {
@@ -455,7 +458,7 @@ void Maison::loop(Process * _process)
           if (!mqtt_connect()) return;
         }
         else {
-          DEBUG("-");
+          NET_DEBUG("-");
           return;
         }
       }
@@ -463,7 +466,7 @@ void Maison::loop(Process * _process)
 
     counting_lost_connection = true;
 
-    DEBUGLN(F("MQTT Connected."));
+    NET_DEBUGLN(F("MQTT Connected."));
 
     // Consume all pending messages. For OTA updates, as the request
     // is composed of 2 messages, 
@@ -482,6 +485,7 @@ void Maison::loop(Process * _process)
              (wait_for_completion && ((millis() - start) < 120000)));
     if (wait_for_completion) {
       wait_for_completion = false;
+      NET_DEBUGLN(F("Error: Wait for completion too long. Aborted."));
       log(F("Error: Wait for completion too long. Aborted."));
     }
     if (restart_now) restart();
