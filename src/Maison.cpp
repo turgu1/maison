@@ -621,7 +621,7 @@ void Maison::loop(Process * _process)
   if (!str2ip(src, &dst)) \
     JSON_ERROR(" Bad IP Address or Mask format for " STRINGIZE(dst))
 
-bool Maison::retrieve_config(JsonObject & _doc, Config & _config)
+bool Maison::retrieve_config(JsonObject _doc, Config & _config)
 {
   JSON_SHOW("retrieve_config()");
 
