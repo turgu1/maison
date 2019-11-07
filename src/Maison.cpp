@@ -463,11 +463,12 @@ void Maison::loop(Process * _process)
           return;
         }
       }
+      #if NET_TESTING
+        if (mqtt_connected()) NET_DEBUGLN(F("MQTT Connected."));
+      #endif
     }
 
     counting_lost_connection = true;
-
-    NET_DEBUGLN(F("MQTT Connected."));
 
     // Consume all pending messages. For OTA updates, as the request
     // is composed of 2 messages, 
