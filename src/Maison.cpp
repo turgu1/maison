@@ -205,7 +205,7 @@ void Maison::get_new_config()
   else {
     Config cfg;
 
-    if (!retrieve_config(doc["content"].as<JsonObject>(), cfg))
+    if (!retrieve_config(doc.as<JsonObject>(), cfg))
     {
       JSON_DEBUGLN(F(" ERROR: Unable to retrieve config from received message"));
     }
