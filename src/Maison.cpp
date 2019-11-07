@@ -456,6 +456,9 @@ void Maison::loop(Process * _process)
         long now = millis();
         if ((now - last_reconnect_attempt) > (1000L * ONE_HOUR)) {
           last_reconnect_attempt = now;
+          NET_DEBUG(F("Been waiting for "));
+          NET_DEBUG(ONE_HOUR);
+          NET_DEBUGLN(F(" Seconds. Trying again..."));
           if (!mqtt_connect()) return;
         }
         else {
