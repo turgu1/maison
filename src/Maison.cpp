@@ -288,7 +288,7 @@ void Maison::get_new_config()
     }
 
     void   showError() {  
-      DEBUGLN(getErrorStr()); 
+      OTA_DEBUGLN(getErrorStr()); 
     }
   } cons;
 
@@ -303,9 +303,9 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
   if (strcmp(_topic, build_topic(MAISON_CTRL_TOPIC, buffer, sizeof(buffer))) == 0) {
     int len;
 
-
     memcpy(buffer, _payload, len = (_length >= sizeof(buffer)) ? (sizeof(buffer) - 1) : _length);
     buffer[len] = 0;
+
     if (!cons.isRunning()) {
       NET_DEBUG(F(" Received MQTT Message: "));
       NET_DEBUGLN(buffer);
@@ -317,8 +317,8 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         DeserializationError error = deserializeJson(doc, &buffer[9]);
 
         if (error) {
+          OTA_DEBUGLN(F("Error: JSON content is in a wrong format"));
           log(F("Error: JSON content is in a wrong format"));
-          OTA_DEBUG(F("Error: JSON content is in a wrong format"));
         }
         else {
           long         size = doc["SIZE"].as<long>();
