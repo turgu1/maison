@@ -147,63 +147,57 @@
 #if MAISON_TESTING
   #define       DEBUG(a) Serial.print(a)
   #define     DEBUGLN(a) Serial.println(a)
-  #define        SHOW(f) DEBUGLN(F(f));
-  #define SHOW_RESULT(f) DEBUG(F(" Result " f ": ")); DEBUGLN(result ? F("success") : F("FAILURE"))
-  #define ERROR(m)  { DEBUGLN(F(" ERROR: " m)); break; } ///< Exit the loop with an ERROR message
+  #define        SHOW(f) DEBUGLN(F(f))
+  #define SHOW_RESULT(f) { DEBUG(F(" Result " f ": ")); DEBUGLN(result ? F("success") : F("FAILURE")); }
+  #define       ERROR(m) { DEBUGLN(F(" ERROR: " m)); break; } ///< Exit the loop with an ERROR message
 #else
   #define       DEBUG(a)
   #define     DEBUGLN(a)
   #define        SHOW(f)
   #define SHOW_RESULT(f)
-  #define       ERROR(m) { break; } ///< Exit the loop with an ERROR message
+  #define       ERROR(m) { break; } ///< Exit the loop
 #endif
 
 #if OTA_TESTING
-  #define OTA_DEBUG(a) Serial.print(a)
-  #define OTA_DEBUGLN(a) Serial.println(a)
-  #define OTA_SHOW(f) OTA_DEBUGLN(F(f));
-  #define OTA_SHOW_RESULT(f)         \
-    OTA_DEBUG(F(" Result " f ": ")); \
-    OTA_DEBUGLN(result ? F("success") : F("FAILURE"))
-  #define OTA_ERROR(m)  { OTA_DEBUGLN(F(" ERROR: " m)); break; } ///< Exit the loop with an ERROR message
+  #define       OTA_DEBUG(a) Serial.print(a)
+  #define     OTA_DEBUGLN(a) Serial.println(a)
+  #define        OTA_SHOW(f) OTA_DEBUGLN(F(f))
+  #define OTA_SHOW_RESULT(f) { OTA_DEBUG(F(" Result " f ": ")); OTA_DEBUGLN(result ? F("success") : F("FAILURE")); }
+  #define       OTA_ERROR(m) { OTA_DEBUGLN(F(" ERROR: " m)); break; } ///< Exit the loop with an ERROR message
 #else
-  #define OTA_DEBUG(a)
-  #define OTA_DEBUGLN(a)
-  #define OTA_SHOW(f)
+  #define       OTA_DEBUG(a)
+  #define     OTA_DEBUGLN(a)
+  #define        OTA_SHOW(f)
   #define OTA_SHOW_RESULT(f)
-  #define ERROR(m)  { break; } ///< Exit the loop with an ERROR message
+  #define           ERROR(m)  { break; } ///< Exit the loop
 #endif
 
 #if NET_TESTING
-  #define NET_DEBUG(a) Serial.print(a)
-  #define NET_DEBUGLN(a) Serial.println(a)
-  #define NET_SHOW(f) NET_DEBUGLN(F(f));
-  #define NET_SHOW_RESULT(f)         \
-    NET_DEBUG(F(" Result " f ": ")); \
-    NET_DEBUGLN(result ? F("success") : F("FAILURE"))
-  #define NET_ERROR(m)  { NET_DEBUGLN(F(" ERROR: " m)); break; } ///< Exit the loop with an ERROR message
+  #define       NET_DEBUG(a) Serial.print(a)
+  #define     NET_DEBUGLN(a) Serial.println(a)
+  #define        NET_SHOW(f) NET_DEBUGLN(F(f))
+  #define NET_SHOW_RESULT(f) { NET_DEBUG(F(" Result " f ": ")); NET_DEBUGLN(result ? F("success") : F("FAILURE")); }
+  #define       NET_ERROR(m) { NET_DEBUGLN(F(" ERROR: " m)); break; } ///< Exit the loop with an ERROR message
 #else
-  #define NET_DEBUG(a)
-  #define NET_DEBUGLN(a)
-  #define NET_SHOW(f)
+  #define       NET_DEBUG(a)
+  #define     NET_DEBUGLN(a)
+  #define        NET_SHOW(f)
   #define NET_SHOW_RESULT(f)
-  #define NET_ERROR(m)  { break; } ///< Exit the loop with an ERROR message
+  #define       NET_ERROR(m)  { break; } ///< Exit the loop
 #endif
 
 #if JSON_TESTING
-  #define JSON_DEBUG(a) Serial.print(a)
-  #define JSON_DEBUGLN(a) Serial.println(a)
-  #define JSON_SHOW(f) JSON_DEBUGLN(F(f));
-  #define JSON_SHOW_RESULT(f)         \
-    JSON_DEBUG(F(" Result " f ": ")); \
-    JSON_DEBUGLN(result ? F("success") : F("FAILURE"))
-  #define JSON_ERROR(m)  { JSON_DEBUGLN(F(" ERROR: " m)); break; } ///< Exit the loop with an ERROR message
+  #define       JSON_DEBUG(a) Serial.print(a)
+  #define     JSON_DEBUGLN(a) Serial.println(a)
+  #define        JSON_SHOW(f) JSON_DEBUGLN(F(f))
+  #define JSON_SHOW_RESULT(f) { JSON_DEBUG(F(" Result " f ": ")); JSON_DEBUGLN(result ? F("success") : F("FAILURE")); }
+  #define       JSON_ERROR(m) { JSON_DEBUGLN(F(" ERROR: " m)); break; } ///< Exit the loop with an ERROR message
 #else
-  #define JSON_DEBUG(a)
-  #define JSON_DEBUGLN(a)
-  #define JSON_SHOW(f)
+  #define       JSON_DEBUG(a)
+  #define     JSON_DEBUGLN(a)
+  #define        JSON_SHOW(f)
   #define JSON_SHOW_RESULT(f)
-  #define JSON_ERROR(m)  { break; } ///< Exit the loop with an ERROR message
+  #define       JSON_ERROR(m) { break; } ///< Exit the loop
 #endif
 
 #define STRINGIZE(a) #a

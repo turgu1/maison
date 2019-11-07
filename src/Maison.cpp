@@ -449,12 +449,12 @@ void Maison::loop(Process * _process)
       }
 
       if (use_deep_sleep()) {
-        NET_DEBUGLN(F("Unable to connect to MQTT Server. Deep Sleep for 5 seconds."));
-        deep_sleep(true, 5);
+        NET_DEBUGLN(F("Unable to connect to MQTT Server. Deep Sleep for 1 hour."));
+        deep_sleep(true, 3600);
       }
       else {
         long now = millis();
-        if ((now - last_reconnect_attempt) > 5000) {
+        if ((now - last_reconnect_attempt) > 3600000) {
           last_reconnect_attempt = now;
           if (!mqtt_connect()) return;
         }
@@ -485,11 +485,13 @@ void Maison::loop(Process * _process)
       mqtt_loop();
     } while (some_message_received || 
              (wait_for_completion && ((millis() - start) < 120000)));
+
     if (wait_for_completion) {
       wait_for_completion = false;
       NET_DEBUGLN(F("Error: Wait for completion too long. Aborted."));
       log(F("Error: Wait for completion too long. Aborted."));
     }
+
     if (restart_now) restart();
     if (reboot_now) reboot();
   }
@@ -810,7 +812,7 @@ bool Maison::wifi_connect()
       while (!wifi_connected()) {
         delay(200);
         NET_DEBUG(F("."));
-        if (++attempt >= 150) {
+        if (++attempt >= 50) { // 10 seconds
           NET_ERROR("Unable to connect to WiFi");
         }
       }
