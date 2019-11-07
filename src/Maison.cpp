@@ -205,7 +205,8 @@ void Maison::get_new_config()
   else {
     Config cfg;
 
-    if (!retrieve_config(doc["content"], cfg)) {
+    if (!retrieve_config(doc["content"].as<JsonObject>(), cfg))
+    {
       JSON_DEBUGLN(F(" ERROR: Unable to retrieve config from received message"));
     }
     else {
@@ -620,7 +621,7 @@ void Maison::loop(Process * _process)
   if (!str2ip(src, &dst)) \
     JSON_ERROR(" Bad IP Address or Mask format for " STRINGIZE(dst))
 
-bool Maison::retrieve_config(DynamicJsonDocument _doc, Config & _config)
+bool Maison::retrieve_config(JsonObject & _doc, Config & _config)
 {
   JSON_SHOW("retrieve_config()");
 
@@ -681,7 +682,9 @@ bool Maison::load_config(int _file_version)
 
     if (error) JSON_ERROR("Unable to parse JSON content");
 
-    if (!retrieve_config(doc, config)) JSON_ERROR("Unable to read config elements");
+    if (!retrieve_config(doc.as<JsonObject>(), config)) {
+      JSON_ERROR("Unable to read config elements");
+    }
 
     OK_DO;
   }
