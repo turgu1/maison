@@ -488,13 +488,13 @@ void Maison::loop(Process * _process)
     NET_DEBUGLN(F("Check for new coming messages..."));
     do {
       some_message_received = false;
-      delay(5000);
-      yield();
-      delay(5000);
-      wifi_client->loop();
-      NET_DEBUG(F("Data available from the network: "));
-      NET_DEBUGLN(wifi_client->available());
-      mqtt_loop();
+      for (int i = 0; i < 200; i++) {
+        yield();
+        mqtt_loop();
+      }
+      //NET_DEBUG(F("Data available from the network: "));
+      //NET_DEBUGLN(wifi_client->available());
+      //mqtt_loop();
       #if NET_TESTING
         if (some_message_received) {
           NET_DEBUGLN(F("Some message received."));
