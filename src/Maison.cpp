@@ -488,9 +488,9 @@ void Maison::loop(Process * _process)
     NET_DEBUGLN(F("Check for new coming messages..."));
     do {
       some_message_received = false;
-      delay(100);
+      delay(500);
       yield();
-      delay(100);
+      delay(500);
       mqtt_loop();
       #if NET_TESTING
         if (some_message_received) {
