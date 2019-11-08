@@ -1,0 +1,16 @@
+BasedOnStyle: Mozilla
+IndentWidth: 2
+AlignAfterOpenBracket: BAS_Align
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignConsecutiveMacros: true
+AlignEscapedNewlines: ENAS_Left
+AlignOperands: true
+AlignTrailingComments: true
+BreakBeforeBraces: Custom
+BraceWrapping:
+  BeforeElse: true
+  AfterFunction: true
+  AfterStruct: false
+IndentCaseLabels: true
+IndentPPDirectives: PPDIS_BeforeHash
