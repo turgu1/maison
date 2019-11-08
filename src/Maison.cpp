@@ -485,10 +485,12 @@ void Maison::loop(Process * _process)
     // of wait time, it will be aborted. This is to control battery drain.
 
     uint32_t start = millis();
+    NET_DEBUGLN(F("Check for new coming messages..."));
     do {
       some_message_received = false;
       delay(100);
       yield();
+      delay(100);
       mqtt_loop();
       #if NET_TESTING
         if (some_message_received) {
@@ -842,44 +844,44 @@ bool Maison::wifi_connect()
 
 bool Maison::init_callbacks()
 {
-  SHOW("init_callbacks()");
+  NET_SHOW("init_callbacks()");
 
   DO {
     mqtt_client.setCallback(maison_callback);
     if (!mqtt_client.subscribe(
                  build_topic(MAISON_CTRL_TOPIC, topic, sizeof(topic)),
                  1)) {
-      DEBUG(F(" Hum... unable to subscribe to topic (State:"));
-      DEBUG(mqtt_client.state());
-      DEBUG(F("): "));
-      DEBUGLN(topic);
+      NET_DEBUG(F(" Hum... unable to subscribe to topic (State:"));
+      NET_DEBUG(mqtt_client.state());
+      NET_DEBUG(F("): "));
+      NET_DEBUGLN(topic);
       break;
     }
     else {
-      DEBUG(F(" Subscription completed to topic "));
-      DEBUGLN(topic);
+      NET_DEBUG(F(" Subscription completed to topic "));
+      NET_DEBUGLN(topic);
     }
 
     if (user_sub_topic != NULL) {
-      build_topic(user_sub_topic, user_topic, sizeof(user_topic));
+      NET_build_topic(user_sub_topic, user_topic, sizeof(user_topic));
 
       if (!mqtt_client.subscribe(user_topic, user_qos)) {
-        DEBUG(F(" Hum... unable to subscribe to user topic (State:"));
-        DEBUG(mqtt_client.state());
-        DEBUG(F("): "));
-        DEBUGLN(user_topic);
+        NET_DEBUG(F(" Hum... unable to subscribe to user topic (State:"));
+        NET_DEBUG(mqtt_client.state());
+        NET_DEBUG(F("): "));
+        NET_DEBUGLN(user_topic);
         break;
       }
       else {
-        DEBUG(F(" Subscription completed to user topic "));
-        DEBUGLN(user_topic);
+        NET_DEBUG(F(" Subscription completed to user topic "));
+        NET_DEBUGLN(user_topic);
       }
     }
     
     OK_DO;
   }
 
-  SHOW_RESULT("init_callbacks()");
+  NET_SHOW_RESULT("init_callbacks()");
 
   return result;
 }
