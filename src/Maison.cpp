@@ -863,7 +863,7 @@ bool Maison::init_callbacks()
     }
 
     if (user_sub_topic != NULL) {
-      NET_build_topic(user_sub_topic, user_topic, sizeof(user_topic));
+      build_topic(user_sub_topic, user_topic, sizeof(user_topic));
 
       if (!mqtt_client.subscribe(user_topic, user_qos)) {
         NET_DEBUG(F(" Hum... unable to subscribe to user topic (State:"));
