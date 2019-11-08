@@ -583,7 +583,7 @@ class Maison
     void wifi_flush();
 
     friend void maison_callback(const char * _topic, byte * _payload, unsigned int _length);
-    void process_callback(const char * _topic, byte * _payload, unsigned int _length);
+    void       process_callback(const char * _topic, byte * _payload, unsigned int _length);
 
     inline bool   wifi_connected() { return WiFi.status() == WL_CONNECTED;             }
     inline bool   mqtt_connected() { return mqtt_client.connected();                   }

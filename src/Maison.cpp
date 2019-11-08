@@ -484,11 +484,17 @@ void Maison::loop(Process * _process)
     // below insure that if the code has not been received inside 2 minutes
     // of wait time, it will be aborted. This is to control battery drain.
 
-    long start = millis();
+    uint32_t start = millis();
     do {
       some_message_received = false;
+      delay(100);
       yield();
       mqtt_loop();
+      #if NET_TESTING
+        if (some_message_received) {
+          NET_DEBUGLN(F("Some message received."));
+        }
+      #endif
     } while (some_message_received || 
              (wait_for_completion && ((millis() - start) < 120000)));
 
