@@ -491,6 +491,7 @@ void Maison::loop(Process * _process)
       delay(5000);
       yield();
       delay(5000);
+      wifi_client->loop();
       NET_DEBUG(F("Data available from the network: "));
       NET_DEBUGLN(wifi_client->available());
       mqtt_loop();
