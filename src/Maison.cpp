@@ -454,7 +454,8 @@ void Maison::loop(Process * _process)
       }
       else {
         long now = millis();
-        if ((now - last_reconnect_attempt) > (1000L * ONE_HOUR)) {
+        if ((now - last_reconnect_attempt) > (1000L * ONE_HOUR))
+        {
           NET_DEBUG(F("\r\nBeen waiting for "));
           NET_DEBUG(ONE_HOUR);
           NET_DEBUGLN(F(" Seconds. Trying again..."));
@@ -1021,15 +1022,15 @@ void Maison::deep_sleep(bool _back_with_wifi, uint16_t _sleep_time_in_sec)
 
   wifi_flush();
 
-  uint32_t sleep_time = 1e6 * _sleep_time_in_sec;
+  uint32_t sleep_time = 1000000U * _sleep_time_in_sec;
 
   // When _sleep_time_in_sec is 0, will sleep only for 100ms
   if (sleep_time == 0) {
-    sleep_time = 100000;
+    sleep_time = 100000U;
     mem.one_hour_step_count += millis() + 100;
   }
   else {
-    mem.one_hour_step_count += millis() + (1000u * _sleep_time_in_sec);
+    mem.one_hour_step_count += millis() + (1000U * _sleep_time_in_sec);
   }
 
   mem.elapse_time = micros() - loop_time_marker + sleep_time;
@@ -1051,7 +1052,7 @@ Maison::State Maison::check_if_24_hours_time(Maison::State _default_state)
   DEBUG(", ");
   DEBUGLN(mem.one_hour_step_count);
 
-  if (mem.one_hour_step_count >= (ONE_HOUR * 1000)) {
+  if (mem.one_hour_step_count >= (1000U * ONE_HOUR)) {
     mem.one_hour_step_count = 0;
     if (++mem.hours_24_count >= 24) {
       mem.hours_24_count = 0;
