@@ -928,10 +928,10 @@ bool Maison::mqtt_connect()
 
       if (mqtt_connected()) {
         if (!init_callbacks()) break;
-        for (int i = 0; i < 2000; i++) {
-          yield();
-          mqtt_client.loop();
-        }
+        //for (int i = 0; i < 2000; i++) {
+        //  yield();
+        //  mqtt_client.loop();
+        //}
       }
       else {
         NET_DEBUG(F(" Unable to connect to mqtt. State: "));
