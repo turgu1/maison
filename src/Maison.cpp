@@ -850,7 +850,6 @@ bool Maison::init_callbacks()
   NET_SHOW("init_callbacks()");
 
   DO {
-    mqtt_client.setCallback(maison_callback);
     if (!mqtt_client.subscribe(
                  build_topic(MAISON_CTRL_TOPIC, topic, sizeof(topic)),
                  1)) {
@@ -866,8 +865,6 @@ bool Maison::init_callbacks()
     }
 
     if (user_sub_topic != NULL) {
-      build_topic(user_sub_topic, user_topic, sizeof(user_topic));
-
       if (!mqtt_client.subscribe(user_topic, user_qos)) {
         NET_DEBUG(F(" Hum... unable to subscribe to user topic (State:"));
         NET_DEBUG(mqtt_client.state());
@@ -910,6 +907,11 @@ bool Maison::mqtt_connect()
       wifi_client->setFingerprint(config.mqtt_fingerprint);
       mqtt_client.setClient(*wifi_client);
       mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
+      mqtt_client.setCallback(maison_callback);
+
+      if (user_sub_topic != NULL) {
+        build_topic(user_sub_topic, user_topic, sizeof(user_topic));
+      }
 
       strlcpy(tmp_buff, "client-",          sizeof(tmp_buff));
       strlcat(tmp_buff, config.device_name, sizeof(tmp_buff));
