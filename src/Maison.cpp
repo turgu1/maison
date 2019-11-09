@@ -488,13 +488,10 @@ void Maison::loop(Process * _process)
     NET_DEBUGLN(F("Check for new coming messages..."));
     do {
       some_message_received = false;
-      for (int i = 0; i < 200; i++) {
+      for (int i = 0; i < 20000; i++) {
         yield();
         mqtt_loop();
       }
-      //NET_DEBUG(F("Data available from the network: "));
-      //NET_DEBUGLN(wifi_client->available());
-      //mqtt_loop();
       #if NET_TESTING
         if (some_message_received) {
           NET_DEBUGLN(F("Some message received."));
@@ -928,10 +925,6 @@ bool Maison::mqtt_connect()
 
       if (mqtt_connected()) {
         if (!init_callbacks()) break;
-        //for (int i = 0; i < 2000; i++) {
-        //  yield();
-        //  mqtt_client.loop();
-        //}
       }
       else {
         NET_DEBUG(F(" Unable to connect to mqtt. State: "));
