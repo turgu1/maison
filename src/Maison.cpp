@@ -926,7 +926,7 @@ bool Maison::mqtt_connect()
                           !use_deep_sleep());  // Permanent session if deep sleep
 
       if (mqtt_connected()) {
-        if (!init_callbacks()) break;
+        //if (!init_callbacks()) break;
       }
       else {
         NET_DEBUG(F(" Unable to connect to mqtt. State: "));
