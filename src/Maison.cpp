@@ -918,6 +918,7 @@ bool Maison::mqtt_connect()
 
       NET_DEBUG(F(" Client name: ")); NET_DEBUGLN(tmp_buff            );
       NET_DEBUG(F(" Username: "   )); NET_DEBUGLN(config.mqtt_username);
+      NET_DEBUG(F(" Clean session: ")); NET_DEBUGLN(use_deep_sleep() ? F("No") : F("Yes"));
 
       mqtt_client.connect(tmp_buff,
                           config.mqtt_username,
@@ -927,6 +928,10 @@ bool Maison::mqtt_connect()
 
       if (mqtt_connected()) {
         //if (!init_callbacks()) break;
+        for (int i = 0; i < 2000; i++) {
+          yield();
+          mqtt_client.loop();
+        }
       }
       else {
         NET_DEBUG(F(" Unable to connect to mqtt. State: "));
