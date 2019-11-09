@@ -927,7 +927,7 @@ bool Maison::mqtt_connect()
                           !use_deep_sleep());  // Permanent session if deep sleep
 
       if (mqtt_connected()) {
-        //if (!init_callbacks()) break;
+        if (!init_callbacks()) break;
         for (int i = 0; i < 2000; i++) {
           yield();
           mqtt_client.loop();
