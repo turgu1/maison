@@ -491,12 +491,13 @@ void Maison::loop(Process * _process)
       for (int i = 0; i < 20000; i++) {
         yield();
         mqtt_loop();
-      }
-      #if NET_TESTING
         if (some_message_received) {
-          NET_DEBUGLN(F("Some message received."));
+          NET_DEBUG(F("Message received after "));
+          NET_DEBUG(i);
+          NET_DEBUGLN(F(" loops."));
+          break;
         }
-      #endif
+      }
     } while (some_message_received || 
              (wait_for_completion && ((millis() - start) < 120000)));
 
