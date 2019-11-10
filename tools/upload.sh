@@ -2,9 +2,9 @@
 #
 # Example tool to upload a binary code through MQTT OTA as defined in maison.
 #
-# Usage: upload <DEVICE_NAME> <APPLICATION_NAME> <CODE_FILENAME>
+# Usage: upload <DEVICE_ID> <APPLICATION_NAME> <CODE_FILENAME>
 #
-# Example: upload KITCHEN1 SONOFF firmware.bin
+# Example: upload DE01F3003571 SONOFF firmware.bin
 #
 # To use it, you must setup the proper definitions below:
 #
