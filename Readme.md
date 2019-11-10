@@ -66,10 +66,11 @@ Note that *MQTT_MAX_PACKET_SIZE* can be larger depending of the application requ
 
 The following options in `platformio.ini` **shall** also be used:
 
-
+```
 framework = arduino
 platform = espressif8266
 ```
+
 ### 2.1 Compilation Options
 
 The **Maison** framework allow for some defined options to be modified through -D compilation parameters (PlatformIO: build_flags). The following are the compilation options available to change some library behavior:
