@@ -53,6 +53,8 @@ The **Maison** framework is using the following libraries and, through its libra
 * BearSSL
 * ArduinoJSON
 
+The PubSubClient library used is a modified version from the originator that adds the capability for message size greather than 64k. This is required to sustain OTA over MQTT.
+
 The following options **shall** be added to the `plarformio.ini` file of your application to integrate the framework:
 
 ```
@@ -64,7 +66,7 @@ Note that *MQTT_MAX_PACKET_SIZE* can be larger depending of the application requ
 
 The following options in `platformio.ini` **shall** also be used:
 
-```
+
 framework = arduino
 platform = espressif8266
 ```
@@ -74,12 +76,15 @@ The **Maison** framework allow for some defined options to be modified through -
 
 Option              | Default   | Description
 :------------------:|:---------:|------------------------------------------------------------------------
-MAISON_TESTING      |    0      | If = 1, enable debuging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any **Maison** function.
-QUICK_TURN          |    0      | If = 1, HOURS_24 state is fired every 2 minutes instead of 24 hours. This is automatically the case when *MAISON_TESTING* is set to 1, unless QUICK_TURN is also defined in build_flags.
-MAISON_PREFIX_TOPIC | maison | All topics used by the framework are prefixed with this text   
+MAISON_TESTING      |    0      | If = 1, enable debugging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any **Maison** function. This will put all other *XXX_TESTING* options to 1, unless they have been previously defined.
+NET_TESTING         |    0      | If = 1, enable network related debugging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any **Maison** function.
+OTA_TESTING         |    0      | If = 1, enable OTA related debugging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any **Maison** function.
+JSON_TESTING        |    0      | If = 1, enable JSONN related debugging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any **Maison** function.
+QUICK_TURN          |    0      | If = 1, HOURS_24 state is fired every 2 minutes instead of 24 hours. This is automatically the case when any *XXX_TESTING* is set to 1, unless QUICK_TURN is also defined in build_flags.
+MAISON_PREFIX_TOPIC | maison | All topics used by the framework are prefixed with this text
 MAISON_STATE_TOPIC  | state | Topic suffix where the framework state are sent
 MAISON_EVENT_TOPIC  | event | Topic suffix where the framework events are sent
-MAISON_CONFIG_TOPIC  | config | Topic suffix where the framework configuration are sent
+MAISON_CONFIG_TOPIC | config | Topic suffix where the framework configuration are sent
 MAISON_LOG_TOPIC    | log | Topic suffix where free text log messages are sent
 MAISON_CTRL_TOPIC   | ctrl | This is the topic suffix used to identify device-related control topic
 DEFAULT_SHORT_REBOOT_TIME |  5  | This is the default reboot time in seconds when deep sleep is enable. This is used at the end of the following states: *PROCESS_EVENT*, *WAIT_END_EVENT*, *END_EVENT*. For the other states, the wait time is 60 minutes (3600 seconds).
@@ -87,7 +92,9 @@ MQTT_OTA            | 0 | Allow for Over the Air (OTA) code update through MQTT 
 APP_NAME | UNKNOWN | Application name. Required for MQTT OTA as a mean to check the new binary to be compatible with the current.
 APP_VERSION | 1.0.0 | Application version number.
 
-The framework will subscribe to MQTT messages coming from the server on a topic built using *MAISON_PREFIX_TOPIC*, the device name and *CTRL_SUFFIX_TOPIC*. For example, if the device name is "WATER_SPILL", the subscribed topic would be `maison/WATER_SPILL/ctrl`.
+The framework will subscribe to MQTT messages coming from the server on a topic built using *MAISON_PREFIX_TOPIC*, the device MAC address and *MAISON_CTRL_TOPIC*. For example, if the device MAC address is "DE01F3003571", the subscribed topic would be `maison/DE01F3003571/ctrl`.
+
+The *SERIAL_NEEDED* flag can be checked by the user application to verify if any of the *XXX_TESTING* options has been set to 1. Usefull to initialize the serial port through the Serial.begin() method.
 
 ## 3. Usage
 
@@ -229,14 +236,14 @@ The **Maison** framework is automating access to the MQTT message broker through
   "version" : 1,
   "device_name" : "WATER_SPILL",
   "ssid" : "the wifi ssid",
+  "wifi_password" : "the wifi password",
   "ip" : "192.168.1.71",
   "dns" : "192.168.1.1",
   "gateway" : "192.168.1.1",
   "subnet_mask" : "255.255.255.0",
-  "wifi_password" : "the wifi password",
-  "mqtt_server_name" : "the server name or IP address",
-  "mqtt_user_name" : "the user name",
-  "mqtt_password" : "password",
+  "mqtt_server_name" : "the MQTT server name or IP address",
+  "mqtt_user_name" : "the MQTT user name",
+  "mqtt_password" : "the MQTT user password",
   "mqtt_port" : 8883,
   "mqtt_fingerprint" : [13,217,75,226,184,245,80,117,113,43,18,251,39,75,237,77,35,65,10,19]
 }
@@ -247,7 +254,7 @@ All parameters must be present in the file to be considered valid by the framewo
 Parameter | Description
 :--------:|------------------------------
 version | This is the sequential version number. This is the property of the Server responsible of transmitting new configuration files to the device. It must be incremented every time a new configuration file is sent to the device. The device will not update its configuration if the version number is not greater than the current one. Unsigned Integer value (16 bits).
-device_name | A unique identifier for the device. This identifier is used inside messages sent through MQTT. It is also used to generate the topics related to the device. It can be an empty string: the MAC address of the device WiFi interface will then be used as the identifier. Use letters, underscore, numbers to compose the identifier (no space or other special characters). Max length: 15 ASCII characters.
+device_name | A unique identifier for the device. This identifier is used inside messages sent through MQTT. It can be an empty string: the MAC address of the device WiFi interface will then be used as the identifier. Use letters, underscore, numbers to compose the identifier (no space or other special characters). Max length: 15 ASCII characters.
 ssid / wifi_password | The WiFi SSID and password. Required to reach the network. Max length: 15 ASCII characters each.
 ip | The ip address to set for the WiFi connection. If an empty string or equal to "0.0.0.0", the device will get its IP, dns, gateway adresses and subnet_mask from the network through DHCP.
 dns | The dns server IP address. Can be set to an empty string.
@@ -256,7 +263,7 @@ subnet_mask | The subnet mask. Can be set to an empty string.
 mqtt_server_name | This is the MQTT server name (SQDN) or IP address.  Max length: 31 ASCII characters.
 mqtt_user_name / mqtt_password | These are the credentials to connect to the MQTT server. Max length: 15 ASCII characters for user_name, 31 ASCII characters for password.
 mqtt_port | The TLS/SSL port number of the MQTT server. Unsigned Integer value (16 bits).
-mqtt_fingerprint | This is the fingerprint associated with the MQTT service certificate. It must be a vector of 20 decimal values. Each value correspond to a byte part of the fingerprint. This is used to validate the MQTT server by the BearSSL library. Length: 20 bytes.
+mqtt_fingerprint | This is the fingerprint associated with the MQTT service certificate. It must be a vector of 20 decimal values. Each value correspond to a byte part of the fingerprint. This is used to validate the MQTT server through the BearSSL library. Length: 20 bytes.
 
 ### 5.1 PlatformIO configuration
 
@@ -281,7 +288,13 @@ A SPIFFS flash file system must be put in place on the targeted device. This can
 
 ## 7. Messages sent by the framework
 
-The **Maison** framework automate some messages that are sent to the **maison/status** topic. All messages are sent using a JSON formatted string. 
+All MQTT messages transmitted/received by the application are using a topic names composed with the following information:
+
+* The MAISON_PREFIX_TOPIC value. Default is "maison". It can be redefined through a new #define definition.
+* The device_id: This is the hexadecimal MAC address of the device.
+* A suffix name as presented in the following sub-sections.
+
+The **Maison** framework automate some messages that are sent to **maison/device_id/xxx** topics. All message contents, but log messages, are sent using a JSON formatted string. Log messages are sent as free text.
 
 Here is a description of each message sent, namely:
 
@@ -289,10 +302,11 @@ Here is a description of each message sent, namely:
 * The Status message
 * The Watchdog message
 * The Config message
+* Log messages
 
 ### 7.1 The Startup message
 
-This message is sent to the MQTT topic **maison/status** when the device is reset (Usually because of a Power-On action or a reset button being pressed). It is not sent when a DeepSleep wake-up action is taken by the device.
+This message is sent to the MQTT topic **maison/device_id/state** when the device is reset (Usually because of a Power-On action or a reset button being pressed). It is not sent when a DeepSleep wake-up action is taken by the device.
 
 Parameter | Description
 :--------:|------------------
@@ -321,7 +335,7 @@ Example:
 
 ### 7.2 The Status message
 
-This message is sent to the MQTT topic **maison/status** when a message sent to the device control topic (e.g. **maison/device_name/ctrl**) containing the string "STATE?" is received.
+This message is sent to the MQTT topic **maison/device_id/state** when a message sent to the device control topic (e.g. **maison/device_id/ctrl**) containing the string "STATE?" is received.
 
 Parameter | Description
 :--------:|------------------
@@ -348,7 +362,7 @@ Example:
 
 ### 7.3 The Watchdog Message
 
-This message is sent to the MQTT topic **maison/status** every 24 hours. Its transmission is enabled through the *WATCHDOG_24H* feature. See the description of the [Feature Mask](#feature-mask).
+This message is sent to the MQTT topic **maison/device_id/state** every 24 hours. Its transmission is enabled through the *WATCHDOG_24H* feature. See the description of the [Feature Mask](#feature-mask).
 
 Parameter | Description
 :--------:|------------------
@@ -364,7 +378,7 @@ Example:
 
 ### 7.4 The Config message
 
-This message is sent to the MQTT topic **maison/status** when a message sent to the device control topic (e.g. **maison/device_name/ctrl**) containing the string "CONFIG?" is received.
+This message is sent to the MQTT topic **maison/device_id/config** when a message sent to the device control topic (e.g. **maison/device_id/ctrl**) containing the string "CONFIG?" is received.
 
 Parameter | Description
 :--------:|------------------
@@ -391,6 +405,9 @@ Example:
   "mqtt_fingerprint" : [13,217,75,226,184,245,80,117,113,43,18,251,39,75,237,77,35,65,10,19]
 }}
 ```
+### 7.5 Log messages
+
+Log messages are sent to the MQTT topic **maison/device_id/log** as non-formatted text messages. They are mainly used for OTA code reception aknowledges for debugging purposes.
 
 ## 8. The Finite State Machine
 
@@ -413,7 +430,7 @@ Here is a state diagram showing the inter-relationship between each state and th
 
 ## 9. Usage on battery power
 
-The **Maison** framework can be tailored to use Deep Sleep when on battery power, through the *DEEP_SLEEP* [feature](#feature-mask). 
+The **Maison** framework can be tailored to use Deep Sleep when on battery power, through the *DEEP_SLEEP* [feature](#feature-mask).
 
 In this context, the finite state machine will cause a call to the `ESP.deep_sleep()` function at the end of each of its processing cycle (function `Maison::loop()`) to put the processor in a dormant state. The deep sleep duration, by default, is set to 5 seconds before entry to the states *PROCESS_EVENT*, *WAIT_END_EVENT*, *END_EVENT* and *HOURS_24*; it is 3600 seconds for *WAIT_FOR_EVENT*.
 
@@ -421,7 +438,7 @@ If the deep sleep feature is enabled, the call to `Maison::loop()` never return 
 
 It is expected that a hardware interrupt will wake up the device to indicate the arrival of a new event. If it's not the case, it will be then be required to modulate the amount of time to wait for the next *WAIT_FOR_EVENT* state to occurs. This must be used with caution as it will have an impact on the battery capacity.
 
-The application process can change the amount of seconds for the next deep sleep period using the `Maison::set_deep_sleep_wait_time()` function. This can be called inside the application `process_state()` function before returning control to the framework. 
+The application process can change the amount of seconds for the next deep sleep period using the `Maison::set_deep_sleep_wait_time()` function. This can be called inside the application `process_state()` function before returning control to the framework.
 
 As the device will be in a deep sleep state almost all the time, it becomes more difficult for it to get messages from the MQTT broker. Messages to be read by the device must then be using Qos (quality of service) of 1 to have them delivered when the device will be ready to receive them (network is running and the message callback is in operation). When connecting to the broker, **Maison** will connect with the cleanup flag to false, indicating the need to keep what is in the queue for retrieval after sleep time. The MQTT broker uses the client_name as the id to manage persistency. As such, it is required to be different than any other device name. When no device name is supplied in the config file (empty string), **Maison** uses the mac address as the device name. Insure that when us set the device name, it is unique amongst your devices. **Maison** prefix it with "client-" and send it to the MQTT broker at connection time.
 
@@ -439,12 +456,12 @@ The **Maison** framework allows for code update through a MQTT firmware transmis
 
 3. The code must be updated on the chip through a serial (FTDI) connexion at least once. After that, it will be possible to upload new codes through MQTT. Do not omit to power reset the device after the update as a reset from an FTDI upload doesn't allow for OTA update.
 
-To update the code, two messages must be sent. The first one will contain a json structure prefixed with "NEW_CODE:" that will have the following fields:
+To update the code, two messages in a single sequence must be sent to topic **maison/device_id/ctrl** with qos 1. The first one will contain a json structure prefixed with "NEW_CODE:" that will have the following fields:
 
 Field Name | Description
 -----------|------------
 SIZE       | The size of the firmware to be sent as a number of bytes
-APP_NAME   | The name of the code 
+APP_NAME   | The name of the application 
 MD5        | The MD5 message digest (fingerprint) of the file to be sent (string of 32 characters)
 
 Here is an example of such a message:
@@ -466,3 +483,5 @@ Once the code has been received, the device will send a log message. For example
 ```
 DEVICE_NAME: Code upload completed. Rebooting
 ```
+
+A shell script can be found in the *tools/upload.sh* file that help in the automated transmission of a new firmware. Some parameters must be modified according to the MQTT broker configuration.

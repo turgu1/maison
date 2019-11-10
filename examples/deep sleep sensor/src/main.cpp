@@ -36,14 +36,18 @@ ADC_MODE(ADC_VCC);
 
 #if DEBUGGING
   #define LONG_WAIT    10
-  #define SETUP_SERIAL Serial.begin(74880)
   #define PRINT(a)     Serial.print(a)
   #define PRINTLN(a)   Serial.println(a)
 #else
   #define LONG_WAIT 60
-  #define SETUP_SERIAL
   #define PRINT(a)
   #define PRINTLN(a)
+#endif
+
+#if DEBUGGING || SERIAL_NEEDED
+  #define SERIAL_SETUP Serial.begin(74880)
+#else
+  #define SERIAL_SETUP
 #endif
 
 #define SENSE_PIN 14

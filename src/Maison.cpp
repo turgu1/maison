@@ -4,61 +4,61 @@
 static Maison * maison;
 
 Maison::Maison() :
-  wifi_client(NULL),
-  last_reconnect_attempt(0),
-  connect_retry_count(0),
-  first_connect_trial(true),
-  user_callback(NULL),
-  user_sub_topic(NULL),
-  user_qos(0),
-  feature_mask(NONE),
-  user_mem(NULL),
-  user_mem_length(0),
-  last_time_count(0),
+               wifi_client(NULL),
+    last_reconnect_attempt(0),
+       connect_retry_count(0),
+       first_connect_trial(true),
+             user_callback(NULL),
+            user_sub_topic(NULL),
+                  user_qos(0),
+              feature_mask(NONE),
+                  user_mem(NULL),
+           user_mem_length(0),
+           last_time_count(0),
   counting_lost_connection(true),
-  wait_for_completion(false),
-  reboot_now(false),
-  restart_now(false)
+       wait_for_completion(false),
+                reboot_now(false),
+               restart_now(false)
 {
   maison = this;
 }
 
 Maison::Maison(uint8_t _feature_mask) :
-  wifi_client(NULL),
-  last_reconnect_attempt(0),
-  connect_retry_count(0),
-  first_connect_trial(true),
-  user_callback(NULL),
-  user_sub_topic(NULL),
-  user_qos(0),
-  feature_mask(_feature_mask),
-  user_mem(NULL),
-  user_mem_length(0),
-  last_time_count(0),
+               wifi_client(NULL),
+    last_reconnect_attempt(0),
+       connect_retry_count(0),
+       first_connect_trial(true),
+             user_callback(NULL),
+            user_sub_topic(NULL),
+                  user_qos(0),
+              feature_mask(_feature_mask),
+                  user_mem(NULL),
+           user_mem_length(0),
+           last_time_count(0),
   counting_lost_connection(true),
-  wait_for_completion(false),
-  reboot_now(false),
-  restart_now(false)
+       wait_for_completion(false),
+                reboot_now(false),
+               restart_now(false)
 {
   maison = this;
 }
 
 Maison::Maison(uint8_t _feature_mask, void * _user_mem, uint16_t _user_mem_length) :
-  wifi_client(NULL),
-  last_reconnect_attempt(0),
-  connect_retry_count(0),
-  first_connect_trial(true),
-  user_callback(NULL),
-  user_sub_topic(NULL),
-  user_qos(0),
-  feature_mask(_feature_mask),
-  user_mem(_user_mem),
-  user_mem_length(_user_mem_length),
-  last_time_count(0),
+               wifi_client(NULL),
+    last_reconnect_attempt(0),
+       connect_retry_count(0),
+       first_connect_trial(true),
+             user_callback(NULL),
+            user_sub_topic(NULL),
+                  user_qos(0),
+              feature_mask(_feature_mask),
+                  user_mem(_user_mem),
+           user_mem_length(_user_mem_length),
+           last_time_count(0),
   counting_lost_connection(true),
-  wait_for_completion(false),
-  reboot_now(false),
-  restart_now(false)
+       wait_for_completion(false),
+                reboot_now(false),
+               restart_now(false)
 {
   maison = this;
 }

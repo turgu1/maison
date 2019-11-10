@@ -28,13 +28,17 @@
 #endif
 
 #if DEBUGGING
-  #define SERIAL_SETUP Serial.begin(74880)
   #define PRINT(msg) Serial.print(msg)
   #define PRINTLN(msg) Serial.println(msg)
 #else
-  #define SERIAL_SETUP
   #define PRINT(msg)
   #define PRINTLN(msg)
+#endif
+
+#if DEBUGGING || SERIAL_NEEDED
+  #define SERIAL_SETUP Serial.begin(74880)
+#else
+  #define SERIAL_SETUP
 #endif
 
 #if DEBUGGING

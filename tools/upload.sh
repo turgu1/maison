@@ -10,7 +10,7 @@
 #
 
 if [[ $# -ne 3 ]]; then
-  echo "Usage: upload <DEVICE_NAME> <APPLICATION_NAME> <CODE_FILENAME>"
+  echo "Usage: upload <DEVICE_ID> <APPLICATION_NAME> <CODE_FILENAME>"
   exit 1
 fi
 
@@ -18,7 +18,7 @@ fi
 # Please adjust the following definitions to your specific context of use.
 #
 
-MQTT_SERVER="your_mqtt_server_sqdn"
+MQTT_SERVER="your_mqtt_server_sqdn_or_ip_address"
 MQTT_PORT=8883
 USER="mqtt_username"
 PSW="mqtt_password"

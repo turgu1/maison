@@ -95,7 +95,7 @@
 
 // This is the topic name suffix to send state information to
 //
-// For example: maison/xxx/state
+// For example: maison/DE01F3003571/state
 
 #ifndef MAISON_STATE_TOPIC
   #define MAISON_STATE_TOPIC "state" ///< maison server state MQTT topic suffix
@@ -103,7 +103,7 @@
 
 // This is the topic name suffix to send configuration to
 //
-// For example: maison/xxxx/config
+// For example: maison/DE01F3003571/config
 
 #ifndef MAISON_CONFIG_TOPIC
   #define MAISON_CONFIG_TOPIC "config" ///< maison server config MQTT topic suffix
@@ -111,7 +111,7 @@
 
 // This is the topic name suffix to send event information to
 //
-// For example: maison/xxx/event
+// For example: maison/DE01F3003571/event
 
 #ifndef MAISON_EVENT_TOPIC
   #define MAISON_EVENT_TOPIC "event" ///< maison server event MQTT topic suffix
@@ -119,7 +119,7 @@
 
 // This is the topic name suffix to send log (free text) information to
 //
-// For example: maison/xxx/log
+// For example: maison/DE01F3003571/log
 
 #ifndef MAISON_LOG_TOPIC
   #define MAISON_LOG_TOPIC "log" ///< maison server log MQTT topic suffix
@@ -129,10 +129,10 @@
 // The completed topic is build using:
 //
 // 1) MAISON_PREFIX_TOPIC
-// 2) The device name from config or MAC address if device name is empty
+// 2) The device MAC address
 // 3) MAISON_CTRL_TOPIC
 //
-// For example: maison/DEV_TEST/crtl
+// For example: maison/DE01F3003571/crtl
 
 #ifndef MAISON_CTRL_TOPIC
   #define MAISON_CTRL_TOPIC "ctrl" ///< Suffix for device control topic
@@ -225,15 +225,16 @@
 /// Please refer to the Main Page of information in this API documentation for
 /// a detailed description.
 ///
-/// The following sequence diagram show the interaction of devices implementing
+/// The following sequence diagram shows the interaction of devices implementing
 /// the protocol and an MQTT broker:
 ///
 /// @startuml{sequence_uml.png} "Maison Sequence Diagram" width=8cm
 ///
 /// actor Device
-/// actor device_ctrl as "maison/WATER_SPILL/ctrl"
-/// actor server_status as "maison/status"
-/// actor server_log as "maison/log"
+/// actor device_ctrl as "maison/DE01F3003571/ctrl"
+/// actor server_status as "maison/DE01F3003571/state"
+/// actor server_config as "maison/DE01F3003571/config"
+/// actor server_log as "maison/DE01F3003571/log"
 ///
 /// group Device actions
 ///   group Reset
@@ -257,7 +258,7 @@
 ///
 ///   group Set Config
 ///     device_ctrl --> Device : "CONFIG: {config}"
-///     Device --> server_status : "{config}"
+///     Device --> server_config : "{config}"
 ///   end
 ///
 ///   group Reset device
