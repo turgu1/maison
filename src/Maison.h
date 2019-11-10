@@ -253,7 +253,7 @@
 ///
 ///   group Current Config
 ///     device_ctrl --> Device : "CONFIG?"
-///     Device --> server_status : "{config}"
+///     Device --> server_config : "{config}"
 ///   end
 ///
 ///   group Set Config
@@ -263,13 +263,15 @@
 ///
 ///   group Reset device
 ///     device_ctrl --> Device : "RESTART!"
+///     Device --> server_log : "Info: Restart requested."
 ///   end
 ///
 ///   group OTA
 ///     device_ctrl --> Device : "NEW_CODE: {params}"
-///     Device --> server_log : "OTA Start"
+///     Device --> server_log : "Code update started ..."
 ///     device_ctrl --> Device : "<binary>"
-///     Device --> server_log : "Completed. Reboot."
+///     Device --> server_log : "Code upload completed. Rebooting"
+///     Device --> server_log : "Info: Restart requested."
 ///   end
 /// end
 /// @enduml
