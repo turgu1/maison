@@ -410,7 +410,7 @@ WAIT_FOR_EVENT |   2   |   NO    | This is the state waiting for an event to occ
 PROCESS_EVENT  |   4   |   YES   | An event is being processed by the application. This will usually send a message to the MQTT broker.
 WAIT_END_EVENT |   8   |   NO    | The device is waiting for the end of the event to occur.
 END_EVENT      |  16   |   YES   | The end of an event has been detected. It's time to do an event rundown. This will usually send a message to the MQTT broker.
-HOURS_24       |  32   |   YES   | This event occurs every 24 hours. It permits the transmission of a Watchdog message if enabled with the  *WATCHDOG_24H* feature. The state is required to have at least one state per day for which the network interface is energized to allow for the reception of configuration and control messages.
+HOURS_24       |  32   |   YES   | This event occurs every 24 hours. It permits the transmission of a Watchdog message if enabled with the  *WATCHDOG_24H* feature. The state is required such that at least one wakeup per day occurs for which the network interface is energized to allow for the reception of configuration, new application code (if OTA is enabled) or control messages.
 
 Here is a state diagram showing the inter-relationship between each state and the corresponding application process return values for witch state changes will be fired:
 
