@@ -31,7 +31,7 @@ The **Maison** framework, to be functional, requires the following:
 
 * Proper application setup parameters in file `platformio.ini`. Look at the [Building an Application](#2-building-an-application) section;
 * Code in the user application to setup and use the framework. Look at the [Code Usage](#code-usage) section;
-* Configuration parameters located in SPIFFS (file `/config.json`). Look at the [Configuration Parameters](#configuration-parameters) section.
+* Configuration parameters located in SPIFFS (file `data/config.json` in example folders). Look at the [Configuration Parameters](#configuration-parameters) section.
 
 The sections below describe the specific of these requirements.
 
@@ -80,7 +80,7 @@ Option              | Default   | Description
 MAISON_TESTING      |    0      | If = 1, enable debugging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any **Maison** function. This will put all other *XXX_TESTING* options to 1, unless they have been previously defined.
 NET_TESTING         |    0      | If = 1, enable network related debugging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any **Maison** function.
 OTA_TESTING         |    0      | If = 1, enable OTA related debugging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any **Maison** function.
-JSON_TESTING        |    0      | If = 1, enable JSONN related debugging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any **Maison** function.
+JSON_TESTING        |    0      | If = 1, enable JSON related debugging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any **Maison** function.
 QUICK_TURN          |    0      | If = 1, HOURS_24 state is fired every 2 minutes instead of 24 hours. This is automatically the case when any *XXX_TESTING* is set to 1, unless QUICK_TURN is also defined in build_flags.
 MAISON_PREFIX_TOPIC | maison | All topics used by the framework are prefixed with this text
 MAISON_STATE_TOPIC  | state | Topic suffix where the framework state are sent
@@ -142,8 +142,7 @@ struct user_data {
   ...
 } my_state;
 
-Maison maison(Maison::Feature::WATCHDOG_24H|
-              Maison::Feature::VOLTAGE_CHECK,
+Maison maison(Maison::Feature::WATCHDOG_24H | Maison::Feature::VOLTAGE_CHECK,
               &my_state, sizeof(my_state));
 
 void msg_callback(const char  * topic,
@@ -313,8 +312,19 @@ Parameter | Description
 :--------:|------------------
 device    | The device name as stated in the configuration parameters. If the configuration parameter is empty, the MAC address of the device WiFi interface is used.
 msg_type  | This content the string "STARTUP".
+ip        | The device WiFi IP adress.
+mac       | The device MAC address.
 reason    | The reason for startup (hardware reset type).
-VBAT      | This is the Battery voltage. This parameter is optional. Its presence depend on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
+state     | The current state of the finite state machine, as a number. Look into the [Finite State Machine](#the-finite-state-machine) section for details.
+return_state | The state to return to after *HOURS_24* processing.
+hours     | Hours counter. Used to compute the next 24 hours period.
+millis    | Milliseconds in the last hour.
+lost      | Counter of the number of time the connection to the MQTT broker has been lost.
+rssi      | The WiFi signal strength of the connection to the router, a relative signal quality measurement. -50 means a pretty good signal, -75 fearly reasonnable and -100 means no signal.
+heap      | The current value of the free heap space available on the device
+VBAT      | This is the Battery voltage. This parameter is optional. Its presence depends on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
+app_name | The name of the application. This is the functional name of the application, used for MQTT OTA updates. Will be showned only when MQTT_OTA is enabled.
+app_version | The code version number. Will be showned only when MQTT_OTA is enabled.
 
 The hardware reset reason come from the ESP8266 reset information:
 
@@ -331,29 +341,12 @@ value | description
 Example:
 
 ```
-{"device":"WATER_SPILL","msg_type":"STARTUP","reason":6,"VBAT":3.0}
+{"device":"WATER_SPILL","msg_type":"STARTUP","ip":"192.168.1.71","mac":"2B:1D:03:31:2A:54","state":32,"return_state":2,hours":7,"millis":8001,"lost":0,"rssi":-63,"heap":16704,"app_name":"BITSENSOR","app_version":"1.0.1","VBAT":3.0}
 ```
 
 ### 7.2 The Status message
 
-This message is sent to the MQTT topic **maison/device_id/state** when a message sent to the device control topic (e.g. **maison/device_id/ctrl**) containing the string "STATE?" is received.
-
-Parameter | Description
-:--------:|------------------
-device    | The device name as stated in the configuration parameters. If the configuration parameter is empty, the MAC address of the device WiFi interface is used.
-msg_type  | This content the string "STATE".
-ip        | The device WiFi IP adress.
-mac       | The device MAC address.
-state     | The current state of the finite state machine, as a number. Look into the [Finite State Machine](#the-finite-state-machine) section for details.
-return_state | The state to return to after *HOURS_24* processing.
-hours     | Hours counter. Used to compute the next 24 hours period.
-millis    | Milliseconds in the last hour.
-lost      | Counter of the number of time the connection to the MQTT broker has been lost.
-rssi      | The WiFi signal strength of the connection to the router, a relative signal quality measurement. -50 means a pretty good signal, -75 fearly reasonnable and -100 means no signal.
-heap      | The current value of the free heap space available on the device
-VBAT      | This is the Battery voltage. This parameter is optional. Its presence depends on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
-app_name | The name of the application. This is the functional name of the application, used for MQTT OTA updates. Will be showned only when MQTT_OTA is enabled.
-app_version | The code version number. Will be showned only when MQTT_OTA is enabled.
+This message is sent to the MQTT topic **maison/device_id/state** when a message sent to the device control topic (e.g. **maison/device_id/ctrl**) containing the string "STATE?" is received. It is similar to the Startup message, with msg_type set to "STATE".
 
 Example:
 
@@ -363,23 +356,17 @@ Example:
 
 ### 7.3 The Watchdog Message
 
-This message is sent to the MQTT topic **maison/device_id/state** every 24 hours. Its transmission is enabled through the *WATCHDOG_24H* feature. See the description of the [Feature Mask](#feature-mask).
-
-Parameter | Description
-:--------:|------------------
-device    | The device name as stated in the configuration parameters. If the configuration parameter is empty, the MAC address of the device WiFi interface is used.
-msg_type  | This content the string "WATCHDOG".
-VBAT      | This is the Battery voltage. This parameter is optional. Its presence depend on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
+This message is sent to the MQTT topic **maison/device_id/state** every 24 hours. Its transmission is enabled through the *WATCHDOG_24H* feature. See the description of the [Feature Mask](#feature-mask).  It is similar to the Startup message, with msg_type set to "WATCHDOG".
 
 Example:
 
 ```
-{"device":"WATER_SPILL","msg_type":"WATCHDOG","VBAT":3.0}
+{"device":"WATER_SPILL","msg_type":"WATCHDOG","ip":"192.168.1.71","mac":"2B:1D:03:31:2A:54","state":32,"return_state":2,hours":7,"millis":8001,"lost":0,"rssi":-63,"heap":16704,"app_name":"BITSENSOR","app_version":"1.0.1","VBAT":3.0}
 ```
 
 ### 7.4 The Config message
 
-This message is sent to the MQTT topic **maison/device_id/config** when a message sent to the device control topic (e.g. **maison/device_id/ctrl**) containing the string "CONFIG?" is received.
+This message is sent to the MQTT topic **maison/device_id/config** when a message sent to the device control topic (e.g. **maison/device_id/ctrl**) containing the string "CONFIG?" is received. 
 
 Parameter | Description
 :--------:|------------------
@@ -441,7 +428,7 @@ It is expected that a hardware interrupt will wake up the device to indicate the
 
 The application process can change the amount of seconds for the next deep sleep period using the `Maison::set_deep_sleep_wait_time()` function. This can be called inside the application `process_state()` function before returning control to the framework.
 
-As the device will be in a deep sleep state almost all the time, it becomes more difficult for it to get messages from the MQTT broker. Messages to be read by the device must then be using Qos (quality of service) of 1 to have them delivered when the device will be ready to receive them (network is running and the message callback is in operation). When connecting to the broker, **Maison** will connect with the cleanup flag to false, indicating the need to keep what is in the queue for retrieval after sleep time. The MQTT broker uses the client_name as the id to manage persistency. As such, it is required to be different than any other device name. When no device name is supplied in the config file (empty string), **Maison** uses the mac address as the device name. Insure that when us set the device name, it is unique amongst your devices. **Maison** prefix it with "client-" and send it to the MQTT broker at connection time.
+As the device will be in a deep sleep state almost all the time, it becomes more difficult for it to get messages from the MQTT broker. Messages to be read by the device must then be using Qos (quality of service) of 1 to have them delivered when the device will be ready to receive them (network is running and the message callback is in operation). When connecting to the broker, **Maison** will connect with the cleanup flag to false, indicating the need to keep what is in the queue for retrieval after sleep time. The MQTT broker uses the client_name as the id to manage persistency. As such, it is required to be different than any other device name. When no device name is supplied in the config file (empty string), **Maison** uses the mac address as the device name. Insure that when you set the device name, it is unique amongst your devices. **Maison** prefix it with "client-" and send it to the MQTT broker at connection time.
 
 The ESP8266 does not allow for a sleep period longer than 4294967295 microseconds, that corresponds to around 4294 seconds or 71 minutes.
 
@@ -485,4 +472,4 @@ Once the code has been received, the device will send a log message. For example
 DEVICE_NAME: Code upload completed. Rebooting
 ```
 
-A shell script can be found in the *tools/upload.sh* file that help in the automated transmission of a new firmware. Some parameters must be modified according to the MQTT broker configuration.
+A shell script (located in the `tools/upload.sh` file) that help in the automated transmission of a new firmware is supplied with the framework. Some parameters must be modified according to the targetted MQTT broker configuration to make it usable.
