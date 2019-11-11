@@ -342,7 +342,7 @@ value | description
 Example:
 
 ```json
-{"device":"WATER_SPILL","msg_type":"STARTUP","ip":"192.168.1.71","mac":"2B:1D:03:31:2A:54","state":32,"return_state":2,hours":7,"millis":8001,"lost":0,"rssi":-63,"heap":16704,"app_name":"BITSENSOR","app_version":"1.0.1","VBAT":3.0}
+{"device":"WATER_SPILL","msg_type":"STARTUP","ip":"192.168.1.71","mac":"2B:1D:03:31:2A:54","state":32,"return_state":2,"hours":7,"millis":8001,"lost":0,"rssi":-63,"heap":16704,"app_name":"BITSENSOR","app_version":"1.0.1","VBAT":3.0}
 ```
 
 ### 7.2 The Status message
@@ -352,7 +352,7 @@ This message is sent to the MQTT topic **maison/device_id/state** when a message
 Example:
 
 ```json
-{"device":"WATER_SPILL","msg_type":"STATE","ip":"192.168.1.71","mac":"2B:1D:03:31:2A:54","state":32,"return_state":2,hours":7,"millis":8001,"lost":0,"rssi":-63,"heap":16704,"app_name":"BITSENSOR","app_version":"1.0.1","VBAT":3.0}
+{"device":"WATER_SPILL","msg_type":"STATE","ip":"192.168.1.71","mac":"2B:1D:03:31:2A:54","state":32,"return_state":2,"hours":7,"millis":8001,"lost":0,"rssi":-63,"heap":16704,"app_name":"BITSENSOR","app_version":"1.0.1","VBAT":3.0}
 ```
 
 ### 7.3 The Watchdog Message
@@ -362,7 +362,7 @@ This message is sent to the MQTT topic **maison/device_id/state** every 24 hours
 Example:
 
 ```json
-{"device":"WATER_SPILL","msg_type":"WATCHDOG","ip":"192.168.1.71","mac":"2B:1D:03:31:2A:54","state":32,"return_state":2,hours":7,"millis":8001,"lost":0,"rssi":-63,"heap":16704,"app_name":"BITSENSOR","app_version":"1.0.1","VBAT":3.0}
+{"device":"WATER_SPILL","msg_type":"WATCHDOG","ip":"192.168.1.71","mac":"2B:1D:03:31:2A:54","state":32,"return_state":2,"hours":7,"millis":8001,"lost":0,"rssi":-63,"heap":16704,"app_name":"BITSENSOR","app_version":"1.0.1","VBAT":3.0}
 ```
 
 ### 7.4 The Config message
