@@ -41,9 +41,9 @@ The **Maison** library supplies the usual algorithms required for an IOT device 
 
 (To be completed)
 
-The following sequence diagram shows the automated interaction between the device and the MQTT broker. 
+The following sequence diagram shows the automated interaction between the device and the MQTT broker.
 
-![](./doc/sequence_uml.png)
+![UML Sequence Diagram](./doc/sequence_uml.png)
 
 ## 2. Building an Application
 
@@ -57,7 +57,7 @@ The PubSubClient library used is a modified version from the originator that add
 
 The following options **shall** be added to the `plarformio.ini` file of your application to integrate the framework:
 
-```
+```yaml
 lib_deps = https://github.com/turgu1/maison.git
 build_flags = -D MQTT_MAX_PACKET_SIZE=1024
 ```
@@ -66,7 +66,7 @@ Note that *MQTT_MAX_PACKET_SIZE* can be larger depending of the application requ
 
 The following options in `platformio.ini` **shall** also be used:
 
-```
+```yaml
 framework = arduino
 platform = espressif8266
 ```
@@ -105,7 +105,7 @@ The **Maison** framework is expecting the following aspects to be properly in pl
 2. A [Configuration Parameters](#5-configuration-parameters) file.
 3. A [MQTT broker](#6-mqtt-broker) on a networked server.
 
-The following sections explain each of this elements. 
+The following sections explain each of this elements.
 
 ## 4. Application Source Code
 
@@ -219,13 +219,13 @@ The Maison::loop() function must be called regularly in the user application mai
 
 Value         | Description
 :------------:|----------------
-COMPLETED     |  Returned when the processing for the current state is considered completed. This is used mainly for all states.           
+COMPLETED     |  Returned when the processing for the current state is considered completed. This is used mainly for all states.
 NOT_COMPLETED | The reverse of *COMPLETED*. Mainly used with *PROCESS_EVENT* in the case that it must be fired again to complete the processing
 ABORTED       | Return in the case of *PROCESS_EVENT* when the event vanished before processing, such that the finite state machine return to the *WAIT_FOR_EVENT* state instead of going to the *WAIT_END_EVENT* state.
 NEW_EVENT     | Returned when processing a *WAIT_FOR_EVENT* state to indicate that an event must be processed.
 RETRY         | When in state *WAIT_END_EVENT*, will return back to *PROCESS_EVENT* to check again for event processing
 
-Note: if the *DEEP_SLEEP* feature was enabled, the loop will almost never return as the processor will wait for further processing through a call to ESP.deep_sleep function. The processor, after the wait time, will restart the code execution from the beginning. 
+Note: if the *DEEP_SLEEP* feature was enabled, the loop will almost never return as the processor will wait for further processing through a call to ESP.deep_sleep function. The processor, after the wait time, will restart the code execution from the beginning.
 
 ## 5. Configuration Parameters
 
@@ -273,9 +273,10 @@ A SPIFFS flash file system must be put in place on the targeted device. This can
 
 2. Add the following compilation options to the `build_flags` element of the **platformio.ini** file:
 
-```
--Wl,-Teagle.flash.4m1m.ld
-```
+   ```ini
+   -Wl,-Teagle.flash.4m1m.ld
+   ```
+
 3. Connect the device to the computer
 
 4. Kill the PlatformIO Serial Monitor. The next step won't work if the Serial Monitor is working.
@@ -340,7 +341,7 @@ value | description
 
 Example:
 
-```
+```json
 {"device":"WATER_SPILL","msg_type":"STARTUP","ip":"192.168.1.71","mac":"2B:1D:03:31:2A:54","state":32,"return_state":2,hours":7,"millis":8001,"lost":0,"rssi":-63,"heap":16704,"app_name":"BITSENSOR","app_version":"1.0.1","VBAT":3.0}
 ```
 
@@ -350,7 +351,7 @@ This message is sent to the MQTT topic **maison/device_id/state** when a message
 
 Example:
 
-```
+```json
 {"device":"WATER_SPILL","msg_type":"STATE","ip":"192.168.1.71","mac":"2B:1D:03:31:2A:54","state":32,"return_state":2,hours":7,"millis":8001,"lost":0,"rssi":-63,"heap":16704,"app_name":"BITSENSOR","app_version":"1.0.1","VBAT":3.0}
 ```
 
@@ -360,13 +361,13 @@ This message is sent to the MQTT topic **maison/device_id/state** every 24 hours
 
 Example:
 
-```
+```json
 {"device":"WATER_SPILL","msg_type":"WATCHDOG","ip":"192.168.1.71","mac":"2B:1D:03:31:2A:54","state":32,"return_state":2,hours":7,"millis":8001,"lost":0,"rssi":-63,"heap":16704,"app_name":"BITSENSOR","app_version":"1.0.1","VBAT":3.0}
 ```
 
 ### 7.4 The Config message
 
-This message is sent to the MQTT topic **maison/device_id/config** when a message sent to the device control topic (e.g. **maison/device_id/ctrl**) containing the string "CONFIG?" is received. 
+This message is sent to the MQTT topic **maison/device_id/config** when a message sent to the device control topic (e.g. **maison/device_id/ctrl**) containing the string "CONFIG?" is received.
 
 Parameter | Description
 :--------:|------------------
@@ -376,7 +377,7 @@ content   | This is the configuration of the device in a JSON format. See the [C
 
 Example:
 
-```
+```json
 {"device":"WATER_SPILL","msg_type":"CONFIG","content":{
   "version"          : 1,
   "device_name"      : "WATER_SPILL",
@@ -393,6 +394,7 @@ Example:
   "mqtt_fingerprint" : [13,217,75,226,184,245,80,117,113,43,18,251,39,75,237,77,35,65,10,19]
 }}
 ```
+
 ### 7.5 Log messages
 
 Log messages are sent to the MQTT topic **maison/device_id/log** as non-formatted text messages. They are mainly used for OTA code reception aknowledges for debugging purposes.
@@ -414,7 +416,7 @@ HOURS_24       |  32   |   YES   | This event occurs every 24 hours. It permits 
 
 Here is a state diagram showing the inter-relationship between each state and the corresponding application process return values for witch state changes will be fired:
 
-![](./doc/state_uml.png)
+![UML State Diagram](./doc/state_uml.png)
 
 A user defined processing function will be called by **Maison** inside the finite state machine. This function must be supplied as a parameter to the maison.loop() method. The function will receive the current state value as a parameter and take appropriate action considering the current state. It must return a status value from the following list:
 
@@ -426,7 +428,7 @@ ABORTED       | PROCESS_EVENT | Return in the case of *PROCESS_EVENT* when the e
 NEW_EVENT     | WAIT_FOR_EVENT | Returned when processing a *WAIT_FOR_EVENT* state to indicate that an event must be processed.
 RETRY         | WAIT_END_EVENT | When in state *WAIT_END_EVENT*, will return back to *PROCESS_EVENT* to check again for event processing
 
-Note that HOURS_24 is not taking any action on the received value. This state is entered automatically when it's the time for it to be fired. It return back to the preceeding state once executed.
+Note that HOURS_24 is not taking any action on the received value. This state is entered automatically when it's the time for it to be fired. It returns back to the preceeding state once executed.
 
 The HOURS_24 state exact time to have it fired is not selectable. The ESP8266 doesn't have any RTC and the internal timer is not accurate enough to ensure proper synchronization with the time of day.
 
@@ -463,18 +465,18 @@ To update the code, two messages in a single sequence must be sent to topic **ma
 Field Name | Description
 -----------|------------
 SIZE       | The size of the firmware to be sent as a number of bytes
-APP_NAME   | The name of the application 
+APP_NAME   | The name of the application
 MD5        | The MD5 message digest (fingerprint) of the file to be sent (string of 32 characters)
 
 Here is an example of such a message:
 
-```
+```json
 NEW_CODE:{"SIZE":412345,"APP_NAME":"BLINKER","MD5":"06fa77583b007464167bbba866d662c2"}
 ```
 
 Once received, the device will send a log message. For example::
 
-```
+```text
 DEVICE_NAME: Code update started with size 412345 and md5: 06fa77583b007464167bbba866d662c2.
 ```
 
@@ -482,7 +484,7 @@ The second message sent to the device will contain the binary code of the file. 
 
 Once the code has been received, the device will send a log message. For example:
 
-```
+```text
 DEVICE_NAME: Code upload completed. Rebooting
 ```
 

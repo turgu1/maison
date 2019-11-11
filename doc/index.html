@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Maison Library: DEEP_SLEEP SENSOR</title>
+<title>Maison Library: Maison - Minimally Secure ESP8266 IOT MQTT based Framework</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -59,22 +59,359 @@ $(function() {
 
 <div class="header">
   <div class="headertitle">
-<div class="title">DEEP_SLEEP SENSOR </div>  </div>
+<div class="title"><a class="el" href="classMaison.html">Maison</a> - Minimally Secure ESP8266 IOT MQTT based Framework </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>An example of using the <a class="el" href="classMaison.html">Maison</a> framework using almost all features available.</p>
-<p>It gets data from GPIO14 pin of an ESP-12E board and when its state changes, it sends a message to the MQTT broker. It is expected that hardware connexion will reset the chip when GPIO14 pin goes high such that the code will gain control before the end of the DeepSleep period. The pin state information is pushed as a message to the <code>maison/ctrl</code> topic. Possible values are "ON", "OFF" and "CHIRP". The "CHIRP" value is sent when the device has been awaken but the signal if OFF.</p>
-<p>Here is an example of a hardware design for this piece of software:</p>
+<div class="textblock"><p>Note: This is still work in progress. The documentation is also a work in progress. The code is working and must be considered of a Beta level.</p>
+<p>This library implements a small, minimally secure, IOT Framework for embedded ESP8266 devices to serve into a Home IOT environment. It diminishes the amount of code to be put in the targeted application source code. The application interacts with the framework through a Finite State Machine algorithm allowing for specific usage at every stage.</p>
+<p>Here are the main characteristics:</p>
+<ul>
+<li>Framework configuration saved in file through SPIFFS.</li>
+<li>WiFi MQTT based communications. Nothing else.</li>
+<li>TLS encryption: All MQTT communication with encryption.</li>
+<li>Server authentication through fingerprinting.</li>
+<li>User/Password identification.</li>
+<li>JSON based data transmission with server.</li>
+<li>Configuration updates through MQTT.</li>
+<li>Option: OTA over MQTT.</li>
+<li>Option: Automated Watchdog transmission every 24 hours.</li>
+<li>Option: Battery voltage transmission.</li>
+<li>Option: DeepSleep or continuous power.</li>
+<li>Option: Application specific MQTT topic subscription.</li>
+<li>Option: Application specific automatic state saving in RTC memory.</li>
+<li>Option: Verbose/Silent debugging output through compilation.</li>
+</ul>
+<p>The MQTT based transmission architecture is specific to this implementation and is describe below.</p>
+<p>The framework is to be used with the <a href="https://platformio.org/">PlarformIO</a> ecosystem. Some examples can be found in the <code>examples</code> folder and shall be compiled through PlatformIO.</p>
+<p>Note that the library maybe usable through the Arduino IDE, but this is not supported. It is known to be a challenge to set compiling options and access <b><a class="el" href="classMaison.html">Maison</a></b> defined types from <code>.ino</code> source code.</p>
+<p>The <b><a class="el" href="classMaison.html">Maison</a></b> framework, to be functional, requires the following:</p>
+<ul>
+<li>Proper application setup parameters in file <code>platformio.ini</code>. Look at the <a href="#2-building-an-application">Building an Application</a> section;</li>
+<li>Code in the user application to setup and use the framework. Look at the <a href="#3-usage">Code Usage</a> section;</li>
+<li>Configuration parameters located in SPIFFS (file <code>data/config.json</code> in example folders). Look at the <a href="#5-configuration-parameters">Configuration Parameters</a> section.</li>
+</ul>
+<p>The sections below describe the specific of these requirements.</p>
+<h2>1. Overview</h2>
+<p>The <b><a class="el" href="classMaison.html">Maison</a></b> library supplies the usual algorithms required for an IOT device to interact within an event management architecture based on the use of a MQTT broker for message exchanges. It helps the programmer in the management of the various aspects of integrating the code responsible of the functionality of the IOT device with the intricacies of managing the lifespan inside the architecture.</p>
+<p>(To be completed)</p>
+<p>The following sequence diagram shows the automated interaction between the device and the MQTT broker.</p>
 <div class="image">
-<img src="design.png"/>
+<img src="./doc/sequence_uml.png"/>
 </div>
-<p>Please note that the framework requires the presence of a file named <code>/config.json</code> located in the device SPIFFS flash file system. To do so, please</p>
+<h2>2. Building an Application</h2>
+<p>The <b><a class="el" href="classMaison.html">Maison</a></b> framework is using the following libraries and, through its library configuration, automate their retrieval through the PlatformIO ecosystem:</p>
+<ul>
+<li>PubSubClient</li>
+<li>BearSSL</li>
+<li>ArduinoJSON</li>
+</ul>
+<p>The PubSubClient library used is a modified version from the originator that adds the capability for message size greather than 64k. This is required to sustain OTA over MQTT.</p>
+<p>The following options <b>shall</b> be added to the <code>plarformio.ini</code> file of your application to integrate the framework:</p>
+<div class="fragment"><div class="line">lib_deps = https://github.com/turgu1/maison.git</div><div class="line">build_flags = -D MQTT_MAX_PACKET_SIZE=1024</div></div><!-- fragment --><p>Note that <em>MQTT_MAX_PACKET_SIZE</em> can be larger depending of the application requirements.</p>
+<p>The following options in <code>platformio.ini</code> <b>shall</b> also be used:</p>
+<div class="fragment"><div class="line">framework = arduino</div><div class="line">platform = espressif8266</div></div><!-- fragment --><h3>2.1 Compilation Options</h3>
+<p>The <b><a class="el" href="classMaison.html">Maison</a></b> framework allow for some defined options to be modified through -D compilation parameters (PlatformIO: build_flags). The following are the compilation options available to change some library behavior:</p>
+<table class="doxtable">
+<tr>
+<th align="center">Option </th><th align="center">Default </th><th>Description  </th></tr>
+<tr>
+<td align="center">MAISON_TESTING </td><td align="center">0 </td><td>If = 1, enable debugging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any <b><a class="el" href="classMaison.html">Maison</a></b> function. This will put all other <em>XXX_TESTING</em> options to 1, unless they have been previously defined. </td></tr>
+<tr>
+<td align="center">NET_TESTING </td><td align="center">0 </td><td>If = 1, enable network related debugging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any <b><a class="el" href="classMaison.html">Maison</a></b> function. </td></tr>
+<tr>
+<td align="center">OTA_TESTING </td><td align="center">0 </td><td>If = 1, enable OTA related debugging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any <b><a class="el" href="classMaison.html">Maison</a></b> function. </td></tr>
+<tr>
+<td align="center">JSON_TESTING </td><td align="center">0 </td><td>If = 1, enable JSON related debugging output through the standard Serial port. The serial port must be initialized by the application (Serial.begin()) before calling any <b><a class="el" href="classMaison.html">Maison</a></b> function. </td></tr>
+<tr>
+<td align="center">QUICK_TURN </td><td align="center">0 </td><td>If = 1, HOURS_24 state is fired every 2 minutes instead of 24 hours. This is automatically the case when any <em>XXX_TESTING</em> is set to 1, unless QUICK_TURN is also defined in build_flags. </td></tr>
+<tr>
+<td align="center">MAISON_PREFIX_TOPIC </td><td align="center">maison </td><td>All topics used by the framework are prefixed with this text </td></tr>
+<tr>
+<td align="center">MAISON_STATE_TOPIC </td><td align="center">state </td><td>Topic suffix where the framework state are sent </td></tr>
+<tr>
+<td align="center">MAISON_EVENT_TOPIC </td><td align="center">event </td><td>Topic suffix where the framework events are sent </td></tr>
+<tr>
+<td align="center">MAISON_CONFIG_TOPIC </td><td align="center">config </td><td>Topic suffix where the framework configuration are sent </td></tr>
+<tr>
+<td align="center">MAISON_LOG_TOPIC </td><td align="center">log </td><td>Topic suffix where free text log messages are sent </td></tr>
+<tr>
+<td align="center">MAISON_CTRL_TOPIC </td><td align="center">ctrl </td><td>This is the topic suffix used to identify device-related control topic </td></tr>
+<tr>
+<td align="center">DEFAULT_SHORT_REBOOT_TIME </td><td align="center">5 </td><td>This is the default reboot time in seconds when deep sleep is enable. This is used at the end of the following states: <em>PROCESS_EVENT</em>, <em>WAIT_END_EVENT</em>, <em>END_EVENT</em>. For the other states, the wait time is 60 minutes (3600 seconds). </td></tr>
+<tr>
+<td align="center">MQTT_OTA </td><td align="center">0 </td><td>Allow for Over the Air (OTA) code update through MQTT see section MQTT OTA for further details. </td></tr>
+<tr>
+<td align="center">APP_NAME </td><td align="center">UNKNOWN </td><td>Application name. Required for MQTT OTA as a mean to check the new binary to be compatible with the current. </td></tr>
+<tr>
+<td align="center">APP_VERSION </td><td align="center">1.0.0 </td><td>Application version number. </td></tr>
+</table>
+<p>The framework will subscribe to MQTT messages coming from the server on a topic built using <em>MAISON_PREFIX_TOPIC</em>, the device MAC address and <em>MAISON_CTRL_TOPIC</em>. For example, if the device MAC address is "DE01F3003571", the subscribed topic would be <code>maison/DE01F3003571/ctrl</code>.</p>
+<p>The <em>SERIAL_NEEDED</em> flag can be checked by the user application to verify if any of the <em>XXX_TESTING</em> options has been set to 1. Usefull to initialize the serial port through the Serial.begin() method.</p>
+<h2>3. Usage</h2>
+<p>The <b><a class="el" href="classMaison.html">Maison</a></b> framework is expecting the following aspects to be properly in place for its usage on a device:</p>
 <ol type="1">
-<li>Update the supplied data/config.json.sample file to your network configuration parameters</li>
-<li>Rename it to data/config.json</li>
-<li>Kill the PlatformIO Serial Monitor</li>
-<li>Launch the "Upload File System Image" task of the PlatformIO IDE. </li>
+<li><a href="#4-application-source-code">Application Source Code</a> with the <b><a class="el" href="classMaison.html">Maison</a></b> framework integration.</li>
+<li>A <a href="#5-configuration-parameters">Configuration Parameters</a> file.</li>
+<li>A <a href="#6-mqtt-broker">MQTT broker</a> on a networked server.</li>
 </ol>
+<p>The following sections explain each of this elements.</p>
+<h2>4. Application Source Code</h2>
+<p>Here is a minimal piece of code to initialize and start the framework:</p>
+<div class="fragment"><div class="line">{C++}</div><div class="line">#include &lt;Maison.h&gt;</div><div class="line"></div><div class="line">Maison maison();</div><div class="line"></div><div class="line">void setup()</div><div class="line">{</div><div class="line">  maison.setup();</div><div class="line">}</div><div class="line"></div><div class="line">void loop()</div><div class="line">{</div><div class="line">  maison.loop();</div><div class="line">}</div></div><!-- fragment --><p>This piece of code won't do much at the user application level, but it will set the scene to the automation of exchanges with a MQTT message broker, sending startup/watchdog messages, answering information requests, changes of configuration, completely automated through the <b><a class="el" href="classMaison.html">Maison</a></b> framework.</p>
+<p>Here is a more complete example of code to be used to initialize the framework with optional features and integrate it in the loop() function. It shows both option parameters, calls to the framework with message callback and finite state machine functions:</p>
+<div class="fragment"><div class="line">{C++}</div><div class="line">ADC_MODE(ADC_VCC);</div><div class="line"></div><div class="line">#include &lt;Maison.h&gt;</div><div class="line"></div><div class="line">struct user_data {</div><div class="line">  uint32_t crc;</div><div class="line">  int my_data;</div><div class="line">  ...</div><div class="line">} my_state;</div><div class="line"></div><div class="line">Maison maison(Maison::Feature::WATCHDOG_24H | Maison::Feature::VOLTAGE_CHECK,</div><div class="line">              &amp;my_state, sizeof(my_state));</div><div class="line"></div><div class="line">void msg_callback(const char  * topic,</div><div class="line">                  byte        * payload,</div><div class="line">                  unsigned int  length)</div><div class="line">{</div><div class="line"></div><div class="line">}</div><div class="line"></div><div class="line">Maison::UserResult process_state(Maison::State state)</div><div class="line">{</div><div class="line">  switch (state) {</div><div class="line">    case ...</div><div class="line">  }</div><div class="line"></div><div class="line">  return Maison::UserResult::COMPLETED;</div><div class="line">}</div><div class="line"></div><div class="line">void setup()</div><div class="line">{</div><div class="line">  maison.setup();</div><div class="line">  maison.set_msg_callback(&quot;my_topic&quot;, msg_callback, 0);</div><div class="line">}</div><div class="line"></div><div class="line">void loop()</div><div class="line">{</div><div class="line">  maison.loop(process_state);</div><div class="line">}</div></div><!-- fragment --><p>The use of <code>process_state</code> and <code>set_msg_callback</code> is optional.</p>
+<p>In the following sections, we describe the specific aspects of this code example.</p>
+<h3>4.1 Include File</h3>
+<p>The <code>#include &lt;<a class="el" href="Maison_8h_source.html">Maison.h</a>&gt;</code> integrates the <b><a class="el" href="classMaison.html">Maison</a></b> header into the user application. This will import the <b><a class="el" href="classMaison.html">Maison</a></b> class declaration and a bunch of definitions that are documented below. All required libraries needed by the framework are also included by this call.</p>
+<h3>4.2 <b><a class="el" href="classMaison.html">Maison</a></b> Declaration</h3>
+<p>The <code><a class="el" href="classMaison.html">Maison</a> maison(...)</code> declaration creates an instance of the framework. This declaration accepts the following parameters:</p>
+<ul>
+<li>An optional <a href="#421-feature-mask">feature mask</a>, to enable some aspects of the framework (see table below).</li>
+<li>An optional <a href="#422-user-application-state-structure">user application state structure</a> (here named <code>my_state</code>) and it's size to be automatically saved in non-volatile memory when DeepSleep is enabled.</li>
+</ul>
+<h4>4.2.1 Feature Mask</h4>
+<p>The following table show the current features supported through the feature mask (They are part of the <a class="el" href="classMaison.html#a78d9ef41e0b19f1018697766cf7d47d7">Maison::Feature</a> enum definition):</p>
+<table class="doxtable">
+<tr>
+<th align="center">Feature Name </th><th>Description  </th></tr>
+<tr>
+<td align="center">NONE </td><td>No feature selected. </td></tr>
+<tr>
+<td align="center">VOLTAGE_CHECK </td><td>Chip A2D voltage readout will be sent on status/watchdog messages. </td></tr>
+<tr>
+<td align="center">DEEP_SLEEP </td><td>deep_sleep will be used by the framework to limit power usage (e.g. on batteries). RESET/RST and WAKE/GPIO16 pins need to be wired together. </td></tr>
+<tr>
+<td align="center">WATCHDOG_24H </td><td>A Watchdog message will be sent every 24 hours. </td></tr>
+</table>
+<p>To use them, you have to prefix them with <code><a class="el" href="classMaison.html">Maison</a>::</code> or <code><a class="el" href="classMaison.html#a78d9ef41e0b19f1018697766cf7d47d7">Maison::Feature</a>::</code> as shown in the code example.</p>
+<p>Note: if the <em>VOLTAGE_CHECK</em> feature is selected, the following line is required to be put at the beginning of the main application sketch:</p>
+<div class="fragment"><div class="line">{C++}</div><div class="line">ADC_MODE(ADC_VCC);</div></div><!-- fragment --><h4>4.2.2 User Application State Structure</h4>
+<p>The user application state structure (here named <code>user_data</code>) <b>shall</b> have a <code>uint32_t</code> item as the first element in the structure. This is used by the framework to verify that the content saved in non-volatile memory is valid using a CRC-32 checksum. The whole content will be initialized (zeroed) if the checksum is bad. The checksum is computed by the framework, the user application just need to supplied the space in the structure.</p>
+<p>This structure is optional and could be required by the application when the <em>DEEP_SLEEP</em> feature is selected. It will allow for the saving and retrieval of the current application state as the Deep Sleep feature induce processor resets that invalidate memory content.</p>
+<h3>4.3 maison.loop()</h3>
+<p>The <a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">Maison::loop()</a> function must be called regularly in the user application main loop function to permit the execution of the finite state machine and the receiving of new MQTT messages. As a parameter, the <a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">Maison::loop()</a> function accepts a processing function that will be called by <b><a class="el" href="classMaison.html">Maison</a></b> inside the finite state machine. The function will receive the current state value as a parameter. It must return a status value from the following list:</p>
+<table class="doxtable">
+<tr>
+<th align="center">Value </th><th>Description  </th></tr>
+<tr>
+<td align="center">COMPLETED </td><td>Returned when the processing for the current state is considered completed. This is used mainly for all states. </td></tr>
+<tr>
+<td align="center">NOT_COMPLETED </td><td>The reverse of <em>COMPLETED</em>. Mainly used with <em>PROCESS_EVENT</em> in the case that it must be fired again to complete the processing </td></tr>
+<tr>
+<td align="center">ABORTED </td><td>Return in the case of <em>PROCESS_EVENT</em> when the event vanished before processing, such that the finite state machine return to the <em>WAIT_FOR_EVENT</em> state instead of going to the <em>WAIT_END_EVENT</em> state. </td></tr>
+<tr>
+<td align="center">NEW_EVENT </td><td>Returned when processing a <em>WAIT_FOR_EVENT</em> state to indicate that an event must be processed. </td></tr>
+<tr>
+<td align="center">RETRY </td><td>When in state <em>WAIT_END_EVENT</em>, will return back to <em>PROCESS_EVENT</em> to check again for event processing </td></tr>
+</table>
+<p>Note: if the <em>DEEP_SLEEP</em> feature was enabled, the loop will almost never return as the processor will wait for further processing through a call to ESP.deep_sleep function. The processor, after the wait time, will restart the code execution from the beginning.</p>
+<h2>5. Configuration Parameters</h2>
+<p>The <b><a class="el" href="classMaison.html">Maison</a></b> framework is automating access to the MQTT message broker through the WiFi connection. As such, parameters are required to link the device to the WiFi network and the MQTT broker server. A file named "/config.json" must be created on a SPIFFS file system in flash memory. This is a JSON structured file. Here is an example of such a file:</p>
+<div class="fragment"><div class="line">{</div><div class="line">  &quot;version&quot; : 1,</div><div class="line">  &quot;device_name&quot; : &quot;WATER_SPILL&quot;,</div><div class="line">  &quot;ssid&quot; : &quot;the wifi ssid&quot;,</div><div class="line">  &quot;wifi_password&quot; : &quot;the wifi password&quot;,</div><div class="line">  &quot;ip&quot; : &quot;192.168.1.71&quot;,</div><div class="line">  &quot;dns&quot; : &quot;192.168.1.1&quot;,</div><div class="line">  &quot;gateway&quot; : &quot;192.168.1.1&quot;,</div><div class="line">  &quot;subnet_mask&quot; : &quot;255.255.255.0&quot;,</div><div class="line">  &quot;mqtt_server_name&quot; : &quot;the MQTT server name or IP address&quot;,</div><div class="line">  &quot;mqtt_user_name&quot; : &quot;the MQTT user name&quot;,</div><div class="line">  &quot;mqtt_password&quot; : &quot;the MQTT user password&quot;,</div><div class="line">  &quot;mqtt_port&quot; : 8883,</div><div class="line">  &quot;mqtt_fingerprint&quot; : [13,217,75,226,184,245,80,117,113,43,18,251,39,75,237,77,35,65,10,19]</div><div class="line">}</div></div><!-- fragment --><p>All parameters must be present in the file to be considered valid by the framework. Here is a description of each parameter:</p>
+<table class="doxtable">
+<tr>
+<th align="center">Parameter </th><th>Description  </th></tr>
+<tr>
+<td align="center">version </td><td>This is the sequential version number. This is the property of the Server responsible of transmitting new configuration files to the device. It must be incremented every time a new configuration file is sent to the device. The device will not update its configuration if the version number is not greater than the current one. Unsigned Integer value (16 bits). </td></tr>
+<tr>
+<td align="center">device_name </td><td>A unique identifier for the device. This identifier is used inside messages sent through MQTT. It can be an empty string: the MAC address of the device WiFi interface will then be used as the identifier. Use letters, underscore, numbers to compose the identifier (no space or other special characters). Max length: 15 ASCII characters. </td></tr>
+<tr>
+<td align="center">ssid / wifi_password </td><td>The WiFi SSID and password. Required to reach the network. Max length: 15 ASCII characters each. </td></tr>
+<tr>
+<td align="center">ip </td><td>The ip address to set for the WiFi connection. If an empty string or equal to "0.0.0.0", the device will get its IP, dns, gateway adresses and subnet_mask from the network through DHCP. </td></tr>
+<tr>
+<td align="center">dns </td><td>The dns server IP address. Can be set to an empty string. </td></tr>
+<tr>
+<td align="center">gateway </td><td>The gateway (router) IP address. Can be set to an empty string. </td></tr>
+<tr>
+<td align="center">subnet_mask </td><td>The subnet mask. Can be set to an empty string. </td></tr>
+<tr>
+<td align="center">mqtt_server_name </td><td>This is the MQTT server name (SQDN) or IP address. Max length: 31 ASCII characters. </td></tr>
+<tr>
+<td align="center">mqtt_user_name / mqtt_password </td><td>These are the credentials to connect to the MQTT server. Max length: 15 ASCII characters for user_name, 31 ASCII characters for password. </td></tr>
+<tr>
+<td align="center">mqtt_port </td><td>The TLS/SSL port number of the MQTT server. Unsigned Integer value (16 bits). </td></tr>
+<tr>
+<td align="center">mqtt_fingerprint </td><td>This is the fingerprint associated with the MQTT service certificate. It must be a vector of 20 decimal values. Each value correspond to a byte part of the fingerprint. This is used to validate the MQTT server through the BearSSL library. Length: 20 bytes. </td></tr>
+</table>
+<h3>5.1 PlatformIO configuration</h3>
+<p>A SPIFFS flash file system must be put in place on the targeted device. This can be accomplished through the following process, as described in the <a href="https://docs.platformio.org/en/latest/platforms/espressif8266.html#uploading-files-to-file-system-spiffs">platformio documentation</a>:</p>
+<ol type="1">
+<li>Put the <b>config.json</b> in a folder named <code>data</code> located at the same level as for the application <code>src</code> folder.</li>
+<li>Add the following compilation options to the <code>build_flags</code> element of the <b>platformio.ini</b> file:</li>
+</ol>
+<div class="fragment"><div class="line">-Wl,-Teagle.flash.4m1m.ld</div></div><!-- fragment --><ol type="1">
+<li>Connect the device to the computer</li>
+<li>Kill the PlatformIO Serial Monitor. The next step won't work if the Serial Monitor is working.</li>
+<li>Initiate the flash memory preparation of the SPIFFS file system using the PlatformIO "Upload File System image" task from the IDE.</li>
+</ol>
+<h2>6. MQTT Broker</h2>
+<p>(To be completed)</p>
+<h2>7. Messages sent by the framework</h2>
+<p>All MQTT messages transmitted/received by the application are using a topic names composed with the following information:</p>
+<ul>
+<li>The MAISON_PREFIX_TOPIC value. Default is "maison". It can be redefined through a new #define definition.</li>
+<li>The device_id: This is the hexadecimal MAC address of the device.</li>
+<li>A suffix name as presented in the following sub-sections.</li>
+</ul>
+<p>The <b><a class="el" href="classMaison.html">Maison</a></b> framework automate some messages that are sent to <b>maison/device_id/xxx</b> topics. All message contents, but log messages, are sent using a JSON formatted string. Log messages are sent as free text.</p>
+<p>Here is a description of each message sent, namely:</p>
+<ul>
+<li>The Startup message</li>
+<li>The Status message</li>
+<li>The Watchdog message</li>
+<li>The Config message</li>
+<li>Log messages</li>
+</ul>
+<h3>7.1 The Startup message</h3>
+<p>This message is sent to the MQTT topic <b>maison/device_id/state</b> when the device is reset (Usually because of a Power-On action or a reset button being pressed). It is not sent when a DeepSleep wake-up action is taken by the device.</p>
+<table class="doxtable">
+<tr>
+<th align="center">Parameter </th><th>Description  </th></tr>
+<tr>
+<td align="center">device </td><td>The device name as stated in the configuration parameters. If the configuration parameter is empty, the MAC address of the device WiFi interface is used. </td></tr>
+<tr>
+<td align="center">msg_type </td><td>This content the string "STARTUP". </td></tr>
+<tr>
+<td align="center">ip </td><td>The device WiFi IP adress. </td></tr>
+<tr>
+<td align="center">mac </td><td>The device MAC address. </td></tr>
+<tr>
+<td align="center">reason </td><td>The reason for startup (hardware reset type). </td></tr>
+<tr>
+<td align="center">state </td><td>The current state of the finite state machine, as a number. Look into the <a href="#8-the-finite-state-machine">Finite State Machine</a> section for details. </td></tr>
+<tr>
+<td align="center">return_state </td><td>The state to return to after <em>HOURS_24</em> processing. </td></tr>
+<tr>
+<td align="center">hours </td><td>Hours counter. Used to compute the next 24 hours period. </td></tr>
+<tr>
+<td align="center">millis </td><td>Milliseconds in the last hour. </td></tr>
+<tr>
+<td align="center">lost </td><td>Counter of the number of time the connection to the MQTT broker has been lost. </td></tr>
+<tr>
+<td align="center">rssi </td><td>The WiFi signal strength of the connection to the router, a relative signal quality measurement. -50 means a pretty good signal, -75 fearly reasonnable and -100 means no signal. </td></tr>
+<tr>
+<td align="center">heap </td><td>The current value of the free heap space available on the device </td></tr>
+<tr>
+<td align="center">VBAT </td><td>This is the Battery voltage. This parameter is optional. Its presence depends on the <em>VOLTAGE_CHECK</em> feature. See the description of the <a href="#421-feature-mask">Feature Mask</a>. </td></tr>
+<tr>
+<td align="center">app_name </td><td>The name of the application. This is the functional name of the application, used for MQTT OTA updates. Will be showned only when MQTT_OTA is enabled. </td></tr>
+<tr>
+<td align="center">app_version </td><td>The code version number. Will be showned only when MQTT_OTA is enabled. </td></tr>
+</table>
+<p>The hardware reset reason come from the ESP8266 reset information:</p>
+<table class="doxtable">
+<tr>
+<th align="center">value </th><th>description  </th></tr>
+<tr>
+<td align="center">0 </td><td>Power Reboot </td></tr>
+<tr>
+<td align="center">1 </td><td>Hardware WDT Reset </td></tr>
+<tr>
+<td align="center">2 </td><td>Fatal Exception </td></tr>
+<tr>
+<td align="center">3 </td><td>Software Watchdog Reset </td></tr>
+<tr>
+<td align="center">4 </td><td>Software Reset </td></tr>
+<tr>
+<td align="center">5 </td><td>Deep Sleep Reset </td></tr>
+<tr>
+<td align="center">6 </td><td>Hardware Reset </td></tr>
+</table>
+<p>Example:</p>
+<div class="fragment"><div class="line">{&quot;device&quot;:&quot;WATER_SPILL&quot;,&quot;msg_type&quot;:&quot;STARTUP&quot;,&quot;ip&quot;:&quot;192.168.1.71&quot;,&quot;mac&quot;:&quot;2B:1D:03:31:2A:54&quot;,&quot;state&quot;:32,&quot;return_state&quot;:2,hours&quot;:7,&quot;millis&quot;:8001,&quot;lost&quot;:0,&quot;rssi&quot;:-63,&quot;heap&quot;:16704,&quot;app_name&quot;:&quot;BITSENSOR&quot;,&quot;app_version&quot;:&quot;1.0.1&quot;,&quot;VBAT&quot;:3.0}</div></div><!-- fragment --><h3>7.2 The Status message</h3>
+<p>This message is sent to the MQTT topic <b>maison/device_id/state</b> when a message sent to the device control topic (e.g. <b>maison/device_id/ctrl</b>) containing the string "STATE?" is received. It is similar to the Startup message, with msg_type set to "STATE".</p>
+<p>Example:</p>
+<div class="fragment"><div class="line">{&quot;device&quot;:&quot;WATER_SPILL&quot;,&quot;msg_type&quot;:&quot;STATE&quot;,&quot;ip&quot;:&quot;192.168.1.71&quot;,&quot;mac&quot;:&quot;2B:1D:03:31:2A:54&quot;,&quot;state&quot;:32,&quot;return_state&quot;:2,hours&quot;:7,&quot;millis&quot;:8001,&quot;lost&quot;:0,&quot;rssi&quot;:-63,&quot;heap&quot;:16704,&quot;app_name&quot;:&quot;BITSENSOR&quot;,&quot;app_version&quot;:&quot;1.0.1&quot;,&quot;VBAT&quot;:3.0}</div></div><!-- fragment --><h3>7.3 The Watchdog Message</h3>
+<p>This message is sent to the MQTT topic <b>maison/device_id/state</b> every 24 hours. Its transmission is enabled through the <em>WATCHDOG_24H</em> feature. See the description of the <a href="#421-feature-mask">Feature Mask</a>. It is similar to the Startup message, with msg_type set to "WATCHDOG".</p>
+<p>Example:</p>
+<div class="fragment"><div class="line">{&quot;device&quot;:&quot;WATER_SPILL&quot;,&quot;msg_type&quot;:&quot;WATCHDOG&quot;,&quot;ip&quot;:&quot;192.168.1.71&quot;,&quot;mac&quot;:&quot;2B:1D:03:31:2A:54&quot;,&quot;state&quot;:32,&quot;return_state&quot;:2,hours&quot;:7,&quot;millis&quot;:8001,&quot;lost&quot;:0,&quot;rssi&quot;:-63,&quot;heap&quot;:16704,&quot;app_name&quot;:&quot;BITSENSOR&quot;,&quot;app_version&quot;:&quot;1.0.1&quot;,&quot;VBAT&quot;:3.0}</div></div><!-- fragment --><h3>7.4 The Config message</h3>
+<p>This message is sent to the MQTT topic <b>maison/device_id/config</b> when a message sent to the device control topic (e.g. <b>maison/device_id/ctrl</b>) containing the string "CONFIG?" is received.</p>
+<table class="doxtable">
+<tr>
+<th align="center">Parameter </th><th>Description  </th></tr>
+<tr>
+<td align="center">device </td><td>The device name as stated in the configuration parameters. If the configuration parameter is empty, the MAC address of the device WiFi interface is used. </td></tr>
+<tr>
+<td align="center">msg_type </td><td>This content the string "CONFIG". </td></tr>
+<tr>
+<td align="center">content </td><td>This is the configuration of the device in a JSON format. See the <a href="#5-configuration-parameters">Configuration Parameters</a> section for the format details. </td></tr>
+</table>
+<p>Example:</p>
+<div class="fragment"><div class="line">{&quot;device&quot;:&quot;WATER_SPILL&quot;,&quot;msg_type&quot;:&quot;CONFIG&quot;,&quot;content&quot;:{</div><div class="line">  &quot;version&quot;          : 1,</div><div class="line">  &quot;device_name&quot;      : &quot;WATER_SPILL&quot;,</div><div class="line">  &quot;ssid&quot;             : &quot;the_ssid&quot;,</div><div class="line">  &quot;wifi_password&quot;    : &quot;the_password&quot;,</div><div class="line">  &quot;ip&quot;               : &quot;192.168.1.71&quot;,</div><div class="line">  &quot;dns&quot;              : &quot;192.168.1.1&quot;,</div><div class="line">  &quot;gateway&quot;          : &quot;192.168.1.1&quot;,</div><div class="line">  &quot;subnet_mask&quot;      : &quot;255.255.255.0&quot;,</div><div class="line">  &quot;mqtt_server_name&quot; : &quot;the_server_sqdn&quot;,</div><div class="line">  &quot;mqtt_user_name&quot;   : &quot;the_mqtt_user_name&quot;,</div><div class="line">  &quot;mqtt_password&quot;    : &quot;the_mqtt_password&quot;,</div><div class="line">  &quot;mqtt_port&quot;        : 8883,</div><div class="line">  &quot;mqtt_fingerprint&quot; : [13,217,75,226,184,245,80,117,113,43,18,251,39,75,237,77,35,65,10,19]</div><div class="line">}}</div></div><!-- fragment --> <h3>7.5 Log messages</h3>
+<p>Log messages are sent to the MQTT topic <b>maison/device_id/log</b> as non-formatted text messages. They are mainly used for OTA code reception aknowledges for debugging purposes.</p>
+<h2>8. The Finite State Machine</h2>
+<p>The finite state machine is processed inside the <code><a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">Maison::loop()</a></code> function.</p>
+<p>When using the <em>DEEP_SLEEP</em> <a href="#421-feature-mask">feature</a>, networking is disabled for some of the states to minimize battery usage. If the <em>DEEP_SLEEP</em> feature is not used, networking is available all the time. The <code><a class="el" href="classMaison.html#a737fc95f3204808f969b025eb3a76d5c">Maison::network_is_available()</a></code> function can be used to check network availability.</p>
+<table class="doxtable">
+<tr>
+<th align="center">State </th><th align="center">Value </th><th align="center">Network </th><th>Description  </th></tr>
+<tr>
+<td align="center">STARTUP </td><td align="center">1 </td><td align="center">YES </td><td>The device has just been reset. </td></tr>
+<tr>
+<td align="center">WAIT_FOR_EVENT </td><td align="center">2 </td><td align="center">NO </td><td>This is the state waiting for an event to occur. The event is application specific. </td></tr>
+<tr>
+<td align="center">PROCESS_EVENT </td><td align="center">4 </td><td align="center">YES </td><td>An event is being processed by the application. This will usually send a message to the MQTT broker. </td></tr>
+<tr>
+<td align="center">WAIT_END_EVENT </td><td align="center">8 </td><td align="center">NO </td><td>The device is waiting for the end of the event to occur. </td></tr>
+<tr>
+<td align="center">END_EVENT </td><td align="center">16 </td><td align="center">YES </td><td>The end of an event has been detected. It's time to do an event rundown. This will usually send a message to the MQTT broker. </td></tr>
+<tr>
+<td align="center">HOURS_24 </td><td align="center">32 </td><td align="center">YES </td><td>This event occurs every 24 hours. It permits the transmission of a Watchdog message if enabled with the <em>WATCHDOG_24H</em> feature. The state is required such that at least one wakeup per day occurs for which the network interface is energized to allow for the reception of configuration, new application code (if OTA is enabled) or control messages. </td></tr>
+</table>
+<p>Here is a state diagram showing the inter-relationship between each state and the corresponding application process return values for witch state changes will be fired:</p>
+<div class="image">
+<img src="./doc/state_uml.png"/>
+</div>
+<p>A user defined processing function will be called by <b><a class="el" href="classMaison.html">Maison</a></b> inside the finite state machine. This function must be supplied as a parameter to the maison.loop() method. The function will receive the current state value as a parameter and take appropriate action considering the current state. It must return a status value from the following list:</p>
+<table class="doxtable">
+<tr>
+<th align="center">Value </th><th align="center">Valid states </th><th>Description  </th></tr>
+<tr>
+<td align="center">COMPLETED </td><td align="center">STARTUP PROCESS_EVENT WAIT_END_EVENT END_EVENT HOURS_24 </td><td>Returned when the processing for the current state is considered completed. This is used mainly for all states. </td></tr>
+<tr>
+<td align="center">NOT_COMPLETED </td><td align="center">all states </td><td>The reverse of <em>COMPLETED</em>. Mainly used with <em>PROCESS_EVENT</em> in the case that it must be fired again to complete the processing </td></tr>
+<tr>
+<td align="center">ABORTED </td><td align="center">PROCESS_EVENT </td><td>Return in the case of <em>PROCESS_EVENT</em> when the event vanished before processing, such that the finite state machine return to the <em>WAIT_FOR_EVENT</em> state instead of going to the <em>WAIT_END_EVENT</em> state. </td></tr>
+<tr>
+<td align="center">NEW_EVENT </td><td align="center">WAIT_FOR_EVENT </td><td>Returned when processing a <em>WAIT_FOR_EVENT</em> state to indicate that an event must be processed. </td></tr>
+<tr>
+<td align="center">RETRY </td><td align="center">WAIT_END_EVENT </td><td>When in state <em>WAIT_END_EVENT</em>, will return back to <em>PROCESS_EVENT</em> to check again for event processing </td></tr>
+</table>
+<p>Note that HOURS_24 is not taking any action on the received value. This state is entered automatically when it's the time for it to be fired. It returns back to the preceeding state once executed.</p>
+<p>The HOURS_24 state exact time to have it fired is not selectable. The ESP8266 doesn't have any RTC and the internal timer is not accurate enough to ensure proper synchronization with the time of day.</p>
+<h2>9. Usage on battery power</h2>
+<p>The <b><a class="el" href="classMaison.html">Maison</a></b> framework can be tailored to use Deep Sleep when on battery power, through the <em>DEEP_SLEEP</em> <a href="#421-feature-mask">feature</a>.</p>
+<p>In this context, the finite state machine will cause a call to the <code>ESP.deep_sleep()</code> function at the end of each of its processing cycle (function <code><a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">Maison::loop()</a></code>) to put the processor in a dormant state. The deep sleep duration, by default, is set to 5 seconds before entry to the states <em>PROCESS_EVENT</em>, <em>WAIT_END_EVENT</em>, <em>END_EVENT</em> and <em>HOURS_24</em>; it is 3600 seconds for <em>WAIT_FOR_EVENT</em>.</p>
+<p>If the deep sleep feature is enabled, the call to <code><a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">Maison::loop()</a></code> never return to the caller as the processor will reset after the deep sleep period.</p>
+<p>It is expected that a hardware interrupt will wake up the device to indicate the arrival of a new event. If it's not the case, it will be then be required to modulate the amount of time to wait for the next <em>WAIT_FOR_EVENT</em> state to occurs. This must be used with caution as it will have an impact on the battery capacity.</p>
+<p>The application process can change the amount of seconds for the next deep sleep period using the <code><a class="el" href="classMaison.html#a20db75bbcbdca7c2b07316c5115db0aa">Maison::set_deep_sleep_wait_time()</a></code> function. This can be called inside the application <code>process_state()</code> function before returning control to the framework.</p>
+<p>As the device will be in a deep sleep state almost all the time, it becomes more difficult for it to get messages from the MQTT broker. Messages to be read by the device must then be using Qos (quality of service) of 1 to have them delivered when the device will be ready to receive them (network is running and the message callback is in operation). When connecting to the broker, <b><a class="el" href="classMaison.html">Maison</a></b> will connect with the cleanup flag to false, indicating the need to keep what is in the queue for retrieval after sleep time. The MQTT broker uses the client_name as the id to manage persistency. As such, it is required to be different than any other device name. When no device name is supplied in the config file (empty string), <b><a class="el" href="classMaison.html">Maison</a></b> uses the mac address as the device name. Insure that when you set the device name, it is unique amongst your devices. <b><a class="el" href="classMaison.html">Maison</a></b> prefix it with "client-" and send it to the MQTT broker at connection time.</p>
+<p>The ESP8266 does not allow for a sleep period longer than 4294967295 microseconds, that corresponds to around 4294 seconds or 71 minutes.</p>
+<p>If <em>DEEP_SLEEP</em> is not used, there is no wait time other than the code processing time in the <code><a class="el" href="classMaison.html#a975d3487e9cc05a3f17ca2b22d8343eb">Maison::loop()</a></code>. Internally, the framework compute the duration of execution for the next <em>HOURS_24</em> state to occur.</p>
+<h2>10. MQTT OTA</h2>
+<p>The <b><a class="el" href="classMaison.html">Maison</a></b> framework allows for code update through a MQTT firmware transmission protocol (Over The Air, or OTA). As such, the following aspects must be properly setup:</p>
+<ol type="1">
+<li>The compilation option MQTT_OTA must be set to 1</li>
+<li>The APP_NAME compilation option must be set to the functional name of the code. This name will need to be present in the NEW_CODE command shown below.</li>
+<li>The code must be updated on the chip through a serial (FTDI) connexion at least once. After that, it will be possible to upload new codes through MQTT. Do not omit to power reset the device after the update as a reset from an FTDI upload doesn't allow for OTA update.</li>
+</ol>
+<p>To update the code, two messages in a single sequence must be sent to topic <b>maison/device_id/ctrl</b> with qos 1. The first one will contain a json structure prefixed with "NEW_CODE:" that will have the following fields:</p>
+<table class="doxtable">
+<tr>
+<th>Field Name </th><th>Description  </th></tr>
+<tr>
+<td>SIZE </td><td>The size of the firmware to be sent as a number of bytes </td></tr>
+<tr>
+<td>APP_NAME </td><td>The name of the application </td></tr>
+<tr>
+<td>MD5 </td><td>The MD5 message digest (fingerprint) of the file to be sent (string of 32 characters) </td></tr>
+</table>
+<p>Here is an example of such a message:</p>
+<div class="fragment"><div class="line">NEW_CODE:{&quot;SIZE&quot;:412345,&quot;APP_NAME&quot;:&quot;BLINKER&quot;,&quot;MD5&quot;:&quot;06fa77583b007464167bbba866d662c2&quot;}</div></div><!-- fragment --><p>Once received, the device will send a log message. For example::</p>
+<div class="fragment"><div class="line">DEVICE_NAME: Code update started with size 412345 and md5: 06fa77583b007464167bbba866d662c2.</div></div><!-- fragment --><p>The second message sent to the device will contain the binary code of the file. Its length must be the same indicated by the SIZE parameter shown above.</p>
+<p>Once the code has been received, the device will send a log message. For example:</p>
+<div class="fragment"><div class="line">DEVICE_NAME: Code upload completed. Rebooting</div></div><!-- fragment --><p>A shell script (located in the <code>tools/upload.sh</code> file) that help in the automated transmission of a new firmware is supplied with the framework. Some parameters must be modified according to the targetted MQTT broker configuration to make it usable. </p>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
