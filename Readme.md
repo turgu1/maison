@@ -30,8 +30,8 @@ Note that the library maybe usable through the Arduino IDE, but this is not supp
 The **Maison** framework, to be functional, requires the following:
 
 * Proper application setup parameters in file `platformio.ini`. Look at the [Building an Application](#2-building-an-application) section;
-* Code in the user application to setup and use the framework. Look at the [Code Usage](#code-usage) section;
-* Configuration parameters located in SPIFFS (file `data/config.json` in example folders). Look at the [Configuration Parameters](#configuration-parameters) section.
+* Code in the user application to setup and use the framework. Look at the [Code Usage](#3-usage) section;
+* Configuration parameters located in SPIFFS (file `data/config.json` in example folders). Look at the [Configuration Parameters](#5-configuration-parameters) section.
 
 The sections below describe the specific of these requirements.
 
@@ -101,9 +101,9 @@ The *SERIAL_NEEDED* flag can be checked by the user application to verify if any
 
 The **Maison** framework is expecting the following aspects to be properly in place for its usage on a device:
 
-1. [Application Source Code](#application-source-code) with the **Maison** framework integration.
-2. A [Configuration Parameters](#configuration-parameters) file.
-3. A [MQTT broker](#mqtt-broker) on a networked server.
+1. [Application Source Code](#4-application-source-code) with the **Maison** framework integration.
+2. A [Configuration Parameters](#5-configuration-parameters) file.
+3. A [MQTT broker](#6-mqtt-broker) on a networked server.
 
 The following sections explain each of this elements. 
 
@@ -185,8 +185,8 @@ The `#include <Maison.h>` integrates the **Maison** header into the user applica
 
 The `Maison maison(...)` declaration creates an instance of the framework. This declaration accepts the following parameters:
 
-* An optional [feature mask](#feature-mask), to enable some aspects of the framework (see table below).
-* An optional [user application state structure](#user-application-state-structure) (here named `my_state`) and it's size to be automatically saved in non-volatile memory when DeepSleep is enabled.
+* An optional [feature mask](#4-2-1-feature-mask), to enable some aspects of the framework (see table below).
+* An optional [user application state structure](#4-2-2-user-application-state-structure) (here named `my_state`) and it's size to be automatically saved in non-volatile memory when DeepSleep is enabled.
 
 #### 4.2.1 Feature Mask
 
@@ -315,14 +315,14 @@ msg_type  | This content the string "STARTUP".
 ip        | The device WiFi IP adress.
 mac       | The device MAC address.
 reason    | The reason for startup (hardware reset type).
-state     | The current state of the finite state machine, as a number. Look into the [Finite State Machine](#the-finite-state-machine) section for details.
+state     | The current state of the finite state machine, as a number. Look into the [Finite State Machine](#8-the-finite-state-machine) section for details.
 return_state | The state to return to after *HOURS_24* processing.
 hours     | Hours counter. Used to compute the next 24 hours period.
 millis    | Milliseconds in the last hour.
 lost      | Counter of the number of time the connection to the MQTT broker has been lost.
 rssi      | The WiFi signal strength of the connection to the router, a relative signal quality measurement. -50 means a pretty good signal, -75 fearly reasonnable and -100 means no signal.
 heap      | The current value of the free heap space available on the device
-VBAT      | This is the Battery voltage. This parameter is optional. Its presence depends on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#feature-mask).
+VBAT      | This is the Battery voltage. This parameter is optional. Its presence depends on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#4-2-1-feature-mask).
 app_name | The name of the application. This is the functional name of the application, used for MQTT OTA updates. Will be showned only when MQTT_OTA is enabled.
 app_version | The code version number. Will be showned only when MQTT_OTA is enabled.
 
@@ -356,7 +356,7 @@ Example:
 
 ### 7.3 The Watchdog Message
 
-This message is sent to the MQTT topic **maison/device_id/state** every 24 hours. Its transmission is enabled through the *WATCHDOG_24H* feature. See the description of the [Feature Mask](#feature-mask).  It is similar to the Startup message, with msg_type set to "WATCHDOG".
+This message is sent to the MQTT topic **maison/device_id/state** every 24 hours. Its transmission is enabled through the *WATCHDOG_24H* feature. See the description of the [Feature Mask](#4-2-1-feature-mask).  It is similar to the Startup message, with msg_type set to "WATCHDOG".
 
 Example:
 
@@ -372,7 +372,7 @@ Parameter | Description
 :--------:|------------------
 device    | The device name as stated in the configuration parameters. If the configuration parameter is empty, the MAC address of the device WiFi interface is used.
 msg_type  | This content the string "CONFIG".
-content   | This is the configuration of the device in a JSON format. See the [Configuration Parameters](#configuration-parameters) section for the format details.
+content   | This is the configuration of the device in a JSON format. See the [Configuration Parameters](#5-configuration-parameters) section for the format details.
 
 Example:
 
@@ -401,7 +401,7 @@ Log messages are sent to the MQTT topic **maison/device_id/log** as non-formatte
 
 The finite state machine is processed inside the `Maison::loop()` function.
 
-When using the *DEEP_SLEEP* [feature](#feature-mask), networking is disabled for some of the states to minimize battery usage. If the *DEEP_SLEEP* feature is not used, networking is available all the time. The `Maison::network_is_available()` function can be used to check network availability.
+When using the *DEEP_SLEEP* [feature](#4-2-1-feature-mask), networking is disabled for some of the states to minimize battery usage. If the *DEEP_SLEEP* feature is not used, networking is available all the time. The `Maison::network_is_available()` function can be used to check network availability.
 
 State          | Value | Network | Description
 :-------------:|:-----:|:-------:|-------------
