@@ -185,8 +185,8 @@ The `#include <Maison.h>` integrates the **Maison** header into the user applica
 
 The `Maison maison(...)` declaration creates an instance of the framework. This declaration accepts the following parameters:
 
-* An optional [feature mask](#4-2-1-feature-mask), to enable some aspects of the framework (see table below).
-* An optional [user application state structure](#4-2-2-user-application-state-structure) (here named `my_state`) and it's size to be automatically saved in non-volatile memory when DeepSleep is enabled.
+* An optional [feature mask](#4.2.1-feature-mask), to enable some aspects of the framework (see table below).
+* An optional [user application state structure](#4.2.2-user-application-state-structure) (here named `my_state`) and it's size to be automatically saved in non-volatile memory when DeepSleep is enabled.
 
 #### 4.2.1 Feature Mask
 
@@ -322,7 +322,7 @@ millis    | Milliseconds in the last hour.
 lost      | Counter of the number of time the connection to the MQTT broker has been lost.
 rssi      | The WiFi signal strength of the connection to the router, a relative signal quality measurement. -50 means a pretty good signal, -75 fearly reasonnable and -100 means no signal.
 heap      | The current value of the free heap space available on the device
-VBAT      | This is the Battery voltage. This parameter is optional. Its presence depends on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#4-2-1-feature-mask).
+VBAT      | This is the Battery voltage. This parameter is optional. Its presence depends on the *VOLTAGE_CHECK* feature. See the description of the [Feature Mask](#4.2.1-feature-mask).
 app_name | The name of the application. This is the functional name of the application, used for MQTT OTA updates. Will be showned only when MQTT_OTA is enabled.
 app_version | The code version number. Will be showned only when MQTT_OTA is enabled.
 
@@ -356,7 +356,7 @@ Example:
 
 ### 7.3 The Watchdog Message
 
-This message is sent to the MQTT topic **maison/device_id/state** every 24 hours. Its transmission is enabled through the *WATCHDOG_24H* feature. See the description of the [Feature Mask](#4-2-1-feature-mask).  It is similar to the Startup message, with msg_type set to "WATCHDOG".
+This message is sent to the MQTT topic **maison/device_id/state** every 24 hours. Its transmission is enabled through the *WATCHDOG_24H* feature. See the description of the [Feature Mask](#4.2.1-feature-mask).  It is similar to the Startup message, with msg_type set to "WATCHDOG".
 
 Example:
 
@@ -401,7 +401,7 @@ Log messages are sent to the MQTT topic **maison/device_id/log** as non-formatte
 
 The finite state machine is processed inside the `Maison::loop()` function.
 
-When using the *DEEP_SLEEP* [feature](#4-2-1-feature-mask), networking is disabled for some of the states to minimize battery usage. If the *DEEP_SLEEP* feature is not used, networking is available all the time. The `Maison::network_is_available()` function can be used to check network availability.
+When using the *DEEP_SLEEP* [feature](#4.2.1-feature-mask), networking is disabled for some of the states to minimize battery usage. If the *DEEP_SLEEP* feature is not used, networking is available all the time. The `Maison::network_is_available()` function can be used to check network availability.
 
 State          | Value | Network | Description
 :-------------:|:-----:|:-------:|-------------
@@ -418,7 +418,7 @@ Here is a state diagram showing the inter-relationship between each state and th
 
 ## 9. Usage on battery power
 
-The **Maison** framework can be tailored to use Deep Sleep when on battery power, through the *DEEP_SLEEP* [feature](#feature-mask).
+The **Maison** framework can be tailored to use Deep Sleep when on battery power, through the *DEEP_SLEEP* [feature](#4.2.1-feature-mask).
 
 In this context, the finite state machine will cause a call to the `ESP.deep_sleep()` function at the end of each of its processing cycle (function `Maison::loop()`) to put the processor in a dormant state. The deep sleep duration, by default, is set to 5 seconds before entry to the states *PROCESS_EVENT*, *WAIT_END_EVENT*, *END_EVENT* and *HOURS_24*; it is 3600 seconds for *WAIT_FOR_EVENT*.
 
