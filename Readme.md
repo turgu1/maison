@@ -416,6 +416,20 @@ Here is a state diagram showing the inter-relationship between each state and th
 
 ![](./doc/state_uml.png)
 
+A user defined processing function will be called by **Maison** inside the finite state machine. This function must be supplied as a parameter to the maison.loop() method. The function will receive the current state value as a parameter and take appropriate action considering the current state. It must return a status value from the following list:
+
+Value         | Valid states |Description
+:------------:|:----------------:|----------------
+COMPLETED     | STARTUP PROCESS_EVENT WAIT_END_EVENT END_EVENT HOURS_24 | Returned when the processing for the current state is considered completed. This is used mainly for all states.
+NOT_COMPLETED | all states | The reverse of *COMPLETED*. Mainly used with *PROCESS_EVENT* in the case that it must be fired again to complete the processing
+ABORTED       | PROCESS_EVENT | Return in the case of *PROCESS_EVENT* when the event vanished before processing, such that the finite state machine return to the *WAIT_FOR_EVENT* state instead of going to the *WAIT_END_EVENT* state.
+NEW_EVENT     | WAIT_FOR_EVENT | Returned when processing a *WAIT_FOR_EVENT* state to indicate that an event must be processed.
+RETRY         | WAIT_END_EVENT | When in state *WAIT_END_EVENT*, will return back to *PROCESS_EVENT* to check again for event processing
+
+Note that HOURS_24 is not taking any action on the received value. This state is entered automatically when it's the time for it to be fired. It return back to the preceeding state once executed.
+
+The HOURS_24 state exact time to have it fired is not selectable. The ESP8266 doesn't have any RTC and the internal timer is not accurate enough to ensure proper synchronization with the time of day.
+
 ## 9. Usage on battery power
 
 The **Maison** framework can be tailored to use Deep Sleep when on battery power, through the *DEEP_SLEEP* [feature](#421-feature-mask).
