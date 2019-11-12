@@ -165,7 +165,7 @@ void setup()
 
   delay(100);
 
-  SETUP_SERIAL;
+  SERIAL_SETUP;
 
   PRINTLN(F("==> SETUP <=="));
 
