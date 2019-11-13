@@ -488,7 +488,12 @@ void Maison::loop(Process * _process)
     NET_DEBUGLN(F("Check for new coming messages..."));
     do {
       some_message_received = false;
-      for (int i = 0; i < 20000; i++) {
+
+      // As with deep_sleep is enable, we must wait longer if there is
+      // messages coming. 
+      int count = use_deep_sleep() ? 5000 : 10;
+      
+      for (int i = 0; i < count; i++) {
         yield();
         mqtt_loop();
         if (some_message_received) {
