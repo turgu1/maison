@@ -1247,8 +1247,7 @@ uint32_t Maison::CRC32(const uint8_t * _data, size_t _length)
 void Maison::wifi_flush()
 {
   if (wifi_client != NULL) {
-    wifi_client->flush();
-    delay(10000);
+    while (!wifi_client->flush(10)) delay(10);
     wifi_client->stop();
     while (wifi_client->connected()) delay(10);
     delay(10);
