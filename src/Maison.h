@@ -572,7 +572,7 @@ class Maison
     uint16_t     deep_sleep_wait_time;
     uint32_t     loop_time_marker;
     bool         some_message_received;
-    bool         wait_for_completion;
+    bool         wait_for_ota_completion;
     bool         reboot_now;  // reboot after code update
     bool         restart_now; // restart after saving the state
 

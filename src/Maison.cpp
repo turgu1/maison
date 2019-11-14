@@ -16,7 +16,7 @@ Maison::Maison() :
            user_mem_length(0),
            last_time_count(0),
   counting_lost_connection(true),
-       wait_for_completion(false),
+   wait_for_ota_completion(false),
                 reboot_now(false),
                restart_now(false)
 {
@@ -36,7 +36,7 @@ Maison::Maison(uint8_t _feature_mask) :
            user_mem_length(0),
            last_time_count(0),
   counting_lost_connection(true),
-       wait_for_completion(false),
+   wait_for_ota_completion(false),
                 reboot_now(false),
                restart_now(false)
 {
@@ -56,7 +56,7 @@ Maison::Maison(uint8_t _feature_mask, void * _user_mem, uint16_t _user_mem_lengt
            user_mem_length(_user_mem_length),
            last_time_count(0),
   counting_lost_connection(true),
-       wait_for_completion(false),
+   wait_for_ota_completion(false),
                 reboot_now(false),
                restart_now(false)
 {
@@ -254,8 +254,7 @@ void Maison::get_new_config()
       if (running) {
         if (--length < 0) running = false;
         else {
-          Update.write(&b, 1);
-          return 1;
+          return Update.write(&b, 1);
         }
       }
       return 0;
@@ -263,10 +262,8 @@ void Maison::get_new_config()
 
     bool end() {
       running = false;
-      if (Update.end()) {
-        completed = Update.isFinished();
-        if (!completed) showError();
-      } else showError();
+      completed = Update.end();
+      if (!completed) showError();
       return completed;
     }
 
@@ -342,7 +339,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
                 OTA_DEBUG(F(" and ")); 
                 OTA_DEBUGLN(tmp);
                 log(F("Code update started with size %d and md5: %s."), size, tmp);
-                wait_for_completion = true;
+                wait_for_ota_completion = true;
               }
               else {
                 OTA_DEBUG(F("Error: Code upload not started: "));
@@ -369,9 +366,9 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
         }
       }
       else if (cons.isRunning()) {
-        // The transmission is complete. Check if the Updater is satisfied and if
-        // so, restart the device
-        if (cons.end() && cons.isCompleted()) {
+        // The transmission is expected to be complete. Check if the 
+        // Updater is satisfied and if so, restart the device
+        if (cons.end()) {
           OTA_DEBUGLN(F(" Upload Completed. Rebooting..."));
           log(F("Code upload completed. Rebooting"));
           reboot_now = true;
@@ -382,7 +379,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
           log(F("Error: Code upload not completed: %s"), 
               cons.getErrorStr().c_str());
         }
-        wait_for_completion = false;
+        wait_for_ota_completion = false;
       }
       else 
     #endif
@@ -479,8 +476,8 @@ void Maison::loop(Process * _process)
     // Consume all pending messages. For OTA updates, as the request
     // is composed of 2 messages, 
     // it may require many calls to mqtt_loop to get it completed. The
-    // wait_for_completion flag is set by the callback to signify the need
-    // to wait until the complete new code has been received. The algorithm
+    // wait_for_ota_completion flag is set by the callback to signify the need
+    // to wait until the new code has been received. The algorithm
     // below insure that if the code has not been received inside 2 minutes
     // of wait time, it will be aborted. This is to control battery drain.
 
@@ -504,10 +501,10 @@ void Maison::loop(Process * _process)
         }
       }
     } while (some_message_received || 
-             (wait_for_completion && ((millis() - start) < 120000)));
+             (wait_for_ota_completion && ((millis() - start) < 120000)));
 
-    if (wait_for_completion) {
-      wait_for_completion = false;
+    if (wait_for_ota_completion) {
+      wait_for_ota_completion = false;
       OTA_DEBUGLN(F("Error: Wait for completion too long. Aborted."));
       log(F("Error: Wait for completion too long. Aborted."));
     }
