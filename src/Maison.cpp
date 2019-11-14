@@ -245,7 +245,7 @@ void Maison::get_new_config()
       length    = _size;
       completed = false;
       running   = Update.begin(_size);
-      if (!running) showError();
+      if (!running) showError(F("cons.begin()"));
       else if (_md5) Update.setMD5(_md5);
       return running;
     }
@@ -263,7 +263,7 @@ void Maison::get_new_config()
     bool end() {
       running = false;
       completed = Update.end();
-      if (!completed) showError();
+      if (!completed) showError(F("cons.end()"));
       return completed;
     }
 
@@ -284,7 +284,9 @@ void Maison::get_new_config()
       return error; 
     }
 
-    void   showError() {  
+    void   showError(const __FlashStringHelper * prefix) {  
+      OTA_DEBUG(prefix);
+      OTA_DEBUG(F(" : "));
       OTA_DEBUGLN(getErrorStr()); 
     }
   } cons;
