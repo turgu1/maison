@@ -91,6 +91,8 @@ void setup()
 
 void loop() 
 {
+  delay(100);
+  
   maison.loop();
 
   if (msg_len > 0) {
