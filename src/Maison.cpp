@@ -1251,7 +1251,7 @@ void Maison::wifi_flush()
     //wifi_client->stop();
     //while (wifi_client->connected()) delay(10);
     //delay(10);
-    while (wifi_client.state() != -1) {
+    while (wifi_client->state() != -1) {
       delay(10);
     }
     delay(10);
