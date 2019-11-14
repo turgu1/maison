@@ -21,8 +21,7 @@
     ],
     "dependencies": [
         {
-        "type": "git",
-        "name": "PubSubClient",
+            "name": "PubSubClient",
             "version": "https://github.com/turgu1/pubsubclient.git"
         },
         {
