@@ -402,6 +402,13 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
       NET_DEBUGLN("Device is restarting");
       restart_now = true;
     }
+    else if (strncmp(buffer, "TEST!", 5) == 0) {
+      log(F("This is a test..."));
+
+      bool res = wifi_client->flush();
+      NET_DEBUG(F("Result: "));
+      NET_DEBUGLN(res);
+    }
     else {
       NET_DEBUGLN(F(" Warning: Unknown message received."));
       log(F("Warning: Unknown message received."));
