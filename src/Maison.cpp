@@ -400,7 +400,7 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
     }
     else if (strncmp(buffer, "RESTART!", 8) == 0) {
       NET_DEBUGLN("Device is restarting");
-      restart_now = true;
+      reboot_now = true;
     }
     #if NET_TESTING
       else if (strncmp(buffer, "TEST!", 5) == 0) {
@@ -1256,8 +1256,8 @@ uint32_t Maison::CRC32(const uint8_t * _data, size_t _length)
 void Maison::wifi_flush()
 {
   if (wifi_client != NULL) {
-    while (!wifi_client->flush(10)) delay(10);
-    wifi_client->stop();
+    while (!wifi_client->flush(100)) delay(10);
+    while (!wifi_client->stop(100)) delay(10);
     while (wifi_client->connected()) delay(10);
     delay(10);
   }
