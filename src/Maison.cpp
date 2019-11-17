@@ -236,6 +236,7 @@ void Maison::get_new_config()
   {
   private:
     size_t length;
+    int count;
     bool running;
     bool completed;
     StreamString error; 
@@ -244,6 +245,7 @@ void Maison::get_new_config()
     bool begin(size_t _size, const char * _md5 = NULL) {
       length    = _size;
       completed = false;
+      count = 0;
       running   = Update.begin(_size);
       if (!running) showError(F("cons.begin()"));
       else if (_md5) Update.setMD5(_md5);
@@ -256,6 +258,10 @@ void Maison::get_new_config()
         else {
           return Update.write(&b, 1);
         }
+      }
+      if (++count > 10000) {
+        count = 0;
+        yield();
       }
       return 0;
     }
@@ -370,6 +376,9 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
       else if (cons.isRunning()) {
         // The transmission is expected to be complete. Check if the 
         // Updater is satisfied and if so, restart the device
+
+        yield();
+        
         if (cons.end()) {
           OTA_DEBUGLN(F(" Upload Completed. Rebooting..."));
           log(F("Code upload completed. Rebooting"));
