@@ -462,7 +462,12 @@ void Maison::loop(Process * _process)
 
     if (!mqtt_connected()) {
 
+      // We have not been able to connect to the MQTT server.
+      // Wait for an hour before trying again. In a deep sleep enabled
+      // situation, this will minimize battery drain.
+
       if (counting_lost_connection) {
+        // This will count lost connection only once between successfull connexion.
         mem.lost_count += 1;
         counting_lost_connection = false;
         NET_DEBUG(F(" Connection Lost Count: "));
@@ -475,8 +480,7 @@ void Maison::loop(Process * _process)
       }
       else {
         long now = millis();
-        if ((now - last_reconnect_attempt) > (1000L * ONE_HOUR))
-        {
+        if ((now - last_reconnect_attempt) > (1000L * ONE_HOUR)) {
           NET_DEBUG(F("\r\nBeen waiting for "));
           NET_DEBUG(ONE_HOUR);
           NET_DEBUGLN(F(" Seconds. Trying again..."));
@@ -510,9 +514,9 @@ void Maison::loop(Process * _process)
     do {
       some_message_received = false;
 
-      // As with deep_sleep is enable, we must wait longer if there is
-      // messages coming. 
-      int count = use_deep_sleep() ? 5000 : 10;
+      // As with deep_sleep is enable, we must wait if there is
+      // messages to be retrieved. 
+      int count = use_deep_sleep() ? 5000 : 1;
       
       for (int i = 0; i < count; i++) {
         yield();
