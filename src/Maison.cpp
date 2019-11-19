@@ -516,7 +516,7 @@ void Maison::loop(Process * _process)
 
       // As with deep_sleep is enable, we must wait if there is
       // messages to be retrieved. 
-      int count = use_deep_sleep() ? 5000 : 1;
+      int count = use_deep_sleep() ? 1000 : 1;
       
       for (int i = 0; i < count; i++) {
         yield();
