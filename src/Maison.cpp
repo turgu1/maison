@@ -407,8 +407,12 @@ void Maison::process_callback(const char * _topic, byte * _payload, unsigned int
       NET_DEBUGLN(F(" Config content requested"));
       send_state_msg("STATE");
     }
-    else if (strncmp(buffer, "RESTART!", 8) == 0) {
+    else if (strncmp(buffer, "RESTART!!", 9) == 0) {
       NET_DEBUGLN("Device is restarting");
+      restart_now = true;
+    }
+    else if (strncmp(buffer, "REBOOT!", 7) == 0) {
+      NET_DEBUGLN("Device is rebooting");
       reboot_now = true;
     }
     #if NET_TESTING
@@ -1264,6 +1268,10 @@ uint32_t Maison::CRC32(const uint8_t * _data, size_t _length)
 
 void Maison::wifi_flush()
 {
+  if (mqtt_connected()) {
+    mqtt_client.disconnect();
+  }
+
   if (wifi_client != NULL) {
     while (!wifi_client->flush(100)) delay(10);
     while (!wifi_client->stop(100)) delay(10);
