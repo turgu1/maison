@@ -69,8 +69,10 @@ void setup()
   led_lit = false;
 
   IPAddress ip = WiFi.localIP();
-  Serial.print("IP Address:");
-  Serial.println(ip);
+  #if SERIAL_NEEDED
+    Serial.print("IP Address:");
+    Serial.println(ip);
+  #endif
 }
 
 void loop() 
