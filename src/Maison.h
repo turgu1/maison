@@ -6,7 +6,6 @@
 #include <FS.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
-#include <WiFiClientSecure.h>
 #include <ArduinoJson.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -140,6 +139,16 @@
 
 #ifndef DEFAULT_SHORT_REBOOT_TIME
   #define DEFAULT_SHORT_REBOOT_TIME 5  ///< DeepSleep time in seconds for short time states
+#endif
+
+#ifndef MAISON_SECURE
+  # define MAISON_SECURE 1
+#endif
+
+#if MAISON_SECURE
+  #include <WiFiClientSecure.h>
+#else
+  #include <WiFi.h>
 #endif
 
 // ----- END OPTIONS -----
@@ -556,7 +565,11 @@ class Maison
     } mem;
 
     PubSubClient                mqtt_client;
-    BearSSL::WiFiClientSecure * wifi_client;
+    #if MAISON_SECURE
+      BearSSL::WiFiClientSecure * wifi_client;
+    #else
+      WiFiClient * wifi_client;
+    #endif
 
     long         last_reconnect_attempt;
     int          connect_retry_count;

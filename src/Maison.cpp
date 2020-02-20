@@ -930,7 +930,11 @@ bool Maison::mqtt_connect()
         wifi_client = NULL;
       }
 
-      wifi_client = new BearSSL::WiFiClientSecure;
+      #if MAISON_SECURE
+        wifi_client = new BearSSL::WiFiClientSecure;
+      #else
+        wifi_client = new WiFiClient;
+      #endif
 
       if (config.mqtt_fingerprint[0]) {
          wifi_client->setFingerprint(config.mqtt_fingerprint);
@@ -965,8 +969,10 @@ bool Maison::mqtt_connect()
       else {
         NET_DEBUG(F(" Unable to connect to mqtt. State: "));
         NET_DEBUGLN(mqtt_client.state());
-        NET_DEBUG(F(" Last SSL Error: "));
-        NET_DEBUGLN(wifi_client->getLastSSLError());
+        #if MAISON_SECURE
+          NET_DEBUG(F(" Last SSL Error: "));
+          NET_DEBUGLN(wifi_client->getLastSSLError());
+        #endif
 
         if (++connect_retry_count >= 5) {
           NET_DEBUGLN(F(" Too many trials, reconnecting WiFi..."));
