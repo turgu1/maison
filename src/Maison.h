@@ -148,7 +148,7 @@
 #if MAISON_SECURE
   #include <WiFiClientSecure.h>
 #else
-  #include <WiFi.h>
+  #include <WiFiClient.h>
 #endif
 
 // ----- END OPTIONS -----
