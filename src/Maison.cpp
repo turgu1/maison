@@ -932,16 +932,16 @@ bool Maison::mqtt_connect()
 
       #if MAISON_SECURE
         wifi_client = new BearSSL::WiFiClientSecure;
+        if (config.mqtt_fingerprint[0]) {
+          wifi_client->setFingerprint(config.mqtt_fingerprint);
+        }
+        else {
+          wifi_client->setInsecure();
+        }
       #else
         wifi_client = new WiFiClient;
       #endif
 
-      if (config.mqtt_fingerprint[0]) {
-         wifi_client->setFingerprint(config.mqtt_fingerprint);
-      }
-      else {
-         wifi_client->setInsecure();
-      }
       mqtt_client.setClient(*wifi_client);
       mqtt_client.setServer(config.mqtt_server, config.mqtt_port);
       mqtt_client.setCallback(maison_callback);
