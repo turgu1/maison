@@ -92,6 +92,7 @@ DEFAULT_SHORT_REBOOT_TIME |  5  | This is the default reboot time in seconds whe
 MQTT_OTA            | 0 | Allow for Over the Air (OTA) code update through MQTT see section MQTT OTA for further details.
 APP_NAME | UNKNOWN | Application name. Required for MQTT OTA as a mean to check the new binary to be compatible with the current.
 APP_VERSION | 1.0.0 | Application version number.
+MAISON_SECURE | 1 | If = 1 WiFi TLS encryption is used for all communications.
 
 The framework will subscribe to MQTT messages coming from the server on a topic built using *MAISON_PREFIX_TOPIC*, the device MAC address and *MAISON_CTRL_TOPIC*. For example, if the device MAC address is "DE01F3003571", the subscribed topic would be `maison/DE01F3003571/ctrl`.
 
@@ -263,7 +264,7 @@ subnet_mask | The subnet mask. Can be set to an empty string.
 mqtt_server_name | This is the MQTT server name (SQDN) or IP address.  Max length: 31 ASCII characters.
 mqtt_user_name / mqtt_password | These are the credentials to connect to the MQTT server. Max length: 15 ASCII characters for user_name, 31 ASCII characters for password.
 mqtt_port | The TLS/SSL port number of the MQTT server. Unsigned Integer value (16 bits).
-mqtt_fingerprint | This is the fingerprint associated with the MQTT service certificate. It must be a vector of 20 decimal values. Each value correspond to a byte part of the fingerprint. This is used to validate the MQTT server through the BearSSL library. Length: 20 bytes.
+mqtt_fingerprint | This is the fingerprint associated with the MQTT service certificate. It must be a vector of 20 decimal values. Each value correspond to a byte part of the fingerprint. This is used to validate the MQTT server through the BearSSL library. Length: 20 bytes. If empty, no check will be done on the server validity. Not used if MAISON_SECURE=0.
 
 ### 5.1 PlatformIO configuration
 
